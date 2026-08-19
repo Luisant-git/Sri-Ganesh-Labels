@@ -147,6 +147,15 @@ export default function ProductDetail() {
               )}
             </div>
 
+            {product.gstPercentage != null && (
+              <p className="mt-3 flex items-center gap-2 text-sm text-slate-600">
+                <span className="font-medium text-slate-500">GST:</span>
+                <span className="rounded-md bg-brand-700 px-2 py-0.5 text-xs font-bold text-white">
+                  {product.gstPercentage}%
+                </span>
+              </p>
+            )}
+
             <p className="mt-6 text-sm leading-relaxed text-slate-600">{product.description}</p>
 
             {/* Options */}
