@@ -51,7 +51,7 @@ export default function OrderSuccess() {
 
   return (
     <div className="bg-slate-50">
-      <div className="mx-auto max-w-3xl px-4 py-14 lg:py-20">
+      <div className="mx-auto max-w-3xl px-4 py-10 lg:py-14">
         <div className="rounded-3xl border border-slate-200 bg-white p-6 text-center shadow-sm sm:p-10">
           <div className="animate-pop mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-teal-50">
             <CheckCircle2 size={44} className="text-teal-500" />

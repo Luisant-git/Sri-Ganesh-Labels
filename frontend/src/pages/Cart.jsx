@@ -11,6 +11,7 @@ import {
 } from 'lucide-react'
 import { useCart, FREE_SHIPPING_THRESHOLD } from '../context/CartContext'
 import ProductCard from '../components/ProductCard'
+import BackButton from '../components/BackButton'
 import { products } from '../data/products'
 import { formatINR } from '../utils/format'
 import { toast } from '../components/Toast'
@@ -62,11 +63,14 @@ export default function Cart() {
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 lg:py-14">
       <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h1 className="font-display text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">Shopping Cart</h1>
-          <p className="mt-1 text-sm text-slate-500">
-            {totals.count} item{totals.count !== 1 ? 's' : ''} in your cart
-          </p>
+        <div className="flex items-center gap-3">
+          <BackButton />
+          <div>
+            <h1 className="font-display text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">Shopping Cart</h1>
+            <p className="mt-1 text-sm text-slate-500">
+              {totals.count} item{totals.count !== 1 ? 's' : ''} in your cart
+            </p>
+          </div>
         </div>
         <Link to="/products" className="text-sm font-semibold text-brand-700 transition-colors hover:text-brand-800">
           ← Continue shopping

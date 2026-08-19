@@ -88,11 +88,11 @@ export default function ProductDetail() {
           <ArrowLeft size={14} className="transition-transform group-hover:-translate-x-0.5" />
           Back
         </button>
-        <div className="relative mx-auto max-w-7xl px-4 py-12 text-center lg:py-16">
+        <div className="relative mx-auto max-w-7xl px-4 py-8 text-center lg:py-10">
           <p className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-accent-400">
             {product.category}
           </p>
-          <h1 className="mx-auto mt-3 max-w-3xl font-display text-3xl font-bold tracking-tight text-white sm:text-4xl lg:text-5xl">
+          <h1 className="mx-auto mt-3 max-w-3xl font-display text-2xl font-bold tracking-tight text-white sm:text-3xl lg:text-4xl">
             {product.name}
           </h1>
         </div>

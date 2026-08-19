@@ -7,7 +7,6 @@ import {
   ShoppingBag,
   Search,
   PackageX,
-  Box,
   Home,
   MapPin,
   Wallet,
@@ -15,11 +14,11 @@ import {
   BadgeCheck,
 } from 'lucide-react'
 import { formatINR, formatDate } from '../utils/format'
+import BackButton from '../components/BackButton'
 
 const steps = [
   { icon: CheckCircle2, label: 'Order Confirmed', desc: 'Your order has been received' },
   { icon: Package, label: 'Processing', desc: 'We are preparing your labels' },
-  { icon: Box, label: 'Packed', desc: 'Quality checked and packed' },
   { icon: Truck, label: 'Shipped', desc: 'Handed over to courier' },
   { icon: Home, label: 'Out for Delivery', desc: 'Out for delivery to your address' },
   { icon: CheckCircle2, label: 'Delivered', desc: 'Delivered successfully' },
@@ -66,8 +65,15 @@ export default function OrderTracking() {
   return (
     <div className="bg-slate-50">
       <div className="mx-auto max-w-4xl px-4 py-12 lg:py-16">
-        <h1 className="font-display text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">Track Your Order</h1>
-        <p className="mt-1 text-sm text-slate-500">Follow the live status of your order with Sri Ganesh Labels.</p>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <BackButton />
+            <div>
+              <h1 className="font-display text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">Track Your Order</h1>
+              <p className="mt-1 text-sm text-slate-500">Follow the live status of your order with Sri Ganesh Labels.</p>
+            </div>
+          </div>
+        </div>
 
         {/* Search order */}
         <form onSubmit={handleSearch} className="mt-6 flex gap-2">

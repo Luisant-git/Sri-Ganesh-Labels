@@ -21,6 +21,7 @@ import {
 import { useCart, FREE_SHIPPING_THRESHOLD } from '../context/CartContext'
 import { useAuth } from '../context/AuthContext'
 import { formatINR, generateOrderId } from '../utils/format'
+import BackButton from '../components/BackButton'
 import { toast } from '../components/Toast'
 
 const initialForm = {
@@ -167,10 +168,17 @@ export default function Checkout() {
   return (
     <div className="bg-slate-50">
       <div className="mx-auto max-w-7xl px-4 py-10 lg:py-14">
-        <h1 className="font-display text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">Secure Checkout</h1>
-        <p className="mt-1 text-sm text-slate-500">
-          Guest checkout — no registration or login required.
-        </p>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <BackButton />
+            <div>
+              <h1 className="font-display text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">Secure Checkout</h1>
+              <p className="mt-1 text-sm text-slate-500">
+                Guest checkout — no registration or login required.
+              </p>
+            </div>
+          </div>
+        </div>
 
         <form onSubmit={handleSubmit} className="mt-8 grid gap-8 lg:grid-cols-3">
           {/* Left column */}

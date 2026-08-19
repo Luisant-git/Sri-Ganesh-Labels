@@ -97,7 +97,7 @@ export default function Products() {
   return (
     <div>
       {/* Page header */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-secondary-900 via-secondary-800 to-secondary-950 py-14 lg:py-20">
+      <section className="relative overflow-hidden bg-gradient-to-br from-secondary-900 via-secondary-800 to-secondary-950 py-8 lg:py-12">
         <div className="pointer-events-none absolute -left-24 -top-24 h-80 w-80 rounded-full bg-secondary-500/20 blur-3xl" />
         <div className="pointer-events-none absolute -bottom-32 -right-24 h-96 w-96 rounded-full bg-accent-500/20 blur-3xl" />
         <div className="relative mx-auto max-w-7xl px-4 text-center">
