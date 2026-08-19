@@ -9,6 +9,7 @@ import {
   MapPin,
   Calendar,
   Hash,
+  BadgeCheck,
   Printer,
   Truck,
 } from 'lucide-react'
@@ -102,6 +103,17 @@ export default function OrderSuccess() {
                 </p>
               </div>
             </div>
+            {order.gstin && (
+              <div className="flex items-center gap-3 sm:col-span-2">
+                <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-100 text-brand-700">
+                  <BadgeCheck size={16} />
+                </span>
+                <div>
+                  <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">GSTIN</p>
+                  <p className="text-sm font-bold text-slate-900">{order.gstin}</p>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Items */}

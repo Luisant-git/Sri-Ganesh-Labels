@@ -233,8 +233,7 @@ export default function Home() {
             <div>
               <p className="text-xs font-bold uppercase tracking-widest text-white/80">Limited Period Offer</p>
               <h2 className="mt-2 font-display text-3xl font-bold text-white sm:text-4xl">
-                Flat <span className="underline decoration-white/40 decoration-4 underline-offset-8">25% OFF</span> on
-                all label orders
+                Premium Labels for <span className="underline decoration-white/40 decoration-4 underline-offset-8">Every Order</span>
               </h2>
               <p className="mt-4 max-w-md text-sm leading-relaxed text-white/90">
                 Stock up your packaging with premium labels. Free shipping on orders above ₹999 and COD available

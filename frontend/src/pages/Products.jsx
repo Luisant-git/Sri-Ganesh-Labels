@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams, Link } from 'react-router-dom'
 import { Search, SlidersHorizontal, PackageX, X, ChevronLeft, ChevronRight, Home as HomeIcon } from 'lucide-react'
 import ProductCard from '../components/ProductCard'
@@ -18,8 +18,14 @@ export default function Products() {
   const [page, setPage] = useState(1)
   const [priceRange, setPriceRange] = useState([PRICE_MIN, PRICE_MAX])
 
+  useEffect(() => {
+    setLocalSearch(searchQuery)
+  }, [searchQuery])
+
   const setCategory = (cat) => {
     const next = new URLSearchParams(searchParams)
+    if (localSearch.trim()) next.set('search', localSearch.trim())
+    else next.delete('search')
     if (cat === 'All') next.delete('category')
     else next.set('category', cat)
     setSearchParams(next)
@@ -45,14 +51,14 @@ export default function Products() {
 
   const isFiltered =
     activeCategory !== 'All' ||
-    !!searchQuery ||
+    !!localSearch.trim() ||
     sort !== 'popular' ||
     priceRange[0] !== PRICE_MIN ||
     priceRange[1] !== PRICE_MAX
 
   const clearFilters = () => {
-    setCategory('All')
-    clearSearch()
+    setLocalSearch('')
+    setSearchParams(new URLSearchParams())
     setSort('popular')
     setPriceRange([PRICE_MIN, PRICE_MAX])
     setPage(1)
@@ -63,8 +69,8 @@ export default function Products() {
     if (activeCategory !== 'All') {
       list = list.filter((p) => p.category === activeCategory)
     }
-    if (searchQuery.trim()) {
-      const q = searchQuery.trim().toLowerCase()
+    const q = localSearch.trim().toLowerCase()
+    if (q) {
       list = list.filter((p) => [p.name, p.category, p.description].join(' ').toLowerCase().includes(q))
     }
     const [min, max] = priceRange
@@ -80,7 +86,7 @@ export default function Products() {
         list.sort((a, b) => a.id - b.id)
     }
     return list
-  }, [activeCategory, searchQuery, sort, priceRange])
+  }, [activeCategory, localSearch, sort, priceRange])
 
   const allCats = ['All', ...categories.map((c) => c.name)]
   const catCount = (name) => categories.find((c) => c.name === name)?.count
@@ -133,7 +139,9 @@ export default function Products() {
               <form onSubmit={applySearch} className="mt-4">
                 <label className="mb-1.5 block text-xs font-semibold text-slate-600">Search</label>
                 <div className="flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-3 py-2 focus-within:border-brand-500 focus-within:ring-2 focus-within:ring-brand-500/20">
-                  <Search size={15} className="shrink-0 text-slate-400" />
+                  <button type="submit" aria-label="Search" className="shrink-0">
+                    <Search size={15} className="text-slate-400" />
+                  </button>
                   <input
                     value={localSearch}
                     onChange={(e) => setLocalSearch(e.target.value)}

@@ -8,7 +8,6 @@ import {
   ShoppingBag,
   Truck,
   ShieldCheck,
-  Tag,
 } from 'lucide-react'
 import { useCart, FREE_SHIPPING_THRESHOLD } from '../context/CartContext'
 import ProductCard from '../components/ProductCard'
@@ -152,9 +151,6 @@ export default function Cart() {
                       </div>
 
                       <div className="flex items-center gap-1">
-                        {item.originalPrice > item.price && (
-                          <span className="mr-1 text-xs text-slate-400 line-through">{formatINR(item.originalPrice)}</span>
-                        )}
                         <button
                           onClick={() => {
                             removeFromCart(item.productId, item.option)
@@ -182,14 +178,6 @@ export default function Cart() {
                 <dt className="text-slate-500">Subtotal</dt>
                 <dd className="font-semibold text-slate-900">{formatINR(totals.subtotal)}</dd>
               </div>
-              {totals.discount > 0 && (
-                <div className="flex justify-between text-teal-600">
-                  <dt className="flex items-center gap-1.5">
-                    <Tag size={13} /> Discount
-                  </dt>
-                  <dd className="font-semibold">− {formatINR(totals.discount)}</dd>
-                </div>
-              )}
               <div className="flex justify-between">
                 <dt className="text-slate-500">Shipping</dt>
                 <dd className="font-semibold text-slate-900">

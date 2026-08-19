@@ -1,5 +1,4 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'
-import { discountPercent } from '../utils/format'
 
 const CartContext = createContext(null)
 
@@ -75,8 +74,7 @@ export function CartProvider({ children }) {
 
   const totals = useMemo(() => {
     const subtotal = items.reduce((s, i) => s + i.price * i.quantity, 0)
-    const originalTotal = items.reduce((s, i) => s + (i.originalPrice || i.price) * i.quantity, 0)
-    const discount = originalTotal - subtotal
+    const discount = 0
     const shipping = subtotal === 0 ? 0 : subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_FEE
     const tax = 0
     const total = subtotal + shipping + tax
@@ -109,5 +107,3 @@ export function useCart() {
   if (!ctx) throw new Error('useCart must be used within CartProvider')
   return ctx
 }
-
-export { discountPercent }

@@ -12,6 +12,7 @@ import {
   MapPin,
   Wallet,
   CreditCard,
+  BadgeCheck,
 } from 'lucide-react'
 import { formatINR, formatDate } from '../utils/format'
 
@@ -114,6 +115,11 @@ export default function OrderTracking() {
                   <MapPin size={13} className="text-accent-600" />
                   {order.address.fullName}, {order.address.city} - {order.address.pincode}
                 </span>
+                {order.gstin && (
+                  <span className="flex items-center gap-1.5">
+                    <BadgeCheck size={13} className="text-brand-600" /> GSTIN: {order.gstin}
+                  </span>
+                )}
               </div>
             </div>
 

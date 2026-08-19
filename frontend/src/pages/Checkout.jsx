@@ -8,6 +8,7 @@ import {
   Building2,
   Landmark,
   Hash,
+  BadgeCheck,
   Wallet,
   CreditCard,
   Lock,
@@ -29,6 +30,7 @@ const initialForm = {
   city: '',
   state: '',
   pincode: '',
+  gstin: '',
 }
 
 const states = [
@@ -56,8 +58,23 @@ export default function Checkout() {
   const [terms, setTerms] = useState(false)
 
   const setField = (key) => (e) => {
-    const value = key === 'mobile' || key === 'pincode' ? e.target.value.replace(/\D/g, '') : e.target.value
-    setForm((f) => ({ ...f, [key]: key === 'mobile' ? value.slice(0, 10) : key === 'pincode' ? value.slice(0, 6) : value }))
+    const value =
+      key === 'mobile' || key === 'pincode'
+        ? e.target.value.replace(/\D/g, '')
+        : key === 'gstin'
+        ? e.target.value.toUpperCase()
+        : e.target.value
+    setForm((f) => ({
+      ...f,
+      [key]:
+        key === 'mobile'
+          ? value.slice(0, 10)
+          : key === 'pincode'
+          ? value.slice(0, 6)
+          : key === 'gstin'
+          ? value.slice(0, 15)
+          : value,
+    }))
     if (errors[key]) setErrors((er) => ({ ...er, [key]: null }))
   }
 
@@ -70,6 +87,8 @@ export default function Checkout() {
     if (!form.city.trim()) er.city = 'Enter your city'
     if (!form.state) er.state = 'Select your state'
     if (!/^\d{6}$/.test(form.pincode)) er.pincode = 'Enter a valid 6-digit pincode'
+    if (form.gstin && !/^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][1-9A-Z]Z[0-9A-Z]$/.test(form.gstin))
+      er.gstin = 'Enter a valid 15-character GSTIN'
     if (!terms) er.terms = 'Please accept the terms to place your order'
     setErrors(er)
     return Object.keys(er).length === 0
@@ -93,6 +112,7 @@ export default function Checkout() {
       items: items.map((i) => ({ name: i.name, option: i.option, qty: i.quantity, price: i.price, image: i.image })),
       totals,
       address: { ...form },
+      gstin: form.gstin.trim() || null,
     }
     localStorage.setItem('sgl_last_order', JSON.stringify(order))
     clearCart()
@@ -241,6 +261,21 @@ export default function Checkout() {
                   </div>
                   {errors.pincode && <p className="mt-1 text-xs text-rose-500">{errors.pincode}</p>}
                 </div>
+                <div className="sm:col-span-2">
+                  <label className="mb-1.5 block text-xs font-semibold text-slate-700">
+                    GSTIN <span className="font-normal text-slate-400">(Optional)</span>
+                  </label>
+                  <div className="relative">
+                    <BadgeCheck size={15} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                    <input
+                      value={form.gstin}
+                      onChange={setField('gstin')}
+                      placeholder="Enter GSTIN (Optional)"
+                      className={`${inputCls('gstin')} pl-10`}
+                    />
+                  </div>
+                  {errors.gstin && <p className="mt-1 text-xs text-rose-500">{errors.gstin}</p>}
+                </div>
               </div>
             </section>
 
@@ -357,12 +392,6 @@ export default function Checkout() {
                   <dt className="text-slate-500">Subtotal</dt>
                   <dd className="font-semibold text-slate-900">{formatINR(totals.subtotal)}</dd>
                 </div>
-                {totals.discount > 0 && (
-                  <div className="flex justify-between text-teal-600">
-                    <dt>Discount</dt>
-                    <dd className="font-semibold">− {formatINR(totals.discount)}</dd>
-                  </div>
-                )}
                 <div className="flex justify-between">
                   <dt className="text-slate-500">Shipping</dt>
                   <dd className="font-semibold text-slate-900">

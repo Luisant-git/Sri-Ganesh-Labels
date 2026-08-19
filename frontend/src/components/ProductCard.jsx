@@ -56,10 +56,9 @@ export default function ProductCard({ product, centered = false }) {
         <p className="mt-1 line-clamp-1 text-xs text-slate-500">{product.description}</p>
 
         <div className="mt-2 flex items-baseline gap-2">
-          <span className="font-display text-lg font-bold text-brand-800">{formatINR(product.price)}</span>
-          {product.originalPrice > product.price && (
-            <span className="text-sm text-slate-400 line-through">{formatINR(product.originalPrice)}</span>
-          )}
+          <span className="font-display text-lg font-bold text-brand-800">
+            {formatINR(product.totalValue ?? product.price)}
+          </span>
         </div>
 
         <div className="mt-4 grid w-full grid-cols-1 gap-2 sm:grid-cols-2">

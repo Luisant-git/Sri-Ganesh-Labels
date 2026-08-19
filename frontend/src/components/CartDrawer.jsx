@@ -151,12 +151,6 @@ export default function CartDrawer() {
                 <span className="text-sm text-slate-600">Subtotal</span>
                 <span className="font-display text-lg font-bold text-slate-900">{formatINR(totals.subtotal)}</span>
               </div>
-              {totals.discount > 0 && (
-                <div className="mt-1 flex items-center justify-between text-xs text-slate-500">
-                  <span>Discount</span>
-                  <span className="font-semibold text-emerald-600">-{formatINR(totals.discount)}</span>
-                </div>
-              )}
               {totals.shipping > 0 && (
                 <div className="mt-1 flex items-center justify-between text-xs text-slate-500">
                   <span>Shipping</span>

@@ -12,7 +12,7 @@ import ProductCard from '../components/ProductCard'
 import { getProductById, getRelatedProducts } from '../data/products'
 import { useCart } from '../context/CartContext'
 import { useAuth } from '../context/AuthContext'
-import { formatINR } from '../utils/format'
+import { formatINR, formatINRDecimal } from '../utils/format'
 import { toast } from '../components/Toast'
 
 export default function ProductDetail() {
@@ -140,20 +140,36 @@ export default function ProductDetail() {
             <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-brand-600">{product.category}</p>
             <h1 className="mt-2 font-display text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">{product.name}</h1>
 
-            <div className="mt-5 flex items-end gap-3">
-              <span className="font-display text-3xl font-bold text-brand-800 sm:text-4xl">{formatINR(product.price)}</span>
-              {product.originalPrice > product.price && (
-                <span className="mb-1 text-base text-slate-400 line-through">{formatINR(product.originalPrice)}</span>
-              )}
-            </div>
-
-            {product.gstPercentage != null && (
-              <p className="mt-3 flex items-center gap-2 text-sm text-slate-600">
-                <span className="font-medium text-slate-500">GST:</span>
-                <span className="rounded-md bg-brand-700 px-2 py-0.5 text-xs font-bold text-white">
-                  {product.gstPercentage}%
+            {product.rate != null && product.gstPercentage != null && product.totalValue != null ? (
+              <div className="mt-5 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Pricing</p>
+                <div className="mt-3 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-slate-500">Rate</span>
+                    <span className="font-display text-sm font-bold text-slate-900">
+                      {formatINRDecimal(product.rate * qty)}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-slate-500">GST</span>
+                    <span className="font-display text-sm font-bold text-slate-900">
+                      {product.gstPercentage}%
+                    </span>
+                  </div>
+                </div>
+                <div className="mt-3 flex items-center justify-between border-t border-slate-200 pt-3">
+                  <span className="font-display text-sm font-bold text-slate-900">Total Price</span>
+                  <span className="font-display text-base font-bold text-brand-800">
+                    {formatINRDecimal(product.totalValue * qty)}
+                  </span>
+                </div>
+              </div>
+            ) : (
+              <div className="mt-5 flex items-end gap-3">
+                <span className="font-display text-3xl font-bold text-brand-800 sm:text-4xl">
+                  {formatINR(product.price)}
                 </span>
-              </p>
+              </div>
             )}
 
             <p className="mt-6 text-sm leading-relaxed text-slate-600">{product.description}</p>
