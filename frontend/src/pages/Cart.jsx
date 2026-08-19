@@ -38,10 +38,10 @@ export default function Cart() {
             <ShoppingBag size={17} /> Continue Shopping
           </Link>
           <Link
-            to="/products?category=Roll+Labels"
+            to="/products?category=Thermal+Roll"
             className="rounded-xl border border-slate-300 px-7 py-3.5 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50"
           >
-            Shop Roll Labels
+            Shop Thermal Rolls
           </Link>
         </div>
 

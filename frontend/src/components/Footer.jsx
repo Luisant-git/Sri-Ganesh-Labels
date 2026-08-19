@@ -36,11 +36,10 @@ const socials = [
 
 const shopLinks = [
   { label: 'All Products', to: '/products' },
-  { label: 'Product Labels', to: '/products?category=Product+Labels' },
-  { label: 'Barcode Labels', to: '/products?category=Barcode+Labels' },
-  { label: 'Packaging Labels', to: '/products?category=Packaging+Labels' },
-  { label: 'Sticker Labels', to: '/products?category=Sticker+Labels' },
-  { label: 'Roll Labels', to: '/products?category=Roll+Labels' },
+  { label: 'Bar code Label', to: '/products?category=Bar+code+Label' },
+  { label: 'DT materials', to: '/products?category=DT+materials' },
+  { label: 'Thermal Roll', to: '/products?category=Thermal+Roll' },
+  { label: 'Wax-Resin Ribbons', to: '/products?category=Wax-Resin+Ribbons' },
 ]
 
 const serviceLinks = [

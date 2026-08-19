@@ -187,7 +187,7 @@ export default function Home() {
               <div className="absolute inset-x-0 bottom-0 flex items-center justify-between p-4">
                 <div>
                   <p className="font-display text-sm font-semibold text-white sm:text-base">{cat.name}</p>
-                  <p className="text-xs text-brand-100/80">Shop now</p>
+                  <p className="text-xs text-brand-100/80">{cat.count} sizes</p>
                 </div>
                 <span className="flex h-8 w-8 items-center justify-center rounded-full bg-accent-500 text-white opacity-0 transition-all duration-300 group-hover:opacity-100">
                   <ArrowRight size={15} />
@@ -248,10 +248,10 @@ export default function Home() {
                   <ShoppingBag size={17} /> Shop the Sale
                 </Link>
                 <Link
-                  to="/products?category=Roll+Labels"
+                  to="/products?category=Thermal+Roll"
                   className="flex items-center gap-2 rounded-xl border-2 border-white/40 px-7 py-3.5 text-sm font-semibold text-white transition-colors hover:bg-white/10"
                 >
-                  Roll Labels
+                  Thermal Rolls
                 </Link>
               </div>
             </div>

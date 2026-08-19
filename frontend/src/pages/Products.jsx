@@ -89,6 +89,7 @@ export default function Products() {
   }, [activeCategory, searchQuery, sort, priceRange])
 
   const allCats = ['All', ...categories.map((c) => c.name)]
+  const catCount = (name) => categories.find((c) => c.name === name)?.count
   const totalPages = Math.max(1, Math.ceil(filtered.length / PER_PAGE))
   const safePage = Math.min(page, totalPages)
   const pageItems = filtered.slice((safePage - 1) * PER_PAGE, safePage * PER_PAGE)
@@ -167,8 +168,13 @@ export default function Products() {
                           : 'text-slate-600 hover:bg-brand-50 hover:text-brand-700'
                       }`}
                     >
-                      {cat}
-                      {activeCategory === cat && <span className="text-xs opacity-80">•</span>}
+                      <span className="flex items-center gap-2">
+                        {cat}
+                        {activeCategory === cat && <span className="text-xs opacity-80">•</span>}
+                      </span>
+                      {cat !== 'All' && (
+                        <span className="text-xs text-slate-400">{catCount(cat)} sizes</span>
+                      )}
                     </button>
                   ))}
                 </div>
