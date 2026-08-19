@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
 import {
   Search,
-  Heart,
   ShoppingCart,
   User,
   Menu,
@@ -11,7 +10,6 @@ import {
   Phone,
 } from 'lucide-react'
 import { useCart } from '../context/CartContext'
-import { useWishlist } from '../context/WishlistContext'
 import { useAuth } from '../context/AuthContext'
 import { products } from '../data/products'
 import { formatINR } from '../utils/format'
@@ -47,7 +45,6 @@ export default function Header() {
   const [query, setQuery] = useState('')
   const [mobileOpen, setMobileOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
-  const { count: wishCount } = useWishlist()
   const { user } = useAuth()
   const navigate = useNavigate()
   const inputRef = useRef(null)
@@ -128,18 +125,6 @@ export default function Header() {
             >
               <Search size={21} />
             </button>
-            <Link
-              to="/wishlist"
-              aria-label="Wishlist"
-              className="relative flex h-10 w-10 items-center justify-center rounded-full text-slate-700 transition-colors hover:bg-rose-50 hover:text-rose-500"
-            >
-              <Heart size={21} />
-              {wishCount > 0 && (
-                <span className="absolute -right-0.5 -top-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-bold text-white shadow-md">
-                  {wishCount}
-                </span>
-              )}
-            </Link>
             <CartButton className="hidden lg:flex" />
             <Link
               to="/account"
@@ -306,18 +291,6 @@ export default function Header() {
               className="mb-2 flex items-center gap-2 rounded-xl bg-slate-50 px-3 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-brand-50"
             >
               {user ? <Phone size={16} /> : <User size={16} />} {user ? user.mobile : 'My Account'}
-            </Link>
-            <Link
-              to="/wishlist"
-              onClick={() => setMobileOpen(false)}
-              className="flex items-center gap-2 rounded-xl bg-slate-50 px-3 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-rose-50"
-            >
-              <Heart size={16} /> My Wishlist
-              {wishCount > 0 && (
-                <span className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-bold text-white">
-                  {wishCount}
-                </span>
-              )}
             </Link>
           </div>
         </div>

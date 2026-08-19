@@ -1,17 +1,14 @@
 import { Link, useNavigate } from 'react-router-dom'
-import { Heart, ShoppingCart, Zap } from 'lucide-react'
+import { ShoppingCart, Zap } from 'lucide-react'
 import { useCart } from '../context/CartContext'
-import { useWishlist } from '../context/WishlistContext'
 import { useAuth } from '../context/AuthContext'
 import { formatINR } from '../utils/format'
 import { toast } from './Toast'
 
 export default function ProductCard({ product, centered = false }) {
   const { addToCart } = useCart()
-  const { toggleWishlist, isWishlisted } = useWishlist()
   const { isLoggedIn, openLogin } = useAuth()
   const navigate = useNavigate()
-  const wished = isWishlisted(product.id)
 
   const requireLogin = (action) => {
     if (isLoggedIn) action()
@@ -36,15 +33,6 @@ export default function ProductCard({ product, centered = false }) {
     })
   }
 
-  const handleWishlist = (e) => {
-    e.preventDefault()
-    e.stopPropagation()
-    requireLogin(() => {
-      toggleWishlist(product.id)
-      toast(wished ? 'Removed from wishlist' : 'Added to wishlist', 'wishlist')
-    })
-  }
-
   return (
     <div className="group relative flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-brand-200 hover:shadow-xl hover:shadow-brand-900/5">
       <Link to={`/products/${product.id}`} className="relative block aspect-[4/3] overflow-hidden bg-slate-100">
@@ -55,15 +43,6 @@ export default function ProductCard({ product, centered = false }) {
           className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-slate-900/10 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
-        <button
-          onClick={handleWishlist}
-          aria-label="Add to wishlist"
-          className={`absolute right-3 bottom-3 flex h-9 w-9 items-center justify-center rounded-full shadow-lg transition-all duration-200 ${
-            wished ? 'bg-white/95 text-rose-500' : 'bg-white/95 text-slate-600 hover:bg-rose-50 hover:text-rose-500'
-          }`}
-        >
-          <Heart size={17} fill={wished ? 'currentColor' : 'none'} />
-        </button>
       </Link>
 
       <div className={`flex flex-1 flex-col p-4 ${centered ? 'items-center text-center' : ''}`}>

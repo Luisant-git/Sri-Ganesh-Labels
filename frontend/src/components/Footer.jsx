@@ -54,7 +54,6 @@ const serviceLinks = [
 const accountLinks = [
   { label: 'My Orders', to: '/order-tracking' },
   { label: 'Cart', to: '/cart' },
-  { label: 'Wishlist', to: '/wishlist' },
 ]
 
 export default function Footer() {

@@ -3,7 +3,6 @@ import {
   Minus,
   Plus,
   Trash2,
-  Heart,
   ShoppingCart,
   ArrowRight,
   ShoppingBag,
@@ -12,7 +11,6 @@ import {
   Tag,
 } from 'lucide-react'
 import { useCart, FREE_SHIPPING_THRESHOLD } from '../context/CartContext'
-import { useWishlist } from '../context/WishlistContext'
 import ProductCard from '../components/ProductCard'
 import { products } from '../data/products'
 import { formatINR } from '../utils/format'
@@ -20,7 +18,6 @@ import { toast } from '../components/Toast'
 
 export default function Cart() {
   const { items, updateQuantity, removeFromCart, totals } = useCart()
-  const { toggleWishlist } = useWishlist()
   const navigate = useNavigate()
 
   if (items.length === 0) {
@@ -166,16 +163,6 @@ export default function Cart() {
                           className="flex items-center gap-1.5 rounded-lg px-2.5 py-2 text-xs font-medium text-slate-500 transition-colors hover:bg-rose-50 hover:text-rose-500"
                         >
                           <Trash2 size={14} /> Remove
-                        </button>
-                        <button
-                          onClick={() => {
-                            toggleWishlist(item.productId)
-                            removeFromCart(item.productId, item.option)
-                            toast('Moved to wishlist', 'wishlist')
-                          }}
-                          className="flex items-center gap-1.5 rounded-lg px-2.5 py-2 text-xs font-medium text-slate-500 transition-colors hover:bg-rose-50 hover:text-rose-500"
-                        >
-                          <Heart size={14} /> Wishlist
                         </button>
                       </div>
                     </div>

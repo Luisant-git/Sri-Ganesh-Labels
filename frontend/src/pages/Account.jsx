@@ -1,13 +1,11 @@
 import { Link } from 'react-router-dom'
-import { User, ShoppingBag, Heart, Truck, PackageSearch, ChevronRight, ShieldCheck, LogOut, Phone } from 'lucide-react'
+import { User, ShoppingBag, Truck, PackageSearch, ChevronRight, ShieldCheck, LogOut, Phone } from 'lucide-react'
 import { useCart } from '../context/CartContext'
-import { useWishlist } from '../context/WishlistContext'
 import { useAuth } from '../context/AuthContext'
 import { toast } from '../components/Toast'
 
 export default function Account() {
   const { getCartCount } = useCart()
-  const { count } = useWishlist()
   const { user, isLoggedIn, login, openLogin, logout } = useAuth()
 
   const links = [
@@ -22,12 +20,6 @@ export default function Account() {
       title: 'My Cart',
       desc: `${getCartCount()} item${getCartCount() !== 1 ? 's' : ''} in your cart`,
       to: '/cart',
-    },
-    {
-      icon: Heart,
-      title: 'My Wishlist',
-      desc: `${count} saved product${count !== 1 ? 's' : ''}`,
-      to: '/wishlist',
     },
   ]
 
@@ -47,7 +39,7 @@ export default function Account() {
               cart and place orders easily.
             </>
           ) : (
-            'Login with your mobile number to add products to cart, wishlist or buy instantly.'
+            'Login with your mobile number to add products to cart or buy instantly.'
           )}
         </p>
         <div className="mt-6 flex flex-wrap items-center justify-center gap-2">

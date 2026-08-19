@@ -1,7 +1,6 @@
 import { useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import {
-  Heart,
   ShoppingCart,
   Zap,
   Minus,
@@ -12,7 +11,6 @@ import {
 import ProductCard from '../components/ProductCard'
 import { getProductById, getRelatedProducts } from '../data/products'
 import { useCart } from '../context/CartContext'
-import { useWishlist } from '../context/WishlistContext'
 import { useAuth } from '../context/AuthContext'
 import { formatINR } from '../utils/format'
 import { toast } from '../components/Toast'
@@ -22,7 +20,6 @@ export default function ProductDetail() {
   const navigate = useNavigate()
   const product = getProductById(id)
   const { addToCart } = useCart()
-  const { toggleWishlist, isWishlisted } = useWishlist()
   const { isLoggedIn, openLogin } = useAuth()
 
   const [selectedImage, setSelectedImage] = useState(0)
@@ -51,7 +48,6 @@ export default function ProductDetail() {
     )
   }
 
-  const wished = isWishlisted(product.id)
   const related = getRelatedProducts(product)
 
   const requireLogin = (action) => {
@@ -177,7 +173,7 @@ export default function ProductDetail() {
               </div>
             )}
 
-            {/* Quantity + wishlist */}
+            {/* Quantity */}
             <div className="mt-6 flex items-center gap-4">
               <div className="flex items-center rounded-xl border border-slate-300 bg-white">
                 <button
@@ -196,22 +192,6 @@ export default function ProductDetail() {
                   <Plus size={16} />
                 </button>
               </div>
-              <button
-                onClick={() =>
-                  requireLogin(() => {
-                    toggleWishlist(product.id)
-                    toast(wished ? 'Removed from wishlist' : 'Added to wishlist', 'wishlist')
-                  })
-                }
-                className={`flex h-11 w-11 items-center justify-center rounded-xl border-2 transition-all duration-200 ${
-                  wished
-                    ? 'border-rose-500 bg-rose-50 text-rose-500'
-                    : 'border-slate-200 bg-white text-slate-500 hover:border-rose-300 hover:text-rose-500'
-                }`}
-                aria-label="Toggle wishlist"
-              >
-                <Heart size={18} fill={wished ? 'currentColor' : 'none'} />
-              </button>
             </div>
 
             {/* CTAs */}

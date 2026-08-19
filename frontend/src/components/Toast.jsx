@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { CheckCircle2, Heart } from 'lucide-react'
+import { CheckCircle2 } from 'lucide-react'
 
 export function toast(message, type = 'success') {
   window.dispatchEvent(new CustomEvent('sgl:toast', { detail: { message, type } }))
@@ -27,11 +27,7 @@ export default function ToastHost() {
           key={t.id}
           className="animate-pop flex w-full items-center gap-3 rounded-xl bg-slate-900 px-4 py-3 text-sm font-medium text-white shadow-xl shadow-slate-900/20"
         >
-          {t.type === 'wishlist' ? (
-            <Heart size={18} className="shrink-0 text-rose-400" fill="currentColor" />
-          ) : (
-            <CheckCircle2 size={18} className="shrink-0 text-teal-400" />
-          )}
+          <CheckCircle2 size={18} className="shrink-0 text-teal-400" />
           <span>{t.message}</span>
         </div>
       ))}
