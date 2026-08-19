@@ -48,7 +48,7 @@ export default function Cart() {
         <div className="mt-16 w-full">
           <h2 className="font-display text-lg font-bold text-slate-900">Popular right now</h2>
           <div className="mt-5 grid grid-cols-2 gap-4 sm:gap-5 lg:grid-cols-4">
-            {products.filter((p) => p.featured).slice(0, 4).map((p) => (
+            {products.slice(0, 4).map((p) => (
               <ProductCard key={p.id} product={p} />
             ))}
           </div>

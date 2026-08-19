@@ -76,14 +76,8 @@ export default function Products() {
       case 'price-desc':
         list.sort((a, b) => b.price - a.price)
         break
-      case 'newest':
-        list.sort((a, b) => Number(b.isNew) - Number(a.isNew) || b.id - a.id)
-        break
-      case 'rating':
-        list.sort((a, b) => b.rating - a.rating)
-        break
       default:
-        list.sort((a, b) => Number(b.featured) - Number(a.featured) || b.reviews - a.reviews)
+        list.sort((a, b) => a.id - b.id)
     }
     return list
   }, [activeCategory, searchQuery, sort, priceRange])

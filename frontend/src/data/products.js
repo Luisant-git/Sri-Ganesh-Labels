@@ -36,15 +36,9 @@ export const products = [
     ],
     "price": 199,
     "originalPrice": 249,
-    "discount": 20,
-    "rating": 4.8,
-    "reviews": 128,
     "description": "High-quality thermal barcode labels with strong permanent adhesive. Crisp, scannable print, smudge resistant and made to last.",
     "options": [],
-    "stock": 500,
-    "featured": true,
-    "badge": "Best Seller",
-    "isNew": false
+    "stock": 500
   },
   {
     "id": 2,
@@ -56,15 +50,9 @@ export const products = [
     ],
     "price": 299,
     "originalPrice": 379,
-    "discount": 21,
-    "rating": 4.7,
-    "reviews": 94,
     "description": "Large-format thermal barcode labels with strong permanent adhesive. Crisp, scannable print, smudge resistant and made to last.",
     "options": [],
-    "stock": 500,
-    "featured": true,
-    "badge": "Popular",
-    "isNew": false
+    "stock": 500
   },
   {
     "id": 3,
@@ -76,15 +64,9 @@ export const products = [
     ],
     "price": 449,
     "originalPrice": 559,
-    "discount": 20,
-    "rating": 4.6,
-    "reviews": 76,
     "description": "Direct thermal label materials for fast, reliable printing without ribbons. Great for shipping, retail and warehouse use.",
     "options": [],
-    "stock": 500,
-    "featured": true,
-    "badge": "Popular",
-    "isNew": true
+    "stock": 500
   },
   {
     "id": 4,
@@ -96,15 +78,9 @@ export const products = [
     ],
     "price": 199,
     "originalPrice": 249,
-    "discount": 20,
-    "rating": 4.5,
-    "reviews": 58,
     "description": "Compact direct thermal labels for price tags and small item labelling. Fast printing with crisp, durable output.",
     "options": [],
-    "stock": 500,
-    "featured": false,
-    "badge": "",
-    "isNew": false
+    "stock": 500
   },
   {
     "id": 5,
@@ -116,15 +92,9 @@ export const products = [
     ],
     "price": 399,
     "originalPrice": 499,
-    "discount": 20,
-    "rating": 4.7,
-    "reviews": 64,
     "description": "High-speed thermal transfer rolls with excellent heat and moisture resistance. Clean, consistent output every time.",
     "options": [],
-    "stock": 600,
-    "featured": true,
-    "badge": "Best Seller",
-    "isNew": false
+    "stock": 600
   },
   {
     "id": 6,
@@ -136,23 +106,13 @@ export const products = [
     ],
     "price": 450,
     "originalPrice": 560,
-    "discount": 20,
-    "rating": 4.8,
-    "reviews": 41,
     "description": "Wax-resin thermal transfer ribbons for durable, smudge-proof prints on labels and tags. Ideal for barcode printers.",
     "options": [],
-    "stock": 400,
-    "featured": true,
-    "badge": "Premium",
-    "isNew": true
+    "stock": 400
   }
 ];
 
 export const sortOptions = [
-  {
-    "value": "popular",
-    "label": "Popular"
-  },
   {
     "value": "price-asc",
     "label": "Price: Low to High"
@@ -160,14 +120,6 @@ export const sortOptions = [
   {
     "value": "price-desc",
     "label": "Price: High to Low"
-  },
-  {
-    "value": "newest",
-    "label": "Newest"
-  },
-  {
-    "value": "rating",
-    "label": "Rating"
   }
 ];
 
@@ -181,4 +133,4 @@ export function getRelatedProducts(product, limit = 4) {
   return [...same, ...others].slice(0, limit)
 }
 
-export const bestsellers = products.filter((p) => p.featured).slice(0, 8)
+export const bestsellers = products.slice(0, 8)
