@@ -3,6 +3,20 @@ import { createContext, useContext, useEffect, useState } from 'react'
 const AuthContext = createContext(null)
 
 const AUTH_KEY = 'sgl_auth'
+const USERS_KEY = 'sgl_users'
+
+function loadUsers() {
+  try {
+    const raw = localStorage.getItem(USERS_KEY)
+    return raw ? JSON.parse(raw) : []
+  } catch {
+    return []
+  }
+}
+
+function saveUsers(users) {
+  localStorage.setItem(USERS_KEY, JSON.stringify(users))
+}
 
 function loadUser() {
   try {
@@ -33,21 +47,51 @@ export function AuthProvider({ children }) {
     setPendingAction(null)
   }
 
-  const login = (mobile) => {
-    setUser({ mobile })
-    setLoginOpen(false)
+  const runPending = () => {
     const action = pendingAction
     setPendingAction(null)
     if (action) action()
   }
 
+  const register = ({ mobile, name, password }) => {
+    const users = loadUsers()
+    if (users.some((u) => u.mobile === mobile)) {
+      return { ok: false, error: 'Mobile number already registered. Please login.' }
+    }
+    const newUser = { mobile, name: (name || '').trim(), password }
+    saveUsers([...users, newUser])
+    setUser({ mobile, name: newUser.name })
+    setLoginOpen(false)
+    runPending()
+    return { ok: true }
+  }
+
+  const login = ({ mobile, password }) => {
+    const users = loadUsers()
+    const found = users.find((u) => u.mobile === mobile)
+    if (!found) {
+      return { ok: false, error: 'No account found with this mobile number. Please register.' }
+    }
+    if (found.password !== password) {
+      return { ok: false, error: 'Incorrect password. Please try again.' }
+    }
+    setUser({ mobile, name: found.name || '' })
+    setLoginOpen(false)
+    runPending()
+    return { ok: true }
+  }
+
   const logout = () => setUser(null)
+
+  const isRegistered = (mobile) => loadUsers().some((u) => u.mobile === mobile)
 
   const value = {
     user,
     isLoggedIn: !!user,
+    register,
     login,
     logout,
+    isRegistered,
     loginOpen,
     openLogin,
     closeLogin,

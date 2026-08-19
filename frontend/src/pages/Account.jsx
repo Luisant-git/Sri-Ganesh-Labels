@@ -1,98 +1,196 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { User, ShoppingBag, Truck, PackageSearch, ChevronRight, ShieldCheck, LogOut, Phone } from 'lucide-react'
+import {
+  User,
+  ShoppingBag,
+  PackageSearch,
+  ChevronRight,
+  ShieldCheck,
+  LogOut,
+  Phone,
+  LogIn,
+  Home as HomeIcon,
+} from 'lucide-react'
 import { useCart } from '../context/CartContext'
 import { useAuth } from '../context/AuthContext'
 import { toast } from '../components/Toast'
 
+function HeroBreadcrumb({ current }) {
+  return (
+    <nav className="mt-3 inline-flex items-center gap-3">
+      <Link
+        to="/"
+        className="group flex items-center gap-2 text-xs font-semibold text-secondary-200/80 transition-colors hover:text-white"
+      >
+        <HomeIcon size={13} className="text-accent-400 transition-transform duration-200 group-hover:-translate-y-0.5" />
+        Home
+      </Link>
+      <span className="flex items-center">
+        <span className="h-px w-12 bg-gradient-to-r from-transparent to-accent-400" />
+        <span className="mx-2 text-[11px] text-accent-400">✦</span>
+        <span className="h-px w-12 bg-gradient-to-l from-transparent to-accent-400" />
+      </span>
+      <span className="text-xs font-semibold uppercase tracking-wider text-white">{current}</span>
+    </nav>
+  )
+}
+
+function HeroHeader({ eyebrow, title, subtitle }) {
+  return (
+    <section className="relative overflow-hidden bg-gradient-to-br from-secondary-900 via-secondary-800 to-secondary-950 py-14 lg:py-20">
+      <div className="pointer-events-none absolute -left-24 -top-24 h-80 w-80 rounded-full bg-secondary-500/20 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-32 -right-24 h-96 w-96 rounded-full bg-accent-500/20 blur-3xl" />
+      <div className="relative mx-auto max-w-7xl px-4 text-center">
+        <p className="text-xs font-semibold uppercase tracking-widest text-accent-400">{eyebrow}</p>
+        <h1 className="mx-auto mt-3 max-w-3xl font-display text-3xl font-bold tracking-tight text-white sm:text-4xl lg:text-5xl">
+          {title}
+        </h1>
+        <p className="mx-auto mt-5 max-w-2xl text-base leading-relaxed text-secondary-100/90">{subtitle}</p>
+        <HeroBreadcrumb current="My Account" />
+      </div>
+    </section>
+  )
+}
+
 export default function Account() {
   const { getCartCount } = useCart()
-  const { user, isLoggedIn, login, openLogin, logout } = useAuth()
+  const { user, isLoggedIn, openLogin, logout } = useAuth()
 
-  const links = [
+  const cartCount = getCartCount()
+
+  const quickActions = [
     {
       icon: PackageSearch,
       title: 'My Orders',
-      desc: 'Track your placed orders',
+      desc: 'Track status of your placed orders',
       to: '/order-tracking',
+      accent: 'bg-violet-50 text-violet-600',
     },
     {
       icon: ShoppingBag,
       title: 'My Cart',
-      desc: `${getCartCount()} item${getCartCount() !== 1 ? 's' : ''} in your cart`,
+      desc: `${cartCount} item${cartCount !== 1 ? 's' : ''} in your cart`,
       to: '/cart',
+      accent: 'bg-brand-50 text-brand-600',
     },
   ]
 
+  if (!isLoggedIn) {
+    return (
+      <div className="min-h-[70vh] bg-slate-50 pb-16">
+        <HeroHeader
+          eyebrow="My Account"
+          title="Welcome to My Account"
+          subtitle="Login or create an account to track your orders, manage your cart and shop faster."
+        />
+        <div className="mx-auto mt-8 max-w-xl px-4">
+          <div className="rounded-3xl border border-slate-200 bg-white p-10 text-center shadow-xl shadow-slate-900/5">
+            <span className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-brand-50 text-brand-700">
+              <User size={40} />
+            </span>
+            <h2 className="mt-5 font-display text-xl font-bold text-slate-900">You are browsing as a guest</h2>
+            <p className="mx-auto mt-2 max-w-sm text-sm leading-relaxed text-slate-500">
+              Login or create an account to track your orders, manage your cart and shop faster.
+            </p>
+            <button
+              onClick={() => openLogin(() => toast('Logged in!'))}
+              className="mt-6 inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-accent-500 to-accent-600 px-8 py-3.5 text-sm font-bold text-white shadow-lg shadow-accent-500/30 transition-all hover:shadow-accent-500/40 active:scale-95"
+            >
+              <LogIn size={17} /> Login / Register
+            </button>
+            <div className="mt-6 flex items-center justify-center gap-2 text-[11px] text-slate-400">
+              <ShieldCheck size={13} className="text-teal-500" /> Secure mobile number based login
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
-    <div className="mx-auto max-w-3xl px-4 py-14 lg:py-20">
-      <div className="rounded-3xl border border-slate-200 bg-white p-8 text-center shadow-sm sm:p-10">
-        <span className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-brand-50 text-brand-700">
-          {user ? <Phone size={38} /> : <User size={40} />}
-        </span>
-        <h1 className="mt-5 font-display text-2xl font-bold text-slate-900 sm:text-3xl">
-          {user ? 'Welcome!' : 'Guest Account'}
-        </h1>
-        <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-slate-500">
-          {user ? (
-            <>
-              You are logged in with <span className="font-semibold text-brand-700">{user.mobile}</span>. Shop, add to
-              cart and place orders easily.
-            </>
-          ) : (
-            'Login with your mobile number to add products to cart or buy instantly.'
-          )}
-        </p>
-        <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
-          {isLoggedIn ? (
+    <div className="min-h-[70vh] bg-slate-50 pb-16">
+      <HeroHeader
+        eyebrow="Your Profile"
+        title="My Account"
+        subtitle="Manage your cart, track orders and keep your shopping details in one place."
+      />
+
+      <div className="mx-auto mt-8 grid max-w-4xl items-start gap-6 px-4 lg:grid-cols-[300px_1fr]">
+        {/* Left sidebar: profile */}
+        <aside className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-xl shadow-slate-900/5">
+          <div className="flex flex-col items-center border-b border-slate-100 px-6 pb-8 pt-10 text-center">
+            <span className="flex h-24 w-24 items-center justify-center rounded-full bg-brand-100 text-brand-700 ring-4 ring-brand-50">
+              <User size={44} />
+            </span>
+            <h2 className="mt-4 truncate font-display text-xl font-bold text-slate-900">{user.name || 'Hello!'}</h2>
+            <p className="mt-1 flex items-center gap-1.5 text-sm text-slate-500">
+              <Phone size={13} className="text-slate-400" /> +91 {user.mobile}
+            </p>
+            <span className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-green-100 px-3 py-1 text-[11px] font-semibold text-green-700">
+              <ShieldCheck size={13} /> {user.name ? 'Verified Account' : 'Mobile Verified'}
+            </span>
+          </div>
+          <div className="px-4 py-4">
             <button
               onClick={() => {
                 logout()
                 toast('Logged out')
               }}
-              className="flex items-center gap-1.5 rounded-full bg-rose-50 px-4 py-1.5 text-xs font-semibold text-rose-600 transition-colors hover:bg-rose-100"
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-600 transition-colors hover:bg-rose-100"
             >
-              <LogOut size={14} /> Logout
+              <LogOut size={16} /> Logout
             </button>
-          ) : (
-            <button
-              onClick={() => openLogin(() => toast('Logged in!'))}
-              className="flex items-center gap-1.5 rounded-full bg-brand-50 px-4 py-1.5 text-xs font-semibold text-brand-700 transition-colors hover:bg-brand-100"
-            >
-              <Phone size={14} /> Login with mobile
-            </button>
-          )}
-          <span className="flex items-center gap-1.5 rounded-full bg-teal-50 px-4 py-1.5 text-xs font-semibold text-teal-700">
-            <ShieldCheck size={14} /> OTP-based login
-          </span>
+          </div>
+        </aside>
+
+        {/* Right content */}
+        <div className="space-y-6">
+          <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+            <div className="flex items-center gap-4 border-b border-slate-100 px-6 py-5">
+              <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-accent-500 to-accent-600 text-white shadow-lg shadow-accent-500/25">
+                <ShieldCheck size={22} />
+              </span>
+              <div>
+                <h3 className="font-display text-base font-bold text-slate-900">
+                  Welcome back, {user.name || 'customer'}!
+                </h3>
+                <p className="text-xs text-slate-500">Manage your orders and cart in one place.</p>
+              </div>
+            </div>
+            <div className="border-b border-slate-100 px-6 py-4">
+              <h3 className="font-display text-sm font-bold text-slate-900">Quick Actions</h3>
+            </div>
+            <div className="divide-y divide-slate-100">
+              {quickActions.map(({ icon: Icon, title, desc, to, accent }) => (
+                <Link
+                  key={title}
+                  to={to}
+                  className="group flex items-center gap-4 px-6 py-4 transition-colors hover:bg-slate-50"
+                >
+                  <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${accent}`}>
+                    <Icon size={20} />
+                  </span>
+                  <span className="flex-1 leading-tight">
+                    <span className="block text-sm font-semibold text-slate-900">{title}</span>
+                    <span className="mt-0.5 block text-xs text-slate-500">{desc}</span>
+                  </span>
+                  <ChevronRight
+                    size={18}
+                    className="text-slate-300 transition-transform group-hover:translate-x-1 group-hover:text-brand-600"
+                  />
+                </Link>
+              ))}
+            </div>
+            <div className="border-t border-slate-100 px-6 py-4">
+              <Link
+                to="/products"
+                className="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-accent-500 to-accent-600 py-3 text-sm font-bold text-white shadow-lg shadow-accent-500/25 transition-all hover:shadow-accent-500/40 active:scale-[0.98]"
+              >
+                <ShoppingBag size={17} /> Start Shopping
+              </Link>
+            </div>
+          </div>
         </div>
-      </div>
-
-      <div className="mt-6 grid gap-4 sm:grid-cols-3">
-        {links.map(({ icon: Icon, title, desc, to }) => (
-          <Link
-            key={title}
-            to={to}
-            className="group rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-brand-200 hover:shadow-xl"
-          >
-            <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-brand-700 text-white shadow-lg shadow-brand-700/25 transition-transform group-hover:scale-110">
-              <Icon size={20} />
-            </span>
-            <h3 className="mt-4 flex items-center gap-1 font-display text-sm font-bold text-slate-900">
-              {title}
-              <ChevronRight size={15} className="text-slate-300 transition-transform group-hover:translate-x-1" />
-            </h3>
-            <p className="mt-1 text-xs text-slate-500">{desc}</p>
-          </Link>
-        ))}
-      </div>
-
-      <div className="mt-8 text-center">
-        <Link
-          to="/products"
-          className="inline-flex items-center gap-2 rounded-xl bg-accent-500 px-7 py-3.5 text-sm font-bold text-white shadow-lg shadow-accent-500/30 transition-all duration-200 hover:bg-accent-600 active:scale-95"
-        >
-          <ShoppingBag size={17} /> Start Shopping
-        </Link>
       </div>
     </div>
   )

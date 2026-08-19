@@ -7,7 +7,6 @@ import {
   Menu,
   X,
   ChevronRight,
-  Phone,
 } from 'lucide-react'
 import { useCart } from '../context/CartContext'
 import { useAuth } from '../context/AuthContext'
@@ -129,16 +128,10 @@ export default function Header() {
             <Link
               to="/account"
               aria-label="Account"
-              title={user ? `Logged in: ${user.mobile}` : 'Login / Account'}
+              title={user ? (user.name ? `Logged in: ${user.name}` : `Logged in: ${user.mobile}`) : 'Login / Account'}
               className="hidden h-10 w-10 items-center justify-center rounded-full text-slate-700 transition-colors hover:bg-brand-50 hover:text-brand-700 sm:flex"
             >
-              {user ? (
-                <span className="flex h-6 min-w-6 items-center justify-center rounded-full bg-brand-700 px-1.5 text-[9px] font-bold text-white">
-                  {user.mobile.slice(-4)}
-                </span>
-              ) : (
-                <User size={21} />
-              )}
+              <User size={21} />
             </Link>
             <button
               onClick={() => setMobileOpen(!mobileOpen)}
@@ -288,9 +281,12 @@ export default function Header() {
             <Link
               to="/account"
               onClick={() => setMobileOpen(false)}
-              className="mb-2 flex items-center gap-2 rounded-xl bg-slate-50 px-3 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-brand-50"
+              className="mb-2 flex items-center gap-3 rounded-xl bg-slate-50 px-3 py-3 text-sm font-medium text-slate-700 transition-colors hover:bg-brand-50"
             >
-              {user ? <Phone size={16} /> : <User size={16} />} {user ? user.mobile : 'My Account'}
+              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-100 text-brand-700">
+                <User size={18} />
+              </span>
+              <span className="text-sm font-semibold text-slate-900">{user ? (user.name || user.mobile) : 'My Account'}</span>
             </Link>
           </div>
         </div>

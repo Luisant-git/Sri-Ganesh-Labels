@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import {
   User,
@@ -19,6 +19,7 @@ import {
   ShoppingCart,
 } from 'lucide-react'
 import { useCart, FREE_SHIPPING_THRESHOLD } from '../context/CartContext'
+import { useAuth } from '../context/AuthContext'
 import { formatINR, generateOrderId } from '../utils/format'
 import { toast } from '../components/Toast'
 
@@ -48,14 +49,29 @@ const onlineMethods = [
 
 export default function Checkout() {
   const { items, totals, clearCart } = useCart()
+  const { user } = useAuth()
   const navigate = useNavigate()
 
-  const [form, setForm] = useState(initialForm)
+  const [form, setForm] = useState({
+    ...initialForm,
+    fullName: user?.name || '',
+    mobile: user?.mobile || '',
+  })
   const [errors, setErrors] = useState({})
   const [payment, setPayment] = useState('cod')
   const [onlineMethod, setOnlineMethod] = useState('upi')
   const [placed, setPlaced] = useState(false)
   const [terms, setTerms] = useState(false)
+
+  useEffect(() => {
+    if (user) {
+      setForm((f) => ({
+        ...f,
+        fullName: f.fullName || user.name || '',
+        mobile: f.mobile || user.mobile || '',
+      }))
+    }
+  }, [user])
 
   const setField = (key) => (e) => {
     const value =
