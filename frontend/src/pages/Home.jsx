@@ -233,16 +233,15 @@ export default function Home() {
       {/* Featured products */}
       <section className="bg-white py-16 lg:py-20">
         <div className="mx-auto max-w-7xl px-4">
-          <div className="flex flex-wrap items-end justify-between gap-4">
+          <div className="text-center">
             <SectionHeading
-              align="left"
               eyebrow="Handpicked For You"
               title="Featured Products"
               subtitle="Our most-loved labels, stickers and rolls chosen by customers across India."
             />
             <Link
               to="/products"
-              className="group mb-1 flex items-center gap-2 text-sm font-semibold text-brand-700 transition-colors hover:text-brand-800"
+              className="group mt-4 inline-flex items-center gap-2 text-sm font-semibold text-brand-700 transition-colors hover:text-brand-800"
             >
               View all products
               <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
