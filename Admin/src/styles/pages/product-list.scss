@@ -1,0 +1,154 @@
+@import '../variables.scss';
+@import '../mixins.scss';
+.product-list {
+  .page-header {
+    @include flex-between;
+    align-items: flex-end;
+    margin-bottom: 24px;
+    gap: 16px;
+
+    @media (max-width: 640px) {
+      flex-direction: column;
+      align-items: flex-start;
+
+      .btn {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+
+    .header-left {
+      h1 {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--gray-900);
+        margin-bottom: 4px;
+
+        @media (max-width: 640px) {
+          font-size: 1.5rem;
+        }
+      }
+      p {
+        color: var(--gray-500);
+        font-size: 1rem;
+
+        @media (max-width: 640px) {
+          font-size: 0.875rem;
+        }
+      }
+    }
+    .btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 1rem;
+      font-weight: 500;
+    }
+  }
+
+  .filters-section {
+    @include flex-between;
+    margin-bottom: 24px;
+    gap: 16px;
+
+    @media (max-width: 768px) {
+      flex-direction: column;
+      align-items: stretch;
+
+      .search-container,
+      .filter-group {
+        width: 100%;
+      }
+
+      .filter-group {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+
+        select {
+          width: 100%;
+        }
+      }
+    }
+  }
+
+  
+  
+  
+  
+  
+  }
+
+// Modal Styles
+.modal-backdrop {
+  position: fixed;
+  z-index: 1000;
+  inset: 0;
+  background: rgba(0,0,0,0.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.modal {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+  padding: 32px 28px 24px 28px;
+  min-width: 340px;
+  max-width: 95vw;
+  position: relative;
+  animation: modalIn 0.18s;
+}
+@keyframes modalIn {
+  from { transform: translateY(40px) scale(0.98); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+.modal-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: none;
+  border: none;
+  color: #888;
+  cursor: pointer;
+  font-size: 1.2rem;
+}
+.modal-content h2 {
+  margin-top: 0;
+  margin-bottom: 18px;
+}
+.modal-product-image {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+.modal-product-info p {
+  margin: 0 0 8px 0;
+}
+.edit-modal label {
+  display: block;
+  margin-bottom: 12px;
+  font-weight: 500;
+}
+.edit-modal input, .edit-modal select {
+  width: 100%;
+  margin-top: 4px;
+  margin-bottom: 8px;
+  padding: 8px 10px;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  font-size: 1rem;
+}
+.modal-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 18px;
+}
+.btn-danger {
+  background: #ef4444;
+  color: #fff;
+  border: none;
+}

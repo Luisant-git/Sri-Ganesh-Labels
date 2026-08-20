@@ -1,0 +1,398 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum IndianState {
+  ANDHRA_PRADESH
+  ARUNACHAL_PRADESH
+  ASSAM
+  BIHAR
+  CHHATTISGARH
+  GOA
+  GUJARAT
+  HARYANA
+  HIMACHAL_PRADESH
+  JHARKHAND
+  KARNATAKA
+  KERALA
+  MADHYA_PRADESH
+  MAHARASHTRA
+  MANIPUR
+  MEGHALAYA
+  MIZORAM
+  NAGALAND
+  ODISHA
+  PUNJAB
+  RAJASTHAN
+  SIKKIM
+  TAMIL_NADU
+  TELANGANA
+  TRIPURA
+  UTTAR_PRADESH
+  UTTARAKHAND
+  WEST_BENGAL
+  ANDAMAN_NICOBAR
+  CHANDIGARH
+  DADRA_NAGAR_HAVELI
+  DELHI
+  JAMMU_KASHMIR
+  LADAKH
+  LAKSHADWEEP
+  PUDUCHERRY
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String?  @unique
+  phone     String?  @unique
+  name      String?
+  password  String?
+  isActive  Boolean  @default(true)
+  shippingAddress Json?
+  createdAt DateTime @default(now())
+  cart      Cart?
+  orders    Order[]
+  otps      Otp[]
+  wishlistItems WishlistItem[]
+  couponUsages CouponUsage[]
+  specificCoupons Coupon[] @relation("UserSpecificCoupons")
+}
+ 
+model Otp {
+  id        Int      @id @default(autoincrement())
+  userId    Int?
+  phone     String
+  otp       String
+  expiresAt DateTime
+  verified  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@index([phone])
+}
+
+model Admin {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  name      String?
+  password  String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+}
+
+model Product {
+  id            Int      @id @default(autoincrement())
+  name          String
+  description   String?
+  categoryId    Int
+  subCategoryId Int?
+  brandId       Int?
+  basePrice     String
+  mrp           String?
+  hsnCode       String?
+  bundleOffers  Json[] // [{colorCount: 1, price: "499"}, {colorCount: 2, price: "800"}, {colorCount: 3, price: "1000"}]
+  tags          String[]
+  gallery       Json[]
+  colors        Json[] // [{name: "Red", code: "#FF0000", sizes: ["S", "M", "L"]}]
+  status        String   @default("active")
+  newArrivals   Boolean  @default(false)
+  discount      Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  category      Category     @relation(fields: [categoryId], references: [id])
+  subCategory   SubCategory? @relation(fields: [subCategoryId], references: [id])
+  brand         Brand?       @relation(fields: [brandId], references: [id])
+  cartItems     CartItem[]
+  orderItems    OrderItem[]
+
+  @@index([categoryId])
+  @@index([subCategoryId])
+  @@index([brandId])
+}
+
+model Brand {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  description String?
+  image       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  products    Product[]
+}
+
+model Category {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  description String?
+  image       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  products      Product[]
+  subCategories SubCategory[]
+}
+
+model SubCategory {
+  id          Int      @id @default(autoincrement())
+  name        String
+  categoryId  Int
+  description String?
+  image       String?
+  sizeChart   String?
+  orderNumber Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  category    Category  @relation(fields: [categoryId], references: [id])
+  products    Product[]
+
+  @@unique([name, categoryId])
+  @@index([categoryId])
+}
+
+model Banner {
+  id          Int      @id @default(autoincrement())
+  title       String?
+  link        String?
+  isActive    Boolean  @default(false)
+  image       String
+  mobileImage String?
+  rowNumber   Int      @default(0)
+  createAt    DateTime @default(now())
+  updatedAt   DateTime @updatedAt 
+}
+
+model Cart {
+  id        Int        @id @default(autoincrement())
+  userId    Int
+  items     CartItem[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId])
+}
+
+model CartItem {
+  id           Int   @id @default(autoincrement())
+  cartId       Int
+  productId    Int?
+  name         String
+  price        String
+  imageUrl     String
+  size         String?
+  color        String?
+  colorVariantId String?
+  sizeVariantId String?
+  quantity     Int      @default(1)
+  type         String   @default("single") // "single" or "bundle"
+  bundleItems  Json?    // For bundle items: [{color, size, originalPrice, colorImage}]
+  hsnCode      String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  cart         Cart     @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  product      Product? @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
+
+model Order {
+  id              Int         @id @default(autoincrement())
+  userId          Int
+  status          String      @default("pending")
+  subtotal        String
+  deliveryFee     String
+  shippingFee     String?     @default("0")
+  codFee          String?     @default("0")
+  discount        String?     @default("0")
+  couponCode      String?
+  total           String
+  paymentMethod   String
+  razorpayPaymentId String?
+  shippingAddress Json
+  deliveryOption  Json
+  invoiceUrl      String?
+  packageSlipUrl  String?
+  courierName     String?
+  trackingId      String?
+  trackingLink    String?
+  items           OrderItem[]
+  cancelRemarks   String?
+  codReturnRemarks String?
+  codCharge       Float?    @default(0)
+  courierCharge   Float?    @default(0)
+  chargedWeight   Float?    @default(0)
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  user            User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model OrderItem {
+  id          Int     @id @default(autoincrement())
+  orderId     Int
+  productId   Int?
+  name        String
+  price       String
+  imageUrl    String
+  size        String?
+  color       String?
+  colorVariantId String?
+  sizeVariantId String?
+  quantity    Int
+  type        String  @default("single")
+  bundleItems Json?
+  hsnCode     String?
+
+  order       Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product     Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+}
+
+model WishlistItem {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  productId Int
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId])
+  @@index([userId])
+}
+
+model Coupon {
+  id              Int      @id @default(autoincrement())
+  code            String   @unique
+  type            String   // "percentage" or "fixed"
+  value           Float
+  minOrderAmount  Float    @default(0)
+  maxDiscount     Float?
+  usageLimit      Int?
+  usageCount      Int      @default(0)
+  perUserLimit    Int      @default(1)
+  isActive        Boolean  @default(true)
+  expiryDate      DateTime?
+  isHiddenFromUser Boolean @default(false)
+  applyTo         String[] @default(["subtotal"])
+  excludeOfferProducts Boolean @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  specificUsers   User[]   @relation("UserSpecificCoupons")
+  usages          CouponUsage[]
+}
+
+model CouponUsage {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  couponId  Int
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  coupon    Coupon   @relation(fields: [couponId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([couponId])
+}
+
+model WhatsappMessage {
+  id        Int      @id @default(autoincrement())
+  messageId String   @unique
+  from      String
+  message   String?
+  mediaType String?  // "image", "video", "document", "audio"
+  mediaUrl  String?
+  direction String   // "incoming" or "outgoing"
+  status    String   // "received", "sent", "delivered", "read"
+  createdAt DateTime @default(now())
+ 
+  @@index([from])
+  @@index([createdAt])
+}
+
+model WhatsappSession {
+  id         Int      @id @default(autoincrement())
+  phone      String   @unique
+  state      String   @default("menu") // "menu", "category", "subcategory", "product"
+  categoryId Int?
+  subCategoryId Int?
+  updatedAt  DateTime @updatedAt
+  createdAt  DateTime @default(now())
+
+  @@index([phone])
+}
+
+model AppSettings {
+  id                      Int      @id @default(autoincrement())
+  signatureUrl            String?
+  codShippingCharge       Float    @default(0)
+  maintenanceMode         Boolean  @default(false)
+  hiddenPages             Json     @default("[]")
+  freeShippingThreshold          Float?   @default(0)
+  freeShippingCodThreshold       Float?   @default(0)
+  freeShippingOnlineDeliveryFee  Boolean? @default(false)
+  freeShippingOnlineCodFee       Boolean? @default(false)
+  freeShippingCombinedDeliveryFee Boolean? @default(false)
+  freeShippingCombinedCodFee     Boolean? @default(false)
+  updatedAt               DateTime @updatedAt
+  createdAt               DateTime @default(now())
+}
+
+model Pincode {
+  id              Int      @id @default(autoincrement())
+  pincode         String   @unique
+  city            String
+  state           IndianState
+  deliveryCharge  Float?   @default(0)
+  deliveryTime    Int?     @default(0)
+  minOrderAmount  Float?   @default(0)
+  codAvailable    Boolean  @default(true)
+  status          String   @default("active")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([pincode])
+}
+
+model ShippingRule {
+  id               Int      @id @default(autoincrement())
+  state            IndianState @unique
+  flatShippingRate Float
+  codAvailable     Boolean  @default(true)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+model SizeChart {
+  id              Int       @id @default(autoincrement())
+  title           String
+  image           String
+  isActive        Boolean   @default(true)
+  rowNumber       Int       @default(0)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+model CourierPartner {
+  id           Int      @id @default(autoincrement())
+  name         String   @unique
+  trackingLink String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model SystemErrorLog {
+  id           Int      @id @default(autoincrement())
+  userId       Int?
+  orderId      Int?
+  status       String?
+  action       String
+  errorMessage String
+  createdAt    DateTime @default(now())
+}

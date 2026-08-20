@@ -1,0 +1,170 @@
+@import '../variables.scss';
+@import '../mixins.scss';
+
+
+.combo-offers {
+  .page-header.with-actions {
+    @include flex-between;
+    align-items: flex-end;
+    margin-bottom: 24px;
+    gap: 16px;
+
+    .header-left {
+      h1 {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--gray-900);
+        margin-bottom: 4px;
+      }
+      p {
+        color: var(--gray-500);
+        font-size: 1rem;
+      }
+    }
+    .btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 1rem;
+      font-weight: 500;
+    }
+  }
+
+  .filters-section {
+    @include flex-between;
+    margin-bottom: 24px;
+    gap: 16px;
+  }
+
+  .combo-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 24px;
+  }
+
+  .combo-card {
+    @include card;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 2px 8px rgba(16, 30, 54, 0.06);
+    transition: box-shadow 0.2s;
+    position: relative;
+    background: var(--white);
+    border-radius: 12px;
+    &:hover {
+      box-shadow: 0 4px 16px rgba(16, 30, 54, 0.12);
+    }
+
+    .combo-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+
+      .combo-icon {
+        background: var(--primary-color);
+        color: var(--white);
+        border-radius: 8px;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+      }
+      .combo-actions {
+        display: flex;
+        gap: 8px;
+        .action-btn {
+          background: var(--gray-100);
+          border: none;
+          border-radius: 6px;
+          padding: 6px;
+          cursor: pointer;
+          color: var(--gray-500);
+          transition: background 0.2s, color 0.2s;
+          &:hover {
+            background: var(--primary-color);
+            color: var(--white);
+          }
+        }
+      }
+    }
+
+    .combo-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+
+      h3 {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: var(--gray-900);
+        margin-bottom: 4px;
+      }
+      .combo-products {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 8px;
+        .product-tag {
+          background: var(--gray-100);
+          color: var(--gray-700);
+          border-radius: 6px;
+          padding: 4px 10px;
+          font-size: 13px;
+          font-weight: 500;
+        }
+      }
+      .combo-pricing {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        .original-price {
+          text-decoration: line-through;
+          color: var(--gray-400);
+          font-size: 15px;
+        }
+        .offer-price {
+          color: var(--primary-color);
+          font-size: 18px;
+          font-weight: 700;
+        }
+        .discount {
+          background: var(--success-color);
+          color: var(--white);
+          border-radius: 6px;
+          padding: 2px 8px;
+          font-size: 13px;
+          font-weight: 500;
+        }
+      }
+      .combo-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 8px;
+        .status {
+          padding: 2px 10px;
+          border-radius: 6px;
+          font-size: 13px;
+          font-weight: 500;
+          &.active {
+            background: var(--success-color);
+            color: var(--white);
+          }
+          &.inactive {
+            background: var(--gray-300);
+            color: var(--gray-600);
+          }
+        }
+        .valid-until {
+          color: var(--gray-500);
+          font-size: 13px;
+        }
+      }
+    }
+  }
+}

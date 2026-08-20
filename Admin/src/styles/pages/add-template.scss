@@ -1,0 +1,44 @@
+@import '../variables.scss';
+@import '../mixins.scss';
+
+.add-template {
+  .page-header {
+    margin-bottom: 24px;
+
+    &.with-actions {
+      @include flex-between;
+      align-items: flex-start;
+
+      @include responsive(tablet) {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 16px;
+      }
+
+      .header-left {
+        h1 {
+          font-size: 28px;
+          font-weight: 700;
+          color: var(--gray-900);
+          margin-bottom: 4px;
+        }
+
+        p {
+          color: var(--gray-600);
+          font-size: 16px;
+        }
+      }
+    }
+  }
+
+  .mobile-preview {
+    position: sticky;
+    top: 24px;
+
+    @include responsive(desktop) {
+      position: static;
+      display: flex;
+      justify-content: center;
+    }
+  }
+}

@@ -1,0 +1,45 @@
+// Product Report Custom Styles
+
+.reports-page {
+  // Compact dropdown styles
+  .ant-select {
+    &.ant-select-lg {
+      .ant-select-selector {
+        height: 38px !important;
+        padding: 4px 11px !important;
+        
+        .ant-select-selection-search {
+          input {
+            height: 30px !important;
+          }
+        }
+        
+        .ant-select-selection-item {
+          line-height: 30px !important;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          max-width: 100%;
+        }
+        
+        .ant-select-selection-placeholder {
+          line-height: 30px !important;
+        }
+      }
+    }
+  }
+
+  // Dropdown menu styles
+  .ant-select-dropdown {
+    .ant-select-item {
+      padding: 5px 12px;
+      font-size: 13px;
+      
+      .ant-select-item-option-content {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+    }
+  }
+}

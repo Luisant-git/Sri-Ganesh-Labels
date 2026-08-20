@@ -1,0 +1,186 @@
+@import '../variables.scss';
+@import '../mixins.scss';
+
+.tracker-stocks {
+  .page-header {
+    @include flex-between;
+    align-items: flex-end;
+    margin-bottom: 24px;
+    gap: 16px;
+    .header-left {
+      h1 {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--gray-900);
+        margin-bottom: 4px;
+      }
+      p {
+        color: var(--gray-500);
+        font-size: 1rem;
+      }
+    }
+  }
+
+  .tracker-stats {
+    display: flex;
+    gap: 24px;
+    margin-bottom: 32px;
+    .stat-card {
+      @include card;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 20px 28px;
+      border-radius: 12px;
+      min-width: 180px;
+      .stat-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        background: var(--gray-50);
+        &.critical { background: var(--danger-bg); }
+        &.low { background: var(--warning-bg); }
+        &.normal { background: var(--success-bg); }
+        svg {
+          color: var(--danger-color);
+          &.low { color: var(--warning-color); }
+          &.normal { color: var(--success-color); }
+        }
+      }
+      .stat-content {
+        h3 {
+          font-size: 1.5rem;
+          font-weight: 700;
+          margin: 0;
+        }
+        p {
+          color: var(--gray-500);
+          font-size: 1rem;
+          margin: 0;
+        }
+      }
+      &.critical .stat-icon { background: var(--danger-bg); }
+      &.low .stat-icon { background: var(--warning-bg); }
+      &.normal .stat-icon { background: var(--success-bg); }
+    }
+  }
+
+  .filters-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    gap: 16px;
+    .search-container {
+      display: flex;
+      align-items: center;
+      background: var(--gray-50);
+      border: 1px solid var(--gray-200);
+      border-radius: 8px;
+      padding: 6px 12px;
+      .search-icon {
+        color: var(--gray-400);
+        margin-right: 8px;
+      }
+      .search-input {
+        border: none;
+        background: transparent;
+        font-size: 1rem;
+        outline: none;
+        width: 200px;
+      }
+    }
+    .filter-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      .filter-select {
+        padding: 8px 12px;
+        border: 1px solid var(--gray-300);
+        border-radius: 6px;
+        font-size: 1rem;
+        background: var(--white);
+        color: var(--gray-900);
+        transition: border-color 0.2s;
+        &:focus {
+          border-color: var(--primary-color);
+          outline: none;
+        }
+      }
+      .btn {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 1rem;
+      }
+    }
+  }
+
+  .tracker-list {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    .tracker-item {
+      @include card;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 18px 24px;
+      border-radius: 10px;
+      background: var(--white);
+      &.critical { border-left: 4px solid var(--danger-color); }
+      &.low { border-left: 4px solid var(--warning-color); }
+      &.normal { border-left: 4px solid var(--success-color); }
+      .item-info {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        .item-status {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 32px;
+          height: 32px;
+          border-radius: 50%;
+          background: var(--gray-100);
+          svg {
+            color: var(--danger-color);
+          }
+        }
+        .item-details {
+          h4 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 0 0 2px 0;
+          }
+          p {
+            color: var(--gray-500);
+            font-size: 0.98rem;
+            margin: 0;
+          }
+        }
+      }
+      .item-trend {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        .trend-indicator {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          font-weight: 500;
+          &.up { color: var(--success-color); }
+          &.down { color: var(--danger-color); }
+        }
+        .last-updated {
+          color: var(--gray-400);
+          font-size: 0.95rem;
+          margin-top: 2px;
+        }
+      }
+    }
+  }
+}

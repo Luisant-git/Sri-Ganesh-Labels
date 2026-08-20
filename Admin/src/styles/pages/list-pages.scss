@@ -1,0 +1,396 @@
+// Common styles for all list pages
+.brand-list,
+.category-list,
+.subcategory-list,
+.banner-list,
+.coupon-list,
+.pincode-list,
+.combo-offers {
+  .page-header {
+    margin-bottom: 2rem;
+    
+    &.with-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      
+      .header-left {
+        h1 {
+          margin: 0 0 0.5rem 0;
+          font-size: 2rem;
+          font-weight: 600;
+          color: var(--text-primary);
+        }
+        
+        p {
+          margin: 0;
+          color: var(--text-secondary);
+          font-size: 0.9rem;
+        }
+      }
+    }
+  }
+
+  .filters-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    gap: 1rem;
+    
+    .search-container {
+      position: relative;
+      flex: 1;
+      max-width: 400px;
+      
+      .search-icon {
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-secondary);
+      }
+      
+      .search-input {
+        width: 100%;
+        padding: 10px 12px 10px 40px;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        font-size: 0.9rem;
+        
+        &:focus {
+          outline: none;
+          border-color: var(--primary-color);
+          box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.1);
+        }
+      }
+    }
+    
+    .filter-group {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+      
+      .view-toggle {
+        display: flex;
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        overflow: hidden;
+        margin-left: 1rem;
+        
+        .view-btn {
+          padding: 8px 16px;
+          border: none;
+          background: white;
+          color: var(--text-secondary);
+          font-size: 0.85rem;
+          cursor: pointer;
+          transition: all 0.2s;
+          
+          &:hover {
+            background: var(--bg-light);
+          }
+          
+          &.active {
+            background: var(--primary-color);
+            color: white;
+          }
+        }
+      }
+    }
+  }
+
+  // Action buttons in table
+  .action-buttons {
+    display: flex;
+    gap: 0.5rem;
+    
+    .action-btn {
+      padding: 6px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      
+      &.view {
+        background: var(--info-light);
+        color: var(--info-color);
+        
+        &:hover {
+          background: var(--info-color);
+          color: white;
+        }
+      }
+      
+      &.edit {
+        background: var(--warning-light);
+        color: var(--warning-color);
+        
+        &:hover {
+          background: var(--warning-color);
+          color: white;
+        }
+      }
+      
+      &.delete {
+        background: var(--danger-light);
+        color: var(--danger-color);
+        
+        &:hover {
+          background: var(--danger-color);
+          color: white;
+        }
+      }
+    }
+  }
+
+  // Status badges
+  .status {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: capitalize;
+    
+    &.active {
+      background: var(--success-light);
+      color: var(--success-color);
+    }
+    
+    &.inactive {
+      background: var(--warning-light);
+      color: var(--warning-color);
+    }
+    
+    &.expired {
+      background: var(--danger-light);
+      color: var(--danger-color);
+    }
+  }
+
+  // Specific styles for different list types
+  .product-count,
+  .click-count,
+  .sales-count {
+    font-weight: 600;
+    color: var(--primary-color);
+  }
+
+  .usage-info {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+  }
+
+  .delivery-days {
+    font-weight: 500;
+  }
+
+  .cod-status {
+    padding: 2px 6px;
+    border-radius: 8px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    
+    &.available {
+      background: var(--success-light);
+      color: var(--success-color);
+    }
+    
+    &.unavailable {
+      background: var(--danger-light);
+      color: var(--danger-color);
+    }
+  }
+
+  .banner-info,
+  .coupon-code,
+  .pincode-info,
+  .combo-name {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    
+    .banner-icon,
+    .coupon-icon,
+    .pincode-icon,
+    .combo-icon {
+      color: var(--primary-color);
+    }
+    
+    .code {
+      font-family: monospace;
+      font-weight: 600;
+      background: var(--bg-light);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+  }
+
+  .product-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    
+    .product-tag {
+      background: var(--bg-light);
+      color: var(--text-secondary);
+      padding: 2px 6px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+    }
+    
+    .more-products {
+      color: var(--text-secondary);
+      font-size: 0.75rem;
+      font-style: italic;
+    }
+  }
+
+  .discount-badge {
+    background: var(--success-light);
+    color: var(--success-color);
+    padding: 2px 6px;
+    border-radius: 8px;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+
+  .shipping-info {
+    padding: 2px 6px;
+    border-radius: 8px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    
+    &.free {
+      background: var(--success-light);
+      color: var(--success-color);
+    }
+    
+    &.paid {
+      background: var(--warning-light);
+      color: var(--warning-color);
+    }
+  }
+
+  // Modal styles
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+  }
+
+  .modal-content {
+    background: white;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 600px;
+  }
+
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+    
+    h3 {
+      margin: 0;
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    
+    .close-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 4px;
+      border-radius: 4px;
+      color: var(--text-secondary);
+      
+      &:hover {
+        background: var(--bg-light);
+        color: var(--text-primary);
+      }
+    }
+  }
+
+  .modal-body {
+    padding: 1.5rem;
+  }
+
+  .detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    align-items: start;
+  }
+
+  .detail-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    padding: 0.75rem;
+    background: var(--bg-light);
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+    
+    .label {
+      font-weight: 500;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      text-align: left;
+    }
+    
+    .value {
+      font-weight: 600;
+      color: var(--text-primary);
+      font-size: 0.9rem;
+      text-align: right;
+    }
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .brand-list,
+  .category-list,
+  .subcategory-list,
+  .banner-list,
+  .coupon-list,
+  .pincode-list,
+  .combo-offers {
+    .page-header.with-actions {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 1rem;
+    }
+    
+    .filters-section {
+      flex-direction: column;
+      align-items: stretch;
+      
+      .filter-group {
+        justify-content: space-between;
+        
+        .view-toggle {
+          margin-left: 0;
+        }
+      }
+    }
+    
+    .action-buttons {
+      justify-content: center;
+    }
+  }
+}

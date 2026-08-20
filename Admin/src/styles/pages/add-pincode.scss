@@ -1,0 +1,162 @@
+@import '../variables.scss';
+@import '../mixins.scss';
+
+.add-pincode {
+  .page-header.with-actions {
+    @include flex-between;
+    align-items: flex-end;
+    margin-bottom: 24px;
+    gap: 16px;
+    .header-left {
+      h1 {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--gray-900);
+        margin-bottom: 4px;
+      }
+      p {
+        color: var(--gray-500);
+        font-size: 1rem;
+      }
+    }
+    .header-actions {
+      display: flex;
+      gap: 12px;
+    }
+    .btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 1rem;
+      font-weight: 500;
+    }
+  }
+
+  .pincode-form {
+    .form-section {
+      @include card;
+      padding: 24px;
+      background: var(--white);
+      border-radius: 12px;
+      margin-bottom: 32px;
+      .section-header {
+        margin-bottom: 20px;
+        h3 {
+          font-size: 18px;
+          font-weight: 600;
+          color: var(--gray-900);
+        }
+      }
+    }
+    .form-group {
+      margin-bottom: 18px;
+      .form-label {
+        font-size: 15px;
+        font-weight: 500;
+        color: var(--gray-700);
+        margin-bottom: 6px;
+        display: block;
+      }
+      .form-input,
+      .form-select,
+      .form-textarea {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid var(--gray-300);
+        border-radius: 6px;
+        font-size: 15px;
+        background: var(--gray-50);
+        color: var(--gray-900);
+        transition: border-color 0.2s;
+        &:focus {
+          border-color: var(--primary-color);
+          outline: none;
+        }
+      }
+      .form-textarea {
+        resize: vertical;
+      }
+      .input-with-icon {
+        display: flex;
+        align-items: center;
+        position: relative;
+        .input-icon {
+          margin-right: 8px;
+          color: var(--gray-500);
+          font-size: 16px;
+        }
+        .form-input {
+          flex: 1;
+        }
+        .searchable-dropdown {
+          position: relative;
+          flex: 1;
+          .dropdown-options {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1px solid var(--gray-300);
+            border-top: none;
+            border-radius: 0 0 6px 6px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            .dropdown-option {
+              padding: 10px 12px;
+              cursor: pointer;
+              border-bottom: 1px solid var(--gray-100);
+              &:hover {
+                background: var(--gray-50);
+              }
+              &:last-child {
+                border-bottom: none;
+              }
+            }
+          }
+        }
+      }
+      .dropdown-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 999;
+      }
+      .checkbox-group {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        input[type='checkbox'] {
+          accent-color: var(--primary-color);
+        }
+        label {
+          font-size: 15px;
+          color: var(--gray-700);
+          cursor: pointer;
+        }
+      }
+    }
+    .form-row {
+      display: flex;
+      gap: 16px;
+      @include responsive(mobile) {
+        flex-direction: column;
+        gap: 0;
+      }
+      .form-group {
+        flex: 1;
+      }
+    }
+    .form-actions {
+      display: flex;
+      gap: 12px;
+      justify-content: flex-end;
+      padding-top: 24px;
+      border-top: 1px solid var(--gray-200);
+    }
+  }
+}
