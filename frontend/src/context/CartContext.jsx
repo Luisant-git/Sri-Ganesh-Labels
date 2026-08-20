@@ -44,7 +44,7 @@ export function CartProvider({ children }) {
           productId: product.id,
           name: product.name,
           image: product.image,
-          price: product.price,
+          price: product.totalValue ?? product.price,
           originalPrice: product.originalPrice,
           option: option || 'default',
           quantity,
