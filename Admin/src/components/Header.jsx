@@ -43,7 +43,7 @@ const Header = ({ onMenuClick }) => {
                 <span>A</span>
               </div>
               <div className="user-info">
-                {/* <span className="user-name">En3 Fashion</span> */}
+                <span className="user-name">Sri Ganesh Labels</span>
                 <span className="user-role">Admin</span>
               </div>
               <ChevronDown size={16} />
