@@ -17,6 +17,7 @@ import {
   CheckCircle2,
   ChevronLeft,
   ShoppingCart,
+  Copy,
 } from 'lucide-react'
 import { useCart, FREE_SHIPPING_THRESHOLD } from '../context/CartContext'
 import { useAuth } from '../context/AuthContext'
@@ -25,14 +26,20 @@ import BackButton from '../components/BackButton'
 import { toast } from '../components/Toast'
 
 const initialForm = {
-  fullName: '',
-  mobile: '',
-  email: '',
-  address: '',
-  city: '',
-  state: '',
-  pincode: '',
+  shippingFullName: '',
+  shippingMobile: '',
+  shippingEmail: '',
+  shippingAddress: '',
+  shippingCity: '',
+  shippingState: '',
+  shippingPincode: '',
   gstin: '',
+  billingFullName: '',
+  billingMobile: '',
+  billingAddress: '',
+  billingCity: '',
+  billingState: '',
+  billingPincode: '',
 }
 
 const states = [
@@ -55,28 +62,31 @@ export default function Checkout() {
 
   const [form, setForm] = useState({
     ...initialForm,
-    fullName: user?.name || '',
-    mobile: user?.mobile || '',
+    shippingFullName: user?.name || '',
+    shippingMobile: user?.mobile || '',
   })
   const [errors, setErrors] = useState({})
   const [payment, setPayment] = useState('cod')
   const [onlineMethod, setOnlineMethod] = useState('upi')
   const [placed, setPlaced] = useState(false)
   const [terms, setTerms] = useState(false)
+  const [sameAsShipping, setSameAsShipping] = useState(true)
 
   useEffect(() => {
     if (user) {
       setForm((f) => ({
         ...f,
-        fullName: f.fullName || user.name || '',
-        mobile: f.mobile || user.mobile || '',
+        shippingFullName: f.shippingFullName || user.name || '',
+        shippingMobile: f.shippingMobile || user.mobile || '',
       }))
     }
   }, [user])
 
+  const numericKeys = ['shippingMobile', 'shippingPincode', 'billingMobile', 'billingPincode']
+
   const setField = (key) => (e) => {
     const value =
-      key === 'mobile' || key === 'pincode'
+      numericKeys.includes(key)
         ? e.target.value.replace(/\D/g, '')
         : key === 'gstin'
         ? e.target.value.toUpperCase()
@@ -84,9 +94,9 @@ export default function Checkout() {
     setForm((f) => ({
       ...f,
       [key]:
-        key === 'mobile'
+        key === 'shippingMobile' || key === 'billingMobile'
           ? value.slice(0, 10)
-          : key === 'pincode'
+          : key === 'shippingPincode' || key === 'billingPincode'
           ? value.slice(0, 6)
           : key === 'gstin'
           ? value.slice(0, 15)
@@ -95,17 +105,46 @@ export default function Checkout() {
     if (errors[key]) setErrors((er) => ({ ...er, [key]: null }))
   }
 
+  const handleSameAsShipping = (checked) => {
+    setSameAsShipping(checked)
+    if (checked) {
+      setForm((f) => ({
+        ...f,
+        billingFullName: f.shippingFullName,
+        billingMobile: f.shippingMobile,
+        billingAddress: f.shippingAddress,
+        billingCity: f.shippingCity,
+        billingState: f.shippingState,
+        billingPincode: f.shippingPincode,
+      }))
+    }
+  }
+
   const validate = () => {
     const er = {}
-    if (!form.fullName.trim() || form.fullName.trim().length < 3) er.fullName = 'Enter your full name (min 3 characters)'
-    if (!/^\d{10}$/.test(form.mobile)) er.mobile = 'Enter a valid 10-digit mobile number'
-    if (form.email && !/^\S+@\S+\.\S+$/.test(form.email)) er.email = 'Enter a valid email address'
-    if (!form.address.trim() || form.address.trim().length < 8) er.address = 'Enter your complete address'
-    if (!form.city.trim()) er.city = 'Enter your city'
-    if (!form.state) er.state = 'Select your state'
-    if (!/^\d{6}$/.test(form.pincode)) er.pincode = 'Enter a valid 6-digit pincode'
+    if (!form.shippingFullName.trim() || form.shippingFullName.trim().length < 3)
+      er.shippingFullName = 'Enter your full name (min 3 characters)'
+    if (!/^\d{10}$/.test(form.shippingMobile)) er.shippingMobile = 'Enter a valid 10-digit mobile number'
+    if (form.shippingEmail && !/^\S+@\S+\.\S+$/.test(form.shippingEmail)) er.shippingEmail = 'Enter a valid email address'
+    if (!form.shippingAddress.trim() || form.shippingAddress.trim().length < 8)
+      er.shippingAddress = 'Enter your complete address'
+    if (!form.shippingCity.trim()) er.shippingCity = 'Enter your city'
+    if (!form.shippingState) er.shippingState = 'Select your state'
+    if (!/^\d{6}$/.test(form.shippingPincode)) er.shippingPincode = 'Enter a valid 6-digit pincode'
     if (form.gstin && !/^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][1-9A-Z]Z[0-9A-Z]$/.test(form.gstin))
       er.gstin = 'Enter a valid 15-character GSTIN'
+
+    if (!sameAsShipping) {
+      if (!form.billingFullName.trim() || form.billingFullName.trim().length < 3)
+        er.billingFullName = 'Enter your full name (min 3 characters)'
+      if (!/^\d{10}$/.test(form.billingMobile)) er.billingMobile = 'Enter a valid 10-digit mobile number'
+      if (!form.billingAddress.trim() || form.billingAddress.trim().length < 8)
+        er.billingAddress = 'Enter your complete address'
+      if (!form.billingCity.trim()) er.billingCity = 'Enter your city'
+      if (!form.billingState) er.billingState = 'Select your state'
+      if (!/^\d{6}$/.test(form.billingPincode)) er.billingPincode = 'Enter a valid 6-digit pincode'
+    }
+
     if (!terms) er.terms = 'Please accept the terms to place your order'
     setErrors(er)
     return Object.keys(er).length === 0
@@ -121,6 +160,26 @@ export default function Checkout() {
     }
     setPlaced(true)
 
+    const shippingAddress = {
+      fullName: form.shippingFullName,
+      mobile: form.shippingMobile,
+      email: form.shippingEmail,
+      address: form.shippingAddress,
+      city: form.shippingCity,
+      state: form.shippingState,
+      pincode: form.shippingPincode,
+    }
+    const billingAddress = sameAsShipping
+      ? { ...shippingAddress }
+      : {
+          fullName: form.billingFullName,
+          mobile: form.billingMobile,
+          address: form.billingAddress,
+          city: form.billingCity,
+          state: form.billingState,
+          pincode: form.billingPincode,
+        }
+
     const order = {
       id: generateOrderId(),
       date: new Date().toISOString(),
@@ -128,7 +187,8 @@ export default function Checkout() {
       paymentDetail: payment === 'cod' ? 'Pay at your doorstep' : onlineMethod.toUpperCase(),
       items: items.map((i) => ({ name: i.name, option: i.option, qty: i.quantity, price: i.price, image: i.image })),
       totals,
-      address: { ...form },
+      address: shippingAddress,
+      billingAddress,
       gstin: form.gstin.trim() || null,
     }
     localStorage.setItem('sgl_last_order', JSON.stringify(order))
@@ -165,6 +225,128 @@ export default function Checkout() {
         : 'border-slate-300 focus:border-brand-500 focus:ring-brand-500/20'
     }`
 
+  const shippingSection = (prefix, isBilling = false) => (
+    <div className="mt-6 grid gap-4 sm:grid-cols-2">
+      <div>
+        <label className="mb-1.5 block text-xs font-semibold text-slate-700">Full Name *</label>
+        <div className="relative">
+          <User size={15} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+          <input
+            value={form[`${prefix}FullName`]}
+            onChange={setField(`${prefix}FullName`)}
+            placeholder="e.g. Ravi Kumar"
+            className={`${inputCls(`${prefix}FullName`)} pl-10`}
+          />
+        </div>
+        {errors[`${prefix}FullName`] && <p className="mt-1 text-xs text-rose-500">{errors[`${prefix}FullName`]}</p>}
+      </div>
+      <div>
+        <label className="mb-1.5 block text-xs font-semibold text-slate-700">Mobile Number *</label>
+        <div className="relative">
+          <Phone size={15} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+          <input
+            value={form[`${prefix}Mobile`]}
+            onChange={setField(`${prefix}Mobile`)}
+            placeholder="10-digit mobile number"
+            inputMode="numeric"
+            className={`${inputCls(`${prefix}Mobile`)} pl-10`}
+          />
+        </div>
+        {errors[`${prefix}Mobile`] && <p className="mt-1 text-xs text-rose-500">{errors[`${prefix}Mobile`]}</p>}
+      </div>
+      {!isBilling && (
+        <div className="sm:col-span-2">
+          <label className="mb-1.5 block text-xs font-semibold text-slate-700">Email</label>
+          <div className="relative">
+            <Mail size={15} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+            <input
+              value={form.shippingEmail}
+              onChange={setField('shippingEmail')}
+              placeholder="you@example.com"
+              className={`${inputCls('shippingEmail')} pl-10`}
+            />
+          </div>
+          {errors.shippingEmail && <p className="mt-1 text-xs text-rose-500">{errors.shippingEmail}</p>}
+        </div>
+      )}
+      <div className="sm:col-span-2">
+        <label className="mb-1.5 block text-xs font-semibold text-slate-700">Address *</label>
+        <div className="relative">
+          <MapPin size={15} className="pointer-events-none absolute left-3.5 top-3 text-slate-400" />
+          <textarea
+            value={form[`${prefix}Address`]}
+            onChange={setField(`${prefix}Address`)}
+            placeholder="House no, street, area, landmark"
+            rows={2}
+            className={`${inputCls(`${prefix}Address`)} resize-none pl-10`}
+          />
+        </div>
+        {errors[`${prefix}Address`] && <p className="mt-1 text-xs text-rose-500">{errors[`${prefix}Address`]}</p>}
+      </div>
+      <div>
+        <label className="mb-1.5 block text-xs font-semibold text-slate-700">City *</label>
+        <div className="relative">
+          <Building2 size={15} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+          <input
+            value={form[`${prefix}City`]}
+            onChange={setField(`${prefix}City`)}
+            placeholder="e.g. Chennai"
+            className={`${inputCls(`${prefix}City`)} pl-10`}
+          />
+        </div>
+        {errors[`${prefix}City`] && <p className="mt-1 text-xs text-rose-500">{errors[`${prefix}City`]}</p>}
+      </div>
+      <div>
+        <label className="mb-1.5 block text-xs font-semibold text-slate-700">State *</label>
+        <div className="relative">
+          <Landmark size={15} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+          <select
+            value={form[`${prefix}State`]}
+            onChange={setField(`${prefix}State`)}
+            className={`${inputCls(`${prefix}State`)} cursor-pointer pl-10 ${form[`${prefix}State`] ? '' : 'text-slate-400'}`}
+          >
+            <option value="">Select state</option>
+            {states.map((s) => (
+              <option key={s} value={s}>{s}</option>
+            ))}
+          </select>
+        </div>
+        {errors[`${prefix}State`] && <p className="mt-1 text-xs text-rose-500">{errors[`${prefix}State`]}</p>}
+      </div>
+      <div>
+        <label className="mb-1.5 block text-xs font-semibold text-slate-700">Pincode *</label>
+        <div className="relative">
+          <Hash size={15} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+          <input
+            value={form[`${prefix}Pincode`]}
+            onChange={setField(`${prefix}Pincode`)}
+            placeholder="6-digit pincode"
+            inputMode="numeric"
+            className={`${inputCls(`${prefix}Pincode`)} pl-10`}
+          />
+        </div>
+        {errors[`${prefix}Pincode`] && <p className="mt-1 text-xs text-rose-500">{errors[`${prefix}Pincode`]}</p>}
+      </div>
+      {!isBilling && (
+        <div>
+          <label className="mb-1.5 block text-xs font-semibold text-slate-700">
+            GSTIN <span className="font-normal text-slate-400">(Optional)</span>
+          </label>
+          <div className="relative">
+            <BadgeCheck size={15} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+            <input
+              value={form.gstin}
+              onChange={setField('gstin')}
+              placeholder="Enter GSTIN (Optional)"
+              className={`${inputCls('gstin')} pl-10`}
+            />
+          </div>
+          {errors.gstin && <p className="mt-1 text-xs text-rose-500">{errors.gstin}</p>}
+        </div>
+      )}
+    </div>
+  )
+
   return (
     <div className="bg-slate-50">
       <div className="mx-auto max-w-7xl px-4 py-10 lg:py-14">
@@ -183,130 +365,65 @@ export default function Checkout() {
         <form onSubmit={handleSubmit} className="mt-8 grid gap-8 lg:grid-cols-3">
           {/* Left column */}
           <div className="space-y-8 lg:col-span-2">
-            {/* Delivery info */}
+            {/* Shipping address */}
             <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
               <div className="flex items-center gap-3">
                 <span className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-700 text-sm font-bold text-white">1</span>
-                <h2 className="font-display text-lg font-bold text-slate-900">Delivery Information</h2>
+                <div>
+                  <h2 className="font-display text-lg font-bold text-slate-900">Shipping Address</h2>
+                  <p className="text-xs text-slate-400">Where should we deliver your order?</p>
+                </div>
               </div>
 
-              <div className="mt-6 grid gap-4 sm:grid-cols-2">
+              {shippingSection('shipping')}
+            </section>
+
+            {/* Billing address */}
+            <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+              <div className="flex items-center gap-3">
+                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-700 text-sm font-bold text-white">2</span>
                 <div>
-                  <label className="mb-1.5 block text-xs font-semibold text-slate-700">Full Name *</label>
-                  <div className="relative">
-                    <User size={15} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-                    <input
-                      value={form.fullName}
-                      onChange={setField('fullName')}
-                      placeholder="e.g. Ravi Kumar"
-                      className={`${inputCls('fullName')} pl-10`}
-                    />
-                  </div>
-                  {errors.fullName && <p className="mt-1 text-xs text-rose-500">{errors.fullName}</p>}
-                </div>
-                <div>
-                  <label className="mb-1.5 block text-xs font-semibold text-slate-700">Mobile Number *</label>
-                  <div className="relative">
-                    <Phone size={15} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-                    <input
-                      value={form.mobile}
-                      onChange={setField('mobile')}
-                      placeholder="10-digit mobile number"
-                      inputMode="numeric"
-                      className={`${inputCls('mobile')} pl-10`}
-                    />
-                  </div>
-                  {errors.mobile && <p className="mt-1 text-xs text-rose-500">{errors.mobile}</p>}
-                </div>
-                <div className="sm:col-span-2">
-                  <label className="mb-1.5 block text-xs font-semibold text-slate-700">Email</label>
-                  <div className="relative">
-                    <Mail size={15} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-                    <input
-                      value={form.email}
-                      onChange={setField('email')}
-                      placeholder="you@example.com"
-                      className={`${inputCls('email')} pl-10`}
-                    />
-                  </div>
-                  {errors.email && <p className="mt-1 text-xs text-rose-500">{errors.email}</p>}
-                </div>
-                <div className="sm:col-span-2">
-                  <label className="mb-1.5 block text-xs font-semibold text-slate-700">Address *</label>
-                  <div className="relative">
-                    <MapPin size={15} className="pointer-events-none absolute left-3.5 top-3 text-slate-400" />
-                    <textarea
-                      value={form.address}
-                      onChange={setField('address')}
-                      placeholder="House no, street, area, landmark"
-                      rows={2}
-                      className={`${inputCls('address')} resize-none pl-10`}
-                    />
-                  </div>
-                  {errors.address && <p className="mt-1 text-xs text-rose-500">{errors.address}</p>}
-                </div>
-                <div>
-                  <label className="mb-1.5 block text-xs font-semibold text-slate-700">City *</label>
-                  <div className="relative">
-                    <Building2 size={15} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-                    <input
-                      value={form.city}
-                      onChange={setField('city')}
-                      placeholder="e.g. Chennai"
-                      className={`${inputCls('city')} pl-10`}
-                    />
-                  </div>
-                  {errors.city && <p className="mt-1 text-xs text-rose-500">{errors.city}</p>}
-                </div>
-                <div>
-                  <label className="mb-1.5 block text-xs font-semibold text-slate-700">State *</label>
-                  <div className="relative">
-                    <Landmark size={15} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-                    <select value={form.state} onChange={setField('state')} className={`${inputCls('state')} cursor-pointer pl-10 ${form.state ? '' : 'text-slate-400'}`}>
-                      <option value="">Select state</option>
-                      {states.map((s) => (
-                        <option key={s} value={s}>{s}</option>
-                      ))}
-                    </select>
-                  </div>
-                  {errors.state && <p className="mt-1 text-xs text-rose-500">{errors.state}</p>}
-                </div>
-                <div>
-                  <label className="mb-1.5 block text-xs font-semibold text-slate-700">Pincode *</label>
-                  <div className="relative">
-                    <Hash size={15} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-                    <input
-                      value={form.pincode}
-                      onChange={setField('pincode')}
-                      placeholder="6-digit pincode"
-                      inputMode="numeric"
-                      className={`${inputCls('pincode')} pl-10`}
-                    />
-                  </div>
-                  {errors.pincode && <p className="mt-1 text-xs text-rose-500">{errors.pincode}</p>}
-                </div>
-                <div className="sm:col-span-2">
-                  <label className="mb-1.5 block text-xs font-semibold text-slate-700">
-                    GSTIN <span className="font-normal text-slate-400">(Optional)</span>
-                  </label>
-                  <div className="relative">
-                    <BadgeCheck size={15} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-                    <input
-                      value={form.gstin}
-                      onChange={setField('gstin')}
-                      placeholder="Enter GSTIN (Optional)"
-                      className={`${inputCls('gstin')} pl-10`}
-                    />
-                  </div>
-                  {errors.gstin && <p className="mt-1 text-xs text-rose-500">{errors.gstin}</p>}
+                  <h2 className="font-display text-lg font-bold text-slate-900">Billing Address</h2>
+                  <p className="text-xs text-slate-400">Billing address for this order</p>
                 </div>
               </div>
+
+              <label className="mt-5 flex cursor-pointer items-center gap-3">
+                <input
+                  type="checkbox"
+                  checked={sameAsShipping}
+                  onChange={(e) => handleSameAsShipping(e.target.checked)}
+                  className="h-4 w-4 rounded border-slate-300 text-brand-700 accent-brand-700"
+                />
+                <span className="flex items-center gap-1.5 text-sm text-slate-700">
+                  <Copy size={14} className="text-brand-600" />
+                  Billing Address is the same as Shipping Address
+                </span>
+              </label>
+
+              {sameAsShipping ? (
+                <div className="mt-4 rounded-xl bg-brand-50/60 px-4 py-3.5 text-sm text-slate-600">
+                  {form.shippingFullName ? (
+                    <>
+                      <p className="font-semibold text-slate-900">{form.shippingFullName}</p>
+                      <p className="mt-0.5 text-xs text-slate-500">
+                        {form.shippingAddress}
+                        {form.shippingCity && <span> — {form.shippingCity}, {form.shippingState} - {form.shippingPincode}</span>}
+                      </p>
+                    </>
+                  ) : (
+                    <span className="text-xs text-slate-400">Shipping address will be used as billing address.</span>
+                  )}
+                </div>
+              ) : (
+                shippingSection('billing', true)
+              )}
             </section>
 
             {/* Payment */}
             <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
               <div className="flex items-center gap-3">
-                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-700 text-sm font-bold text-white">2</span>
+                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-700 text-sm font-bold text-white">3</span>
                 <h2 className="font-display text-lg font-bold text-slate-900">Select Payment Method</h2>
               </div>
 
