@@ -11,8 +11,9 @@ import {
 } from 'lucide-react'
 import ProductCard from '../components/ProductCard'
 import SectionHeading from '../components/SectionHeading'
-import { categories, bestsellers } from '../data/products'
+import { bestsellers } from '../data/products'
 import { getActiveBanners } from '../api/bannerApi'
+import { getCategories } from '../api/categoryApi'
 
 const heroCollage = ['/web/hero1.jpg', '/web/hero2.jpg', '/web/hero3.jpg', '/web/hero4.jpg', '/web/hero5.jpg']
 
@@ -47,6 +48,7 @@ const testimonials = [
 export default function Home() {
   const [current, setCurrent] = useState(0)
   const [banners, setBanners] = useState(null)
+  const [apiCategories, setApiCategories] = useState(null)
 
   const heroSlides = banners
     ? banners.map((b) => ({
@@ -58,6 +60,13 @@ export default function Home() {
       }))
     : []
 
+  const displayCategories = (apiCategories || []).map((c) => ({
+    id: c.id,
+    name: c.name,
+    image: c.image,
+    count: c.subCategories?.length || 0,
+  }))
+
   useEffect(() => {
     let cancelled = false
     getActiveBanners()
@@ -66,6 +75,13 @@ export default function Home() {
       })
       .catch(() => {
         if (!cancelled) setBanners([])
+      })
+    getCategories()
+      .then((data) => {
+        if (!cancelled) setApiCategories(Array.isArray(data) && data.length > 0 ? data : [])
+      })
+      .catch(() => {
+        if (!cancelled) setApiCategories([])
       })
     return () => {
       cancelled = true
@@ -176,6 +192,7 @@ export default function Home() {
       )}
 
       {/* Categories */}
+      {displayCategories.length > 0 && (
       <section className="mx-auto max-w-7xl px-4 py-16 lg:py-20">
         <SectionHeading
           eyebrow="Browse Collections"
@@ -183,9 +200,9 @@ export default function Home() {
           subtitle="Find the perfect labels for your products — from barcode rolls to premium custom stickers."
         />
         <div className="mt-10 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-          {categories.map((cat) => (
+          {displayCategories.map((cat) => (
             <Link
-              key={cat.slug}
+              key={cat.id}
               to={`/products?category=${encodeURIComponent(cat.name)}`}
               className="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
             >
@@ -211,6 +228,7 @@ export default function Home() {
           ))}
         </div>
       </section>
+      )}
 
       {/* Featured products */}
       <section className="bg-white py-16 lg:py-20">

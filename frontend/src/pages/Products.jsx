@@ -2,8 +2,9 @@ import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams, Link } from 'react-router-dom'
 import { Search, SlidersHorizontal, PackageX, X, ChevronLeft, ChevronRight, Home as HomeIcon } from 'lucide-react'
 import ProductCard from '../components/ProductCard'
-import { products, categories, sortOptions } from '../data/products'
+import { products, sortOptions } from '../data/products'
 import { formatINR } from '../utils/format'
+import { getCategories } from '../api/categoryApi'
 
 const PER_PAGE = 8
 const PRICE_MIN = 0
@@ -17,10 +18,25 @@ export default function Products() {
   const [localSearch, setLocalSearch] = useState(searchQuery)
   const [page, setPage] = useState(1)
   const [priceRange, setPriceRange] = useState([PRICE_MIN, PRICE_MAX])
+  const [cats, setCats] = useState([])
 
   useEffect(() => {
     setLocalSearch(searchQuery)
   }, [searchQuery])
+
+  useEffect(() => {
+    let cancelled = false
+    getCategories()
+      .then((data) => {
+        if (!cancelled) setCats(Array.isArray(data) ? data : [])
+      })
+      .catch(() => {
+        if (!cancelled) setCats([])
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   const setCategory = (cat) => {
     const next = new URLSearchParams(searchParams)
@@ -88,8 +104,8 @@ export default function Products() {
     return list
   }, [activeCategory, localSearch, sort, priceRange])
 
-  const allCats = ['All', ...categories.map((c) => c.name)]
-  const catCount = (name) => categories.find((c) => c.name === name)?.count
+  const allCats = ['All', ...cats.map((c) => c.name)]
+  const catCount = (name) => cats.find((c) => c.name === name)?.subCategories?.length
   const totalPages = Math.max(1, Math.ceil(filtered.length / PER_PAGE))
   const safePage = Math.min(page, totalPages)
   const pageItems = filtered.slice((safePage - 1) * PER_PAGE, safePage * PER_PAGE)
