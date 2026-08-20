@@ -44,12 +44,6 @@ export class OverviewService {
       select: { name: true, updatedAt: true }
     });
 
-    const lowStockProducts = await this.prisma.product.findMany({
-      take: 1,
-      orderBy: { updatedAt: 'desc' },
-      select: { name: true, updatedAt: true }
-    });
-
     const activities: Array<{type: string; message: string; time: string}> = [];
 
     recentOrders.forEach(order => {
@@ -73,14 +67,6 @@ export class OverviewService {
         type: 'product',
         message: `Product "${recentProducts[0].name}" updated`,
         time: this.getTimeAgo(recentProducts[0].updatedAt)
-      });
-    }
-
-    if (lowStockProducts[0]) {
-      activities.push({
-        type: 'stock',
-        message: `Low stock alert for "${lowStockProducts[0].name}"`,
-        time: this.getTimeAgo(lowStockProducts[0].updatedAt)
       });
     }
 

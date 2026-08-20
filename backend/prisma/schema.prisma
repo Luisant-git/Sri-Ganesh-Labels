@@ -57,7 +57,6 @@ model User {
   createdAt DateTime @default(now())
   cart      Cart?
   orders    Order[]
-  wishlistItems WishlistItem[]
   couponUsages CouponUsage[]
   specificCoupons Coupon[] @relation("UserSpecificCoupons")
 }
@@ -76,15 +75,10 @@ model Product {
   name          String
   description   String?
   categoryId    Int
-  subCategoryId Int?
-  brandId       Int?
   basePrice     String
   mrp           String?
   hsnCode       String?
-  bundleOffers  Json[] // [{colorCount: 1, price: "499"}, {colorCount: 2, price: "800"}, {colorCount: 3, price: "1000"}]
-  tags          String[]
   gallery       Json[]
-  colors        Json[] // [{name: "Red", code: "#FF0000", sizes: ["S", "M", "L"]}]
   status        String   @default("active")
   newArrivals   Boolean  @default(false)
   discount      Boolean  @default(false)
@@ -92,25 +86,10 @@ model Product {
   updatedAt     DateTime @updatedAt
 
   category      Category     @relation(fields: [categoryId], references: [id])
-  subCategory   SubCategory? @relation(fields: [subCategoryId], references: [id])
-  brand         Brand?       @relation(fields: [brandId], references: [id])
   cartItems     CartItem[]
   orderItems    OrderItem[]
 
   @@index([categoryId])
-  @@index([subCategoryId])
-  @@index([brandId])
-}
-
-model Brand {
-  id          Int      @id @default(autoincrement())
-  name        String   @unique
-  description String?
-  image       String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  products    Product[]
 }
 
 model Category {
@@ -122,25 +101,6 @@ model Category {
   updatedAt   DateTime @updatedAt
 
   products      Product[]
-  subCategories SubCategory[]
-}
-
-model SubCategory {
-  id          Int      @id @default(autoincrement())
-  name        String
-  categoryId  Int
-  description String?
-  image       String?
-  sizeChart   String?
-  orderNumber Int      @default(0)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  category    Category  @relation(fields: [categoryId], references: [id])
-  products    Product[]
-
-  @@unique([name, categoryId])
-  @@index([categoryId])
 }
 
 model Banner {
@@ -241,18 +201,6 @@ model OrderItem {
   product     Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
 }
 
-model WishlistItem {
-  id        Int      @id @default(autoincrement())
-  userId    Int
-  productId Int
-  createdAt DateTime @default(now())
-
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, productId])
-  @@index([userId])
-}
-
 model Coupon {
   id              Int      @id @default(autoincrement())
   code            String   @unique
@@ -286,33 +234,6 @@ model CouponUsage {
 
   @@index([userId])
   @@index([couponId])
-}
-
-model WhatsappMessage {
-  id        Int      @id @default(autoincrement())
-  messageId String   @unique
-  from      String
-  message   String?
-  mediaType String?  // "image", "video", "document", "audio"
-  mediaUrl  String?
-  direction String   // "incoming" or "outgoing"
-  status    String   // "received", "sent", "delivered", "read"
-  createdAt DateTime @default(now())
- 
-  @@index([from])
-  @@index([createdAt])
-}
-
-model WhatsappSession {
-  id         Int      @id @default(autoincrement())
-  phone      String   @unique
-  state      String   @default("menu") // "menu", "category", "subcategory", "product"
-  categoryId Int?
-  subCategoryId Int?
-  updatedAt  DateTime @updatedAt
-  createdAt  DateTime @default(now())
-
-  @@index([phone])
 }
 
 model AppSettings {

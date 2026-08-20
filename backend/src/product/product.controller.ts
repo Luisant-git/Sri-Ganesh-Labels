@@ -64,20 +64,4 @@ export class ProductController {
   remove(@Param('id') id: string) {
     return this.productService.remove(+id);
   }
-
-  @Patch(':id/bundle-offers')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'Update product bundle offers' })
-  @ApiResponse({ status: 200, description: 'Bundle offers updated successfully' })
-  updateBundleOffers(@Param('id') id: string, @Body() bundleOffers: any[]) {
-    return this.productService.updateBundleOffers(+id, bundleOffers);
-  }
-
-  @Post(':id/calculate-price')
-  @ApiOperation({ summary: 'Calculate price for selected colors' })
-  @ApiResponse({ status: 200, description: 'Price calculated successfully' })
-  calculatePrice(@Param('id') id: string, @Body() body: { selectedColors: string[] }) {
-    return this.productService.calculatePrice(+id, body.selectedColors);
-  }
 }

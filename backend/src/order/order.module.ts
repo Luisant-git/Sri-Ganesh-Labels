@@ -3,12 +3,11 @@ import { OrderController } from './order.controller';
 import { OrderService } from './order.service';
 import { PrismaService } from '../prisma.service';
 import { CouponModule } from '../coupon/coupon.module';
-import { WhatsappModule } from '../whatsapp/whatsapp.module';
 import { PaymentService } from './payment.service';
 import { OrderCleanupService } from './order-cleanup.service';
 
 @Module({
-  imports: [CouponModule, WhatsappModule],
+  imports: [CouponModule],
   controllers: [OrderController],
   providers: [OrderService, PrismaService, PaymentService, OrderCleanupService],
   exports: [OrderService]

@@ -14,32 +14,21 @@ export class CategoryService {
   }
 
   findAll() {
-    return this.prisma.category.findMany({
-      include: {
-        subCategories: true,
-      },
-    });
+    return this.prisma.category.findMany();
   }
 
   findOne(id: number) {
     return this.prisma.category.findUnique({
       where: { id },
-      include: {
-        subCategories: true,
-      },
     });
   }
 
   update(id: number, updateCategoryDto: UpdateCategoryDto) {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { subCategories, ...categoryData } = updateCategoryDto;
 
     return this.prisma.category.update({
       where: { id },
       data: categoryData,
-      include: {
-        subCategories: true,
-      },
     });
   }
 

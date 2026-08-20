@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { LayoutDashboard, Package, ShoppingCart, Users, FileText, Warehouse, Settings, ChevronDown, ChevronRight, BarChart3, Eye, Plus, List, Gift, Tag, Image, Percent, MapPin, Star, TrendingUp, UserPlus, Menu, X,FolderKanban,TicketPercent, Layers, MessageCircle, Truck} from 'lucide-react'
+import { LayoutDashboard, Package, ShoppingCart, Users, FileText, Warehouse, Settings, ChevronDown, ChevronRight, BarChart3, Eye, Plus, List, Gift, Tag, Image, Percent, MapPin, Star, TrendingUp, UserPlus, Menu, X,FolderKanban,TicketPercent, Layers, Truck} from 'lucide-react'
 
 const Sidebar = ({ collapsed, setCollapsed, mobileOpen, setMobileOpen }) => {
   const [expandedItems, setExpandedItems] = useState({})
@@ -31,15 +31,11 @@ const Sidebar = ({ collapsed, setCollapsed, mobileOpen, setMobileOpen }) => {
       children: [
         { key: 'add-product', icon: Plus, label: 'Add Product', path: '/add-product' },
         { key: 'product-list', icon: List, label: 'Product List', path: '/product-list' },
-        // { key: 'combo-offers', icon: Gift, label: 'Combo Offers', path: '/combo-offers' },
-       { key: 'brand-list', icon: Tag, label: 'Brands', path: '/brand-list' },
   { key: 'category-list', icon: FolderKanban, label: 'Categories', path: '/category-list' },
-  { key: 'subcategory-list', icon: Layers, label: 'Sub Categories', path: '/subcategory-list' },
   { key: 'banner-list', icon: Image, label: 'Banners', path: '/banner-list' },
   { key: 'coupon-list', icon: TicketPercent, label: 'Coupons', path: '/coupon-list' },
   { key: 'shipping-settings', icon: Warehouse, label: 'Shipping Settings', path: '/shipping-settings' },
   { key: 'courier-partners', icon: Truck, label: 'Courier Partners', path: '/courier-partners' },
-  // { key: 'pincode-list', icon: MapPin, label: 'Pincodes', path: '/pincode-list' },
       ]
     },
     {
@@ -48,15 +44,6 @@ const Sidebar = ({ collapsed, setCollapsed, mobileOpen, setMobileOpen }) => {
       label: 'Orders List',
       path: '/orders'
     },
-    // {
-    //   key: 'whatsapp',
-    //   icon: MessageCircle,
-    //   label: 'WhatsApp',
-    //   children: [
-    //     { key: 'whatsapp-chat', icon: MessageCircle, label: 'WhatsApp Chat', path: '/whatsapp-chat' },
-    //     { key: 'bulk-whatsapp', icon: MessageCircle, label: 'Bulk WhatsApp', path: '/bulk-whatsapp' }
-    //   ]
-    // },
     {
       key: 'customers',
       icon: Users,

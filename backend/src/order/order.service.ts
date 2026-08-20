@@ -1,8 +1,7 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { CouponService } from '../coupon/coupon.service';
-import { WhatsappService } from '../whatsapp/whatsapp.service';
 import { PaymentService } from './payment.service';
  
 @Injectable()
@@ -10,7 +9,6 @@ export class OrderService {
   constructor(
     private prisma: PrismaService,
     private couponService: CouponService,
-    private whatsappService: WhatsappService,
     private paymentService: PaymentService
   ) {}
  
@@ -152,9 +150,6 @@ export class OrderService {
       
       // Deduct stock for COD orders
       await this.deductStock((order as any).items);
-      
-      // Send WhatsApp confirmation only for COD orders
-      await this.whatsappService.sendOrderConfirmation(order);
     }
  
     // Return order with Razorpay order ID for online payments
@@ -455,25 +450,6 @@ async getOrderStats(startDate?: string, endDate?: string) {
     if (existingOrder?.status !== 'Placed') {
       await this.deductStock((order as any).items);
     }
-
-    // Send WhatsApp confirmation
-    await this.whatsappService.sendOrderConfirmation(order);
-  }
-
-  // Send WhatsApp notification based on status
-  if (status === 'Accepted') {
-    await this.whatsappService.sendOrderAccepted(order);
-  } else if (status === 'Shipped') {
-    const trackingInfo = {
-      courier: courierName || order.courierName || 'N/A',
-      trackingId: trackingId || order.trackingId || 'N/A',
-      trackingUrl: trackingLink || order.trackingLink || 'N/A'
-    };
-    const invoiceFilename = `invoice-${order.id}.pdf`;
-    await this.whatsappService.sendOrderShipped(order, trackingInfo, invoiceFilename);
-  } else if (status === 'Delivered') {
-    const invoiceFilename = `invoice-${order.id}.pdf`;
-    await this.whatsappService.sendOrderDelivered(order, invoiceFilename);
   }
 
   return order;
@@ -578,27 +554,7 @@ async getOrderStats(startDate?: string, endDate?: string) {
   }
 
   private async restoreStock(orderItems: any[]) {
-    for (const item of orderItems) {
-      if (!item.productId) continue;
-      const product = await this.prisma.product.findUnique({ where: { id: item.productId } });
-      if (!product || !product.colors) continue;
-      let colors = product.colors as any[];
-      colors = colors.map(color => {
-        if (color.name === item.color) {
-          return {
-            ...color,
-            sizes: color.sizes.map(size => {
-              if (size.size === item.size) {
-                return { ...size, quantity: (parseInt(size.quantity || '0') + (parseInt(item.quantity) || 1)).toString() };
-              }
-              return size;
-            })
-          };
-        }
-        return color;
-      });
-      await this.prisma.product.update({ where: { id: item.productId }, data: { colors } });
-    }
+    // Stock tracking removed with color/size variants
   }
 
   async cleanupOldPendingOrders() {
@@ -620,94 +576,11 @@ async getOrderStats(startDate?: string, endDate?: string) {
   }
 
   private async validateItemsStock(items: any[]) {
-    for (const item of items) {
-      if (!item.productId) continue;
-      const product = await this.prisma.product.findUnique({ where: { id: item.productId } });
-      if (!product || !product.colors) continue;
-
-      const colors = product.colors as any[];
-      
-      if (item.type === 'bundle' && item.bundleItems) {
-        for (const bItem of (item.bundleItems as any[])) {
-          const color = colors.find(c => c.name === bItem.color);
-          const size = color?.sizes.find(s => s.size === bItem.size);
-          const avail = parseInt(size?.quantity || '0');
-          if (avail < 1) {
-            throw new BadRequestException(`Item ${product.name} (${bItem.color} - ${bItem.size}) is now sold out.`);
-          }
-        }
-      } else {
-        const color = colors.find(c => c.name === item.color);
-        const size = color?.sizes.find(s => s.size === item.size);
-        const avail = parseInt(size?.quantity || '0');
-        const req = item.quantity || 1;
-        if (avail < req) {
-          throw new BadRequestException(`Only ${avail} units left for ${product.name} (${item.color} - ${item.size}).`);
-        }
-      }
-    }
+    // Stock tracking removed with color/size variants
   }
 
   private async deductStock(orderItems: any[]) {
-    for (const item of orderItems) {
-      if (!item.productId) continue;
-      
-      const product = await this.prisma.product.findUnique({
-        where: { id: item.productId }
-      });
-      
-      if (!product || !product.colors) continue;
-      
-      let colors = product.colors as any[];
-      
-      if (item.type === 'bundle' && item.bundleItems) {
-        // Handle Bundles
-        const bundleItems = item.bundleItems as any[];
-        bundleItems.forEach(bItem => {
-          colors = colors.map(color => {
-            if (color.name === bItem.color) {
-              const updatedSizes = color.sizes.map(size => {
-                if (size.size === bItem.size) {
-                  const currentQty = parseInt(size.quantity || '0');
-                  const deductQty = 1; // Each item in bundle counts as 1
-                  return {
-                    ...size,
-                    quantity: Math.max(0, currentQty - deductQty).toString()
-                  };
-                }
-                return size;
-              });
-              return { ...color, sizes: updatedSizes };
-            }
-            return color;
-          });
-        });
-      } else {
-        // Handle Single Items
-        colors = colors.map(color => {
-          if (color.name === item.color) {
-            const updatedSizes = color.sizes.map(size => {
-              if (size.size === item.size) {
-                const currentQty = parseInt(size.quantity || '0');
-                const deductQty = parseInt(item.quantity || '1');
-                return {
-                  ...size,
-                  quantity: Math.max(0, currentQty - deductQty).toString()
-                };
-              }
-              return size;
-            });
-            return { ...color, sizes: updatedSizes };
-          }
-          return color;
-        });
-      }
-      
-      await this.prisma.product.update({
-        where: { id: item.productId },
-        data: { colors }
-      });
-    }
+    // Stock tracking removed with color/size variants
   }
 
   async logSystemError(userId: number | null, orderId: number | null, status: string | null, action: string, errorMessage: string) {
@@ -1022,12 +895,8 @@ async getProductReport(startDate?: string, endDate?: string) {
       }
     });
 
-    // Get all products to fetch current stock and prices
-    const products = await this.prisma.product.findMany({
-      include: {
-        subCategory: true
-      }
-    });
+    // Get all products to fetch current prices
+    const products = await this.prisma.product.findMany();
 
     // Map to store product variant data
     const productMap = new Map<string, any>();
@@ -1130,38 +999,19 @@ async getProductReport(startDate?: string, endDate?: string) {
       });
     });
 
-    // Enrich with current stock from products
+    // Enrich with current price from products
     const productReport = Array.from(productMap.values()).map(item => {
       const product = products.find(p => p.id === item.productId);
-      let currentStock = 0;
-      let currentPrice = 0;
-      let subcategoryName: string | null = null;
-      
-      if (product && product.colors) {
-        const colors = product.colors as any[];
-        const colorVariant = colors.find(c => c.name === item.color);
-        if (colorVariant && colorVariant.sizes) {
-          const sizeVariant = colorVariant.sizes.find(s => s.size === item.size);
-          if (sizeVariant) {
-            currentStock = parseInt(sizeVariant.quantity || '0');
-            currentPrice = parseFloat(sizeVariant.price || '0');
-          }
-        }
-        // Get subcategory name
-        if (product.subCategory) {
-          subcategoryName = product.subCategory.name;
-        }
-      }
-      
+      let currentPrice = product ? parseFloat(product.basePrice || '0') : 0;
+
       const deliveredQty = item.deliveredQty;
-      const initialStock = currentStock + deliveredQty;
       const avgPrice = deliveredQty > 0 ? item.totalSalesAmount / deliveredQty : currentPrice;
-      
+
       return {
         ...item,
-        subcategoryName,
-        currentStock,
-        initialStock,
+        currentPrice,
+        currentStock: 0,
+        initialStock: deliveredQty,
         saleStock: deliveredQty,
         price: parseFloat(avgPrice.toFixed(2)),
         totalSalesAmount: parseFloat(item.totalSalesAmount.toFixed(2))

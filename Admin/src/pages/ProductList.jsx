@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { Search, Filter, Plus, Edit, Trash2, Eye, X, Download, MessageCircle } from "lucide-react";
+import { Search, Plus, Edit, Trash2, Eye, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import { jsPDF } from "jspdf";
 import DataTable from "../components/DataTable";
 import {
   getProducts,
@@ -10,10 +9,6 @@ import {
   updateProduct,
   deleteProduct,
   getCategories,
-  getSubCategories,
-  getBrands,
-  uploadImage,
-  sendLowStockAlert,
 } from "../api";
 import "../styles/pages/product-list.scss";
 
@@ -36,12 +31,9 @@ const ProductList = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [filterCategory, setFilterCategory] = useState("all");
-  const [filterSubCategory, setFilterSubCategory] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
-  const [subCategories, setSubCategories] = useState([]);
-  const [brands, setBrands] = useState([]);
   const [modal, setModal] = useState({ type: null, product: null });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -50,24 +42,14 @@ const ProductList = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const [productsData, categoriesData, subCategoriesData, brandsData] = await Promise.all([
+        const [productsData, categoriesData] = await Promise.all([
           getProducts(),
           getCategories(),
-          getSubCategories(),
-          getBrands(),
         ]);
-        console.log("Products:", productsData);
-        console.log("Categories:", categoriesData);
-        console.log("SubCategories:", subCategoriesData);
-        console.log("Brands:", brandsData);
-        console.log("API Base URL:", import.meta.env.VITE_API_BASE_URL);
         setProducts(productsData);
         setCategories(categoriesData);
-        setSubCategories(subCategoriesData);
-        setBrands(brandsData);
       } catch (err) {
         console.error("Error loading data:", err);
-        console.error("Error details:", err.message);
         const errorMsg = `Failed to load products: ${err.message}`;
         setError(errorMsg);
         toast.error(errorMsg);
@@ -162,69 +144,6 @@ const ProductList = () => {
     }
   };
 
-  const downloadProductVariants = (product) => {
-    const doc = new jsPDF();
-    const pageWidth = doc.internal.pageSize.getWidth();
-    const pageHeight = doc.internal.pageSize.getHeight();
-    const labelWidth = pageWidth / 2;
-    const labelHeight = 15;
-    let x = 0;
-    let y = 5;
-    let count = 0;
-    
-    product.colors?.forEach(color => {
-      color.sizes?.forEach(size => {
-        doc.setFontSize(12);
-        doc.setFont(undefined, 'bold');
-        doc.text(size.sizeVariantId || 'N/A', x + labelWidth / 2, y + 8, { align: 'center' });
-        doc.line(x, y + labelHeight, x + labelWidth, y + labelHeight);
-        
-        count++;
-        if (count % 2 === 0) {
-          x = 0;
-          y += labelHeight;
-          if (y + labelHeight > pageHeight) {
-            doc.addPage();
-            y = 5;
-          }
-        } else {
-          x = labelWidth;
-          doc.line(labelWidth, y, labelWidth, y + labelHeight);
-        }
-      });
-    });
-    
-    doc.save(`${product.name.replace(/\s+/g, '_')}_labels.pdf`);
-  };
-
-  const handleLowStockAlert = async (product) => {
-    const lowStockVariants = [];
-    product.colors?.forEach(color => {
-      color.sizes?.forEach(size => {
-        if (parseInt(size.quantity || 0) < 5) {
-          lowStockVariants.push(`${color.name} - ${size.size}: ${size.quantity} units (ID: ${size.sizeVariantId})`);
-        }
-      });
-    });
-
-    if (lowStockVariants.length === 0) {
-      toast.info('No low stock variants found');
-      return;
-    }
-
-    const phoneNumber = prompt('Enter WhatsApp number (with country code, e.g., 919876543210):');
-    if (!phoneNumber) return;
-
-    const productDetails = `🚨 *LOW STOCK ALERT* 🚨\n\n📦 *Product:* ${product.name}\n⚠️ *Status:* Low Stock\n\n*Variants Running Low:*\n${lowStockVariants.map((v, i) => `${i + 1}. ${v}`).join('\n')}\n\n⏰ *Action Required:* Please restock immediately!\n\n_This is an automated alert from Inventory Management System_`;
-
-    try {
-      await sendLowStockAlert(phoneNumber, productDetails);
-      toast.success('Low stock alert sent successfully!');
-    } catch (err) {
-      toast.error('Failed to send alert: ' + err.message);
-    }
-  };
-
   const columns = [
     {
       key: "id",
@@ -240,7 +159,7 @@ const ProductList = () => {
       label: "Image",
       render: (value, row) => (
         <img
-          src={row.gallery?.[0]?.url || row.colors?.[0]?.image || "/placeholder.svg"}
+          src={row.gallery?.[0]?.url || "/placeholder.svg"}
           alt="Product"
           className="product-thumbnail"
         />
@@ -256,37 +175,6 @@ const ProductList = () => {
       key: "basePrice",
       label: "Base Price",
       render: (value) => `₹${value}`,
-    },
-    {
-      key: "colors",
-      label: "Variants",
-      render: (value) => (
-        <span className="stock-badge in-stock">
-          {value?.length || 0} colors
-        </span>
-      ),
-    },
-    {
-      key: "totalQuantity",
-      label: "Total Quantity",
-      render: (_, row) => {
-        const totalQty = row.colors?.reduce((total, color) => 
-          total + (color.sizes?.reduce((sum, size) => sum + parseInt(size.quantity || 0), 0) || 0), 0
-        ) || 0;
-        const hasLowStock = row.colors?.some(color => 
-          color.sizes?.some(size => parseInt(size.quantity || 0) < 5)
-        );
-        return (
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
-            <span>{totalQty}</span>
-            {hasLowStock && (
-              <span className="stock-badge low-stock" style={{ fontSize: '11px' }}>
-                Low Stock
-              </span>
-            )}
-          </div>
-        );
-      },
     },
     {
       key: "newArrivals",
@@ -326,40 +214,28 @@ const ProductList = () => {
     {
       key: "actions",
       label: "Actions",
-      render: (_, row) => {
-        const hasLowStock = row.colors?.some(color => 
-          color.sizes?.some(size => parseInt(size.quantity || 0) < 5)
-        );
-        return (
-          <div className="action-buttons" style={{ display: 'flex', gap: '4px', flexWrap: 'nowrap' }}>
-            <button
-              className="action-btn view"
-              onClick={() => openModal("view", row)}
-            >
-              <Eye size={16} />
-            </button>
-            <button
-              className="action-btn edit"
-              onClick={() => navigate(`/edit-product/${row.id}`)}
-            >
-              <Edit size={16} />
-            </button>
-            <button
-              className="action-btn delete"
-              onClick={() => openModal("delete", row)}
-            >
-              <Trash2 size={16} />
-            </button>
-            <button
-              className="action-btn download"
-              onClick={() => downloadProductVariants(row)}
-              title="Download Variants"
-            >
-              <Download size={16} />
-            </button>
-          </div>
-        );
-      },
+      render: (_, row) => (
+        <div className="action-buttons" style={{ display: 'flex', gap: '4px', flexWrap: 'nowrap' }}>
+          <button
+            className="action-btn view"
+            onClick={() => openModal("view", row)}
+          >
+            <Eye size={16} />
+          </button>
+          <button
+            className="action-btn edit"
+            onClick={() => navigate(`/edit-product/${row.id}`)}
+          >
+            <Edit size={16} />
+          </button>
+          <button
+            className="action-btn delete"
+            onClick={() => openModal("delete", row)}
+          >
+            <Trash2 size={16} />
+          </button>
+        </div>
+      ),
     },
   ];
 
@@ -390,12 +266,6 @@ const ProductList = () => {
           <strong>Category:</strong> {product.category?.name || "N/A"}
         </p>
         <p>
-          <strong>SubCategory:</strong> {product.subCategory?.name || "N/A"}
-        </p>
-        <p>
-          <strong>Brand:</strong> {product.brand?.name || "N/A"}
-        </p>
-        <p>
           <strong>Base Price:</strong> ₹{product.basePrice}
         </p>
         {product.hsnCode && (
@@ -406,37 +276,6 @@ const ProductList = () => {
         <p>
           <strong>Status:</strong> {product.status}
         </p>
-        {product.tags && product.tags.length > 0 && (
-          <p>
-            <strong>Tags:</strong> {product.tags.join(", ")}
-          </p>
-        )}
-        {product.colors && product.colors.length > 0 && (
-          <div style={{ marginTop: '16px' }}>
-            <strong>Color Variants:</strong>
-            {product.colors.map((color, i) => (
-              <div key={i} style={{ marginTop: '8px', padding: '8px', background: '#f9fafb', borderRadius: '6px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                  <div style={{ width: '20px', height: '20px', borderRadius: '50%', background: color.code, border: '1px solid #e5e7eb' }}></div>
-                  <strong>{color.name}</strong>
-                </div>
-                <div style={{ fontSize: '13px', color: '#6b7280' }}>
-                  Sizes: {color.sizes.map((s, idx) => (
-                    <span key={idx}>
-                      {s.size} (₹{s.price}, Qty: {s.quantity})
-                      {s.sizeVariantId && (
-                        <span style={{ fontSize: '11px', color: '#9ca3af', fontFamily: 'monospace', marginLeft: '4px' }}>
-                          [{s.sizeVariantId}]
-                        </span>
-                      )}
-                      {idx < color.sizes.length - 1 ? ', ' : ''}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
       </div>
     </div>
   );
@@ -450,30 +289,9 @@ const ProductList = () => {
       hsnCode: product.hsnCode || "",
       status: product.status,
       categoryId: product.categoryId,
-      subCategoryId: product.subCategoryId || "",
-      brandId: product.brandId || "",
-      tags: product.tags || [],
       gallery: product.gallery || [],
-      colors: product.colors || [],
     });
     const [saving, setSaving] = useState(false);
-    const [imageUploading, setImageUploading] = useState(false);
-
-    const handleImageUpload = async (e) => {
-      const file = e.target.files[0];
-      if (file) {
-        setImageUploading(true);
-        try {
-          const uploadResult = await uploadImage(file);
-          setForm((f) => ({ ...f, image: uploadResult.url }));
-          toast.success("Image uploaded successfully!");
-        } catch (err) {
-          toast.error("Failed to upload image");
-        } finally {
-          setImageUploading(false);
-        }
-      }
-    };
 
     const handleSubmit = async (e) => {
       e.preventDefault();
@@ -542,29 +360,6 @@ const ProductList = () => {
           </select>
         </label>
         <label>
-          Brand
-          <select
-            value={form.brandId}
-            onChange={(e) =>
-              setForm((f) => ({
-                ...f,
-                brandId: e.target.value ? parseInt(e.target.value) : null,
-              }))
-            }
-          >
-            <option value="">Select Brand</option>
-            {brands && brands.length > 0 ? (
-              brands.map((brand) => (
-                <option key={brand.id} value={brand.id}>
-                  {brand.name}
-                </option>
-              ))
-            ) : (
-              <option disabled>No brands available</option>
-            )}
-          </select>
-        </label>
-        <label>
           Base Price
           <input
             type="text"
@@ -586,12 +381,6 @@ const ProductList = () => {
             placeholder="Optional"
           />
         </label>
-        <div style={{ marginBottom: '16px' }}>
-          <strong>Color Variants:</strong> {form.colors?.length || 0}
-          <div style={{ fontSize: '13px', color: '#6b7280', marginTop: '4px' }}>
-            Edit colors in Add Product page
-          </div>
-        </div>
         <label>
           Status
           <select
@@ -613,7 +402,7 @@ const ProductList = () => {
           <button
             type="submit"
             className="btn btn-primary"
-            disabled={saving || imageUploading}
+            disabled={saving}
           >
             {saving ? "Saving..." : "Save Changes"}
           </button>
@@ -667,7 +456,7 @@ const ProductList = () => {
               <Search size={20} className="search-icon" />
               <input
                 type="text"
-                placeholder="Search by product ID, name, or variant ID..."
+                placeholder="Search by product ID or name..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="search-input"
@@ -677,10 +466,7 @@ const ProductList = () => {
             <div className="filter-group">
               <select
                 value={filterCategory}
-                onChange={(e) => {
-                  setFilterCategory(e.target.value);
-                  setFilterSubCategory("all");
-                }}
+                onChange={(e) => setFilterCategory(e.target.value)}
                 className="filter-select"
               >
                 <option value="all">All Categories</option>
@@ -704,41 +490,19 @@ const ProductList = () => {
                 <option value="active">Active</option>
                 <option value="inactive">Inactive</option>
               </select>
-
-              <select
-                value={filterSubCategory}
-                onChange={(e) => setFilterSubCategory(e.target.value)}
-                className="filter-select"
-              >
-                <option value="all">All SubCategories</option>
-                {subCategories
-                  .filter(sub => filterCategory === 'all' || sub.categoryId === parseInt(filterCategory))
-                  .map((subCategory) => (
-                    <option key={subCategory.id} value={subCategory.id}>
-                      {subCategory.name}
-                    </option>
-                  ))}
-              </select>
             </div>
           </div>
 
           <DataTable
             data={products.filter(p => {
               const categoryMatch = filterCategory === 'all' || p.categoryId === parseInt(filterCategory);
-              const subCategoryMatch = filterSubCategory === 'all' || p.subCategoryId === parseInt(filterSubCategory);
               const statusMatch = filterStatus === 'all' || p.status?.toLowerCase() === filterStatus;
-              
-              // Search by product ID, name, or sizeVariantId
-              const searchMatch = searchTerm === '' || 
+
+              const searchMatch = searchTerm === '' ||
                 p.id?.toString().includes(searchTerm) ||
-                p.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                p.colors?.some(color => 
-                  color.sizes?.some(size => 
-                    size.sizeVariantId?.toUpperCase() === searchTerm.toUpperCase()
-                  )
-                );
-              
-              return categoryMatch && subCategoryMatch && statusMatch && searchMatch;
+                p.name?.toLowerCase().includes(searchTerm.toLowerCase());
+
+              return categoryMatch && statusMatch && searchMatch;
             })}
             columns={columns}
             searchTerm=""

@@ -1,4 +1,4 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
 import { AddToCartDto } from './dto/add-to-cart.dto';
 
@@ -121,23 +121,7 @@ export class CartService {
   }
 
   private async validateStock(productId: number, colorName: string, sizeName: string, requestedQty: number) {
-    const product = await this.prisma.product.findUnique({
-      where: { id: productId }
-    });
-
-    if (!product || !product.colors) return;
-
-    const colors = product.colors as any[];
-    const color = colors.find(c => c.name === colorName);
-    if (!color) return;
-
-    const size = color.sizes?.find(s => s.size === sizeName);
-    if (!size) return;
-
-    const availableQty = parseInt(size.quantity || '0');
-    if (requestedQty > availableQty) {
-      throw new BadRequestException(`Only ${availableQty} units available for this variant.`);
-    }
+    // Stock tracking removed with color/size variants
   }
 
   async clearCart(userId: number) {

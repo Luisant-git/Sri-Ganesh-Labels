@@ -79,7 +79,6 @@ export class EmailControlService implements OnModuleInit {
       { name: 'Cart', path: '/cart' },
       { name: 'Checkout', path: '/checkout' },
       { name: 'Profile', path: '/profile' },
-      { name: 'Wishlist', path: '/wishlist' },
       { name: 'Orders', path: '/orders' },
       { name: 'Product', path: '/product' },
       { name: 'Search', path: '/search' }
