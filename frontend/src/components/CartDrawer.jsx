@@ -1,10 +1,10 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { X, Minus, Plus, Trash2, ShoppingBag, Truck } from 'lucide-react'
-import { useCart, FREE_SHIPPING_THRESHOLD } from '../context/CartContext'
+import { useCart } from '../context/CartContext'
 import { formatINR } from '../utils/format'
 
 export default function CartDrawer() {
-  const { items, isCartOpen, closeCart, updateQuantity, removeFromCart, totals } = useCart()
+  const { items, isCartOpen, closeCart, updateQuantity, removeFromCart, totals, freeShippingThreshold } = useCart()
   const navigate = useNavigate()
 
   const goCheckout = () => {
@@ -17,8 +17,8 @@ export default function CartDrawer() {
     navigate('/cart')
   }
 
-  const progress = Math.min(100, (totals.subtotal / FREE_SHIPPING_THRESHOLD) * 100)
-  const remaining = FREE_SHIPPING_THRESHOLD - totals.subtotal
+  const progress = Math.min(100, (totals.subtotal / freeShippingThreshold) * 100)
+  const remaining = freeShippingThreshold - totals.subtotal
 
   return (
     <>

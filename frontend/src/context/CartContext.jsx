@@ -1,10 +1,11 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react'
+import { getSettings } from '../api/settingsApi'
 
 const CartContext = createContext(null)
 
 const STORAGE_KEY = 'sgl_cart'
-export const FREE_SHIPPING_THRESHOLD = 999
 export const SHIPPING_FEE = 50
+export const DEFAULT_FREE_SHIPPING_THRESHOLD = 999
 
 function loadCart() {
   try {
@@ -22,10 +23,25 @@ function itemKey(productId, option) {
 export function CartProvider({ children }) {
   const [items, setItems] = useState(loadCart)
   const [isCartOpen, setIsCartOpen] = useState(false)
+  const [freeShippingThreshold, setFreeShippingThreshold] = useState(DEFAULT_FREE_SHIPPING_THRESHOLD)
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(items))
   }, [items])
+
+  useEffect(() => {
+    let cancelled = false
+    getSettings()
+      .then((data) => {
+        if (!cancelled && data.freeShippingThreshold != null) {
+          setFreeShippingThreshold(Number(data.freeShippingThreshold))
+        }
+      })
+      .catch(() => {})
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   const addToCart = (product, quantity = 1, option) => {
     setItems((prev) => {
@@ -75,12 +91,12 @@ export function CartProvider({ children }) {
   const totals = useMemo(() => {
     const subtotal = items.reduce((s, i) => s + i.price * i.quantity, 0)
     const discount = 0
-    const shipping = subtotal === 0 ? 0 : subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_FEE
+    const shipping = subtotal === 0 ? 0 : subtotal >= freeShippingThreshold ? 0 : SHIPPING_FEE
     const tax = 0
     const total = subtotal + shipping + tax
     const count = items.reduce((s, i) => s + i.quantity, 0)
     return { subtotal, discount, shipping, tax, total, count }
-  }, [items])
+  }, [items, freeShippingThreshold])
 
   const getCartTotal = () => totals
   const getCartCount = () => totals.count
@@ -94,6 +110,7 @@ export function CartProvider({ children }) {
     getCartTotal,
     getCartCount,
     totals,
+    freeShippingThreshold,
     isCartOpen,
     openCart,
     closeCart,

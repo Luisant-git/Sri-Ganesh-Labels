@@ -19,7 +19,7 @@ import {
   ShoppingCart,
   Copy,
 } from 'lucide-react'
-import { useCart, FREE_SHIPPING_THRESHOLD } from '../context/CartContext'
+import { useCart } from '../context/CartContext'
 import { useAuth } from '../context/AuthContext'
 import { formatINR, generateOrderId } from '../utils/format'
 import BackButton from '../components/BackButton'
@@ -56,7 +56,7 @@ const onlineMethods = [
 ]
 
 export default function Checkout() {
-  const { items, totals, clearCart } = useCart()
+  const { items, totals, clearCart, freeShippingThreshold } = useCart()
   const { user } = useAuth()
   const navigate = useNavigate()
 
@@ -604,7 +604,7 @@ export default function Checkout() {
               <div className="mt-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 text-[11px] text-slate-400">
                 <span className="flex items-center gap-1"><Lock size={12} className="text-teal-500" /> 100% secure</span>
                 <span className="flex items-center gap-1"><ShieldCheck size={12} className="text-brand-600" /> Buyer protection</span>
-                <span className="flex items-center gap-1"><Truck size={12} className="text-accent-600" /> {totals.subtotal >= FREE_SHIPPING_THRESHOLD ? 'Free shipping' : 'COD available'}</span>
+                <span className="flex items-center gap-1"><Truck size={12} className="text-accent-600" /> {totals.subtotal >= freeShippingThreshold ? 'Free shipping' : 'COD available'}</span>
               </div>
 
               <Link

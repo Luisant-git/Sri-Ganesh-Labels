@@ -10,7 +10,7 @@ import {
   Truck,
   ShieldCheck,
 } from 'lucide-react'
-import { useCart, FREE_SHIPPING_THRESHOLD } from '../context/CartContext'
+import { useCart } from '../context/CartContext'
 import ProductCard from '../components/ProductCard'
 import BackButton from '../components/BackButton'
 import { getStorefrontProducts } from '../api/productApi'
@@ -18,7 +18,7 @@ import { formatINR } from '../utils/format'
 import { toast } from '../components/Toast'
 
 export default function Cart() {
-  const { items, updateQuantity, removeFromCart, totals } = useCart()
+  const { items, updateQuantity, removeFromCart, totals, freeShippingThreshold } = useCart()
   const [popular, setPopular] = useState([])
   const navigate = useNavigate()
 
@@ -73,8 +73,8 @@ export default function Cart() {
     )
   }
 
-  const shippingProgress = Math.min(100, (totals.subtotal / FREE_SHIPPING_THRESHOLD) * 100)
-  const remaining = FREE_SHIPPING_THRESHOLD - totals.subtotal
+  const shippingProgress = Math.min(100, (totals.subtotal / freeShippingThreshold) * 100)
+  const remaining = freeShippingThreshold - totals.subtotal
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 lg:py-14">
