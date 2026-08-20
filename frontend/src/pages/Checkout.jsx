@@ -24,7 +24,8 @@ import { useAuth } from '../context/AuthContext'
 import { formatINR, generateOrderId } from '../utils/format'
 import BackButton from '../components/BackButton'
 import { toast } from '../components/Toast'
-import { getShippingRules, normalizeState } from '../api/shippingApi'
+import { getShippingRules, calculateShipping } from '../api/shippingApi'
+import { syncServerCart, clearServerCart, createOrder } from '../api/orderApi'
 
 const initialForm = {
   shippingFullName: '',
@@ -58,7 +59,7 @@ const onlineMethods = [
 
 export default function Checkout() {
   const { items, totals, clearCart, freeShippingThreshold } = useCart()
-  const { user } = useAuth()
+  const { user, isLoggedIn, openLogin } = useAuth()
   const navigate = useNavigate()
 
   const [form, setForm] = useState(() => {
@@ -71,7 +72,7 @@ export default function Checkout() {
     }
     return {
       ...initialForm,
-      shippingFullName: user?.name || lastAddress?.fullName || '',
+      shippingFullName: user?.name && user.name.trim() && user.name.trim() !== 'User' ? user.name : '',
       shippingMobile: user?.mobile || lastAddress?.mobile || '',
       shippingEmail: lastAddress?.email || '',
       shippingAddress: lastAddress?.address || '',
@@ -87,6 +88,7 @@ export default function Checkout() {
   const [terms, setTerms] = useState(false)
   const [sameAsShipping, setSameAsShipping] = useState(true)
   const [shippingRules, setShippingRules] = useState([])
+  const [calc, setCalc] = useState(null)
 
   useEffect(() => {
     let cancelled = false
@@ -101,10 +103,27 @@ export default function Checkout() {
   }, [])
 
   useEffect(() => {
+    let cancelled = false
+    const timeout = setTimeout(() => {
+      calculateShipping({ state: form.shippingState, subtotal: totals.subtotal })
+        .then((data) => {
+          if (!cancelled) setCalc(data)
+        })
+        .catch(() => {})
+    }, 250)
+    return () => {
+      cancelled = true
+      clearTimeout(timeout)
+    }
+  }, [form.shippingState, totals.subtotal])
+
+  useEffect(() => {
     if (user) {
       setForm((f) => ({
         ...f,
-        shippingFullName: f.shippingFullName || user.name || '',
+        shippingFullName:
+          f.shippingFullName ||
+          (user?.name && user.name.trim() && user.name.trim() !== 'User' ? user.name : ''),
         shippingMobile: f.shippingMobile || user.mobile || '',
       }))
     }
@@ -129,6 +148,7 @@ export default function Checkout() {
           : key === 'gstin'
           ? value.slice(0, 15)
           : value,
+      ...(key === 'billingMobile' ? { shippingMobile: value.slice(0, 10) } : {}),
     }))
     if (errors[key]) setErrors((er) => ({ ...er, [key]: null }))
   }
@@ -178,18 +198,23 @@ export default function Checkout() {
     return Object.keys(er).length === 0
   }
 
-  const stateShippingRule = shippingRules.find((r) => r.state === normalizeState(form.shippingState))
-  const baseShippingFee = stateShippingRule ? Number(stateShippingRule.flatShippingRate) : totals.shipping
-  const isFreeShipping = totals.subtotal >= freeShippingThreshold
+  const stateShippingRule = shippingRules.find((r) => r.state === (form.shippingState || '').trim().toUpperCase().replace(/\s+/g, '_'))
+  const baseShippingFee = calc ? Number(calc.baseFee) : stateShippingRule ? Number(stateShippingRule.flatShippingRate) : totals.shipping
+  const isFreeShipping = calc ? Boolean(calc.isFreeShipping) : freeShippingThreshold > 0 && totals.subtotal >= freeShippingThreshold
   const shippingCharged = isFreeShipping ? 0 : baseShippingFee
   const orderTotal = totals.subtotal + shippingCharged + totals.tax
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     if (placed) return
     if (!validate()) {
       toast('Please fix the highlighted fields', 'error')
       window.scrollTo({ top: 0, behavior: 'smooth' })
+      return
+    }
+    if (!isLoggedIn) {
+      toast('Please login to place your order', 'info')
+      openLogin()
       return
     }
     setPlaced(true)
@@ -214,23 +239,59 @@ export default function Checkout() {
           pincode: form.billingPincode,
         }
 
-    const order = {
-      id: generateOrderId(),
-      date: new Date().toISOString(),
-      payment: payment === 'cod' ? 'Cash on Delivery' : 'Online Payment',
-      paymentDetail: payment === 'cod' ? 'Pay at your doorstep' : onlineMethod.toUpperCase(),
-      items: items.map((i) => ({ name: i.name, option: i.option, qty: i.quantity, price: i.price, image: i.image })),
-      totals: { ...totals, shipping: shippingCharged, total: orderTotal },
-      address: shippingAddress,
-      billingAddress,
-      gstin: form.gstin.trim() || null,
+    const orderPayload = {
+      subtotal: totals.subtotal.toFixed(2),
+      deliveryFee: shippingCharged.toFixed(2),
+      shippingFee: '0',
+      codFee: '0',
+      total: orderTotal.toFixed(2),
+      paymentMethod: payment === 'cod' ? 'cod' : 'online',
+      shippingAddress: {
+        fullName: form.shippingFullName,
+        addressLine1: form.shippingAddress,
+        addressLine2: '',
+        landmark: '',
+        city: form.shippingCity,
+        state: form.shippingState,
+        pincode: form.shippingPincode,
+        mobile: form.shippingMobile,
+      },
+      deliveryOption: { fee: shippingCharged, name: 'Standard Delivery', duration: '3-5 days' },
     }
-    localStorage.setItem('sgl_last_order', JSON.stringify(order))
-    clearCart()
-    if (payment === 'cod') {
-      navigate('/order-success', { state: { order } })
-    } else {
-      setTimeout(() => navigate('/order-success', { state: { order } }), 1600)
+
+    try {
+      await syncServerCart(items)
+      const backendOrder = await createOrder(orderPayload)
+      const order = {
+        id: backendOrder.id ? String(backendOrder.id) : generateOrderId(),
+        date: new Date().toISOString(),
+        payment: payment === 'cod' ? 'Cash on Delivery' : 'Online Payment',
+        paymentDetail: payment === 'cod' ? 'Pay at your doorstep' : onlineMethod.toUpperCase(),
+        items: items.map((i) => ({
+          name: i.name,
+          option: i.option,
+          qty: i.quantity,
+          price: i.price,
+          originalPrice: i.originalPrice,
+          image: i.image,
+          productId: i.productId,
+        })),
+        totals: { ...totals, shipping: shippingCharged, shippingRate: baseShippingFee, total: orderTotal },
+        address: shippingAddress,
+        billingAddress,
+        gstin: form.gstin.trim() || null,
+      }
+      localStorage.setItem('sgl_last_order', JSON.stringify(order))
+      clearCart()
+      await clearServerCart()
+      if (payment === 'cod') {
+        navigate('/order-success', { state: { order } })
+      } else {
+        setTimeout(() => navigate('/order-success', { state: { order } }), 1600)
+      }
+    } catch (err) {
+      setPlaced(false)
+      toast(err.message || 'Failed to place order', 'error')
     }
   }
 
@@ -283,7 +344,9 @@ export default function Checkout() {
             onChange={setField(`${prefix}Mobile`)}
             placeholder="10-digit mobile number"
             inputMode="numeric"
-            className={`${inputCls(`${prefix}Mobile`)} pl-10`}
+            disabled={!isBilling}
+            title={!isBilling ? 'Mobile number is set from your account' : ''}
+            className={`${inputCls(`${prefix}Mobile`)} pl-10 ${!isBilling ? 'cursor-not-allowed bg-slate-100 text-slate-500' : ''}`}
           />
         </div>
         {errors[`${prefix}Mobile`] && <p className="mt-1 text-xs text-rose-500">{errors[`${prefix}Mobile`]}</p>}
@@ -570,7 +633,7 @@ export default function Checkout() {
                 <div className="flex justify-between">
                   <dt className="text-slate-500">Shipping</dt>
                   <dd className="font-semibold text-slate-900">
-                    {isFreeShipping ? (
+                    {isFreeShipping && baseShippingFee > 0 ? (
                       <>
                         <span className="mr-1.5 text-slate-400 line-through">{formatINR(baseShippingFee)}</span>
                         <span className="text-teal-600">FREE</span>

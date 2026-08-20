@@ -12,6 +12,7 @@ import Cart from './pages/Cart'
 import Checkout from './pages/Checkout'
 import OrderSuccess from './pages/OrderSuccess'
 import OrderTracking from './pages/OrderTracking'
+import MyOrders from './pages/MyOrders'
 import Contact from './pages/Contact'
 import Account from './pages/Account'
 import NotFound from './pages/NotFound'
@@ -33,6 +34,7 @@ export default function App() {
               <Route path="/checkout" element={<Checkout />} />
               <Route path="/order-success" element={<OrderSuccess />} />
               <Route path="/order-tracking" element={<OrderTracking />} />
+              <Route path="/my-orders" element={<MyOrders />} />
               <Route path="/contact" element={<Contact />} />
               <Route path="/account" element={<Account />} />
               <Route path="*" element={<NotFound />} />

@@ -74,7 +74,7 @@ export default function Account() {
       icon: PackageSearch,
       title: 'My Orders',
       desc: 'Track status of your placed orders',
-      to: '/order-tracking',
+      to: '/my-orders',
       accent: 'bg-violet-50 text-violet-600',
     },
     {

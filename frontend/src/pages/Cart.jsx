@@ -72,8 +72,10 @@ export default function Cart() {
     )
   }
 
-  const shippingProgress = Math.min(100, (totals.subtotal / freeShippingThreshold) * 100)
-  const remaining = freeShippingThreshold - totals.subtotal
+  const freeShippingEnabled = freeShippingThreshold > 0
+  const shippingProgress = freeShippingEnabled ? Math.min(100, (totals.subtotal / freeShippingThreshold) * 100) : 0
+  const remaining = freeShippingEnabled ? freeShippingThreshold - totals.subtotal : 0
+  const isFreeShipping = freeShippingEnabled && totals.shipping === 0 && shippingFee > 0
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 lg:py-14">
@@ -96,25 +98,27 @@ export default function Cart() {
         {/* Items */}
         <div className="lg:col-span-2">
           {/* Free shipping progress */}
-          <div className="mb-6 rounded-2xl border border-brand-100 bg-brand-50/70 p-4">
-            {remaining > 0 ? (
-              <p className="text-sm font-medium text-brand-800">
-                <Truck size={15} className="mr-1.5 inline -translate-y-0.5" />
-                Add {formatINR(remaining)} more to get <span className="font-bold">FREE shipping</span>
-              </p>
-            ) : (
-              <p className="text-sm font-medium text-teal-700">
-                <Truck size={15} className="mr-1.5 inline -translate-y-0.5" />
-                Congratulations! You've unlocked FREE shipping.
-              </p>
-            )}
-            <div className="mt-2.5 h-2 overflow-hidden rounded-full bg-white">
-              <div
-                className="h-full rounded-full bg-gradient-to-r from-brand-600 to-accent-500 transition-all duration-500"
-                style={{ width: `${shippingProgress}%` }}
-              />
+          {freeShippingEnabled && (
+            <div className="mb-6 rounded-2xl border border-brand-100 bg-brand-50/70 p-4">
+              {remaining > 0 ? (
+                <p className="text-sm font-medium text-brand-800">
+                  <Truck size={15} className="mr-1.5 inline -translate-y-0.5" />
+                  Add {formatINR(remaining)} more to get <span className="font-bold">FREE shipping</span>
+                </p>
+              ) : (
+                <p className="text-sm font-medium text-teal-700">
+                  <Truck size={15} className="mr-1.5 inline -translate-y-0.5" />
+                  Congratulations! You've unlocked FREE shipping.
+                </p>
+              )}
+              <div className="mt-2.5 h-2 overflow-hidden rounded-full bg-white">
+                <div
+                  className="h-full rounded-full bg-gradient-to-r from-brand-600 to-accent-500 transition-all duration-500"
+                  style={{ width: `${shippingProgress}%` }}
+                />
+              </div>
             </div>
-          </div>
+          )}
 
           <div className="divide-y divide-slate-200 rounded-2xl border border-slate-200 bg-white shadow-sm">
             {items.map((item) => {
@@ -200,7 +204,7 @@ export default function Cart() {
               <div className="flex justify-between">
                 <dt className="text-slate-500">Shipping</dt>
                 <dd className="font-semibold text-slate-900">
-                  {totals.shipping === 0 ? (
+                  {isFreeShipping ? (
                     <>
                       <span className="mr-1.5 text-slate-400 line-through">{formatINR(shippingFee)}</span>
                       <span className="text-teal-600">FREE</span>

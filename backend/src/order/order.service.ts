@@ -173,6 +173,13 @@ export class OrderService {
       include: { items: true }
     });
   }
+
+  async getPublicOrder(orderId: number) {
+    return this.prisma.order.findUnique({
+      where: { id: orderId },
+      include: { items: true }
+    });
+  }
  
   async getAllOrders() {
     return this.prisma.order.findMany({

@@ -35,6 +35,20 @@ const capitalizeEachWord = (str) => {
   return str.toLowerCase().replace(/\b\w/g, char => char.toUpperCase());
 };
 
+const SELLER_DETAILS = [
+  'SRI GANESH LABELS',
+  'State Bank of India, Rajaji Road,',
+  'Salem - 636 007, Tamil Nadu',
+  'A/c No: 41202153215',
+  'IFSC: SBIN0070328',
+];
+
+const PACKAGE_SLIP_SELLER_DETAILS = [
+  'SRI GANESH LABELS',
+  '300, Cherry Road, Salem-636007, Tamil Nadu',
+  'GST No: 33ANCPK9033A1ZK',
+];
+
 const OrdersList = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -385,22 +399,13 @@ const [orderStats, setOrderStats] = useState({
     pdf.setFont(undefined, 'bold');
     pdf.text('Sold By :', 15, 35);
     pdf.setFont(undefined, 'normal');
-    pdf.text('KPG APPARELS', 15, 40);
-    pdf.text('2/3, KPG Buliding, Jothi Theater Road, Valipalayam, Tiruppur,', 15, 45);
-    pdf.text('TIRUPPUR, TAMIL NADU, 641601', 15, 50);
-    pdf.text('IN', 15, 55);
+    pdf.text(SELLER_DETAILS[0], 15, 40);
+    pdf.text(SELLER_DETAILS[1], 15, 45);
+    pdf.text(SELLER_DETAILS[2], 15, 50);
+    pdf.text(SELLER_DETAILS[3], 15, 55);
+    pdf.text(SELLER_DETAILS[4], 15, 60);
 
-    pdf.setFont(undefined, 'bold');
-    pdf.text('PAN No:', 15, 63);
-    pdf.setFont(undefined, 'normal');
-    pdf.text('AARFK8101F', 35, 63);
-
-    pdf.setFont(undefined, 'bold');
-    pdf.text('GST No:', 15, 68);
-    pdf.setFont(undefined, 'normal');
-    pdf.text('33AARFK8101F1ZG', 35, 68);
-
-    pdf.line(15, 73, 190, 73);
+    pdf.line(15, 66, 190, 66);
 
     // Billing Address (Right Top)
     pdf.setFont(undefined, 'bold');
@@ -410,7 +415,7 @@ const [orderStats, setOrderStats] = useState({
       let billingY = 40;
       pdf.text(capitalizeEachWord(address.fullName || order.user?.name || 'N/A'), 120, billingY);
       billingY += 5;
-      const addr1Lines = pdf.splitTextToSize(capitalizeEachWord(address.addressLine1 || ''), 70);
+      const addr1Lines = pdf.splitTextToSize(capitalizeEachWord(address.addressLine1 || address.address || ''), 70);
       pdf.text(addr1Lines, 120, billingY);
       billingY += addr1Lines.length * 5;
       if (address.addressLine2) {
@@ -437,7 +442,7 @@ const [orderStats, setOrderStats] = useState({
       shippingY += 5;
       pdf.text(address.mobile || order.user?.phone || 'N/A', 120, shippingY);
       shippingY += 5;
-      const shipAddr1Lines = pdf.splitTextToSize(capitalizeEachWord(address.addressLine1 || ''), 70);
+      const shipAddr1Lines = pdf.splitTextToSize(capitalizeEachWord(address.addressLine1 || address.address || ''), 70);
       pdf.text(shipAddr1Lines, 120, shippingY);
       shippingY += shipAddr1Lines.length * 5;
       if (address.addressLine2) {
@@ -649,12 +654,13 @@ const [orderStats, setOrderStats] = useState({
     pdf.rect(15, tableTop, 180, finalTableHeight);
 
     let footerY = yPos + 50;
-    if (footerY > 250) {
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    if (footerY > pageHeight - 20) {
       pdf.addPage();
       footerY = 30;
     }
     pdf.setFont(undefined, 'bold');
-    pdf.text('For EN3 FASHIONS:', 140, footerY - 30);
+    pdf.text('For SRI GANESH LABELS:', 140, footerY - 30);
     if (signatureUrl) {
       const signatureImg = new Image();
       signatureImg.src = signatureUrl;
@@ -823,14 +829,17 @@ const handleUpdateStatus = async () => {
     let shipY = 68;
     if (address) {
       pdf.setFont(undefined, 'bold');
-      pdf.text(`${capitalizeEachWord(address.fullName || order.user?.name || 'N/A')} (${address.mobile || order.user?.phone || 'N/A'})`, 20, shipY);
+      const shipToNameLines = pdf.splitTextToSize(`${capitalizeEachWord(address.fullName || order.user?.name || 'N/A')} (${address.mobile || order.user?.phone || 'N/A'})`, 92);
+      pdf.text(shipToNameLines, 20, shipY);
+      shipY += shipToNameLines.length * 7;
       pdf.setFont(undefined, 'normal');
-      shipY += 7;
-      pdf.text(capitalizeEachWord(address.addressLine1 || ''), 20, shipY);
-      shipY += 7;
+      const shipToAddrLines = pdf.splitTextToSize(capitalizeEachWord(address.addressLine1 || address.address || ''), 92);
+      pdf.text(shipToAddrLines, 20, shipY);
+      shipY += shipToAddrLines.length * 7;
       if (address.addressLine2) {
-        pdf.text(capitalizeEachWord(address.addressLine2), 20, shipY);
-        shipY += 7;
+        const shipToAddr2Lines = pdf.splitTextToSize(capitalizeEachWord(address.addressLine2), 92);
+        pdf.text(shipToAddr2Lines, 20, shipY);
+        shipY += shipToAddr2Lines.length * 7;
       }
       pdf.text(`${capitalizeEachWord(address.city || '')}, ${capitalizeEachWord(address.state || '')}, ${address.pincode || ''}`, 20, shipY);
       shipY += 7;
@@ -846,13 +855,13 @@ const handleUpdateStatus = async () => {
     pdf.setFont(undefined, 'normal');
 
     let fromY = 108;
-    pdf.text('KPG APPARELS', 120, fromY);
+    pdf.text(PACKAGE_SLIP_SELLER_DETAILS[0], 120, fromY);
     fromY += 7;
-    pdf.text('2/3, KPG Buliding, Jothi Theater Road,', 120, fromY);
-    fromY += 7;
-    pdf.text('Valipalayam, Tiruppur,', 120, fromY);
-    fromY += 7;
-    pdf.text('TAMIL NADU, 641601,', 120, fromY);
+    const fromAddrLines = pdf.splitTextToSize(PACKAGE_SLIP_SELLER_DETAILS[1], 78);
+    pdf.text(fromAddrLines, 120, fromY);
+    fromY += fromAddrLines.length * 7;
+    const fromGstLines = pdf.splitTextToSize(PACKAGE_SLIP_SELLER_DETAILS[2], 78);
+    pdf.text(fromGstLines, 120, fromY);
 
     pdf.setFont(undefined, 'italic');
     pdf.text('Thank you for shopping with us!', 105, 150, { align: 'center' });
@@ -1077,14 +1086,17 @@ const exportAllOrdersExcel = () => {
       let shipY = 68;
       if (address) {
         pdf.setFont(undefined, 'bold');
-        pdf.text(`${capitalizeEachWord(address.fullName || order.user?.name || 'N/A')} (${address.mobile || order.user?.phone || 'N/A'})`, 20, shipY);
+        const shipToNameLines = pdf.splitTextToSize(`${capitalizeEachWord(address.fullName || order.user?.name || 'N/A')} (${address.mobile || order.user?.phone || 'N/A'})`, 92);
+        pdf.text(shipToNameLines, 20, shipY);
+        shipY += shipToNameLines.length * 7;
         pdf.setFont(undefined, 'normal');
-        shipY += 7;
-        pdf.text(capitalizeEachWord(address.addressLine1 || ''), 20, shipY);
-        shipY += 7;
+        const shipToAddrLines = pdf.splitTextToSize(capitalizeEachWord(address.addressLine1 || address.address || ''), 92);
+        pdf.text(shipToAddrLines, 20, shipY);
+        shipY += shipToAddrLines.length * 7;
         if (address.addressLine2) {
-          pdf.text(capitalizeEachWord(address.addressLine2), 20, shipY);
-          shipY += 7;
+          const shipToAddr2Lines = pdf.splitTextToSize(capitalizeEachWord(address.addressLine2), 92);
+          pdf.text(shipToAddr2Lines, 20, shipY);
+          shipY += shipToAddr2Lines.length * 7;
         }
         pdf.text(`${capitalizeEachWord(address.city || '')}, ${capitalizeEachWord(address.state || '')}, ${address.pincode || ''}`, 20, shipY);
         shipY += 7;
@@ -1100,13 +1112,13 @@ const exportAllOrdersExcel = () => {
       pdf.setFont(undefined, 'normal');
 
       let fromY = 108;
-      pdf.text('KPG APPARELS', 120, fromY);
+      pdf.text(PACKAGE_SLIP_SELLER_DETAILS[0], 120, fromY);
       fromY += 7;
-      pdf.text('2/3, KPG Buliding, Jothi Theater Road,', 120, fromY);
-      fromY += 7;
-      pdf.text('Valipalayam, Tiruppur,', 120, fromY);
-      fromY += 7;
-      pdf.text('TAMIL NADU, 641601,', 120, fromY);
+      const fromAddrLines = pdf.splitTextToSize(PACKAGE_SLIP_SELLER_DETAILS[1], 78);
+      pdf.text(fromAddrLines, 120, fromY);
+      fromY += fromAddrLines.length * 7;
+      const fromGstLines = pdf.splitTextToSize(PACKAGE_SLIP_SELLER_DETAILS[2], 78);
+      pdf.text(fromGstLines, 120, fromY);
 
       pdf.setFont(undefined, 'italic');
       pdf.text('Thank you for shopping with us!', 105, 150, { align: 'center' });
@@ -1541,7 +1553,7 @@ const exportAllOrdersExcel = () => {
       pdf.text(nameLines, 10, shipY);
       shipY += nameLines.length * 3.5;
       pdf.setFont(undefined, 'normal');
-      const addr1Lines = pdf.splitTextToSize(capitalizeEachWord(address.addressLine1 || ''), 95);
+      const addr1Lines = pdf.splitTextToSize(capitalizeEachWord(address.addressLine1 || address.address || ''), 95);
       pdf.text(addr1Lines, 10, shipY);
       shipY += addr1Lines.length * 3.5;
       if (address.addressLine2) {
@@ -1565,15 +1577,13 @@ const exportAllOrdersExcel = () => {
     pdf.text('SHIP FROM:', 50, 94);
 
     let fromY = 98;
-    pdf.text('KPG APPARELS', 50, fromY);
+    pdf.text(PACKAGE_SLIP_SELLER_DETAILS[0], 50, fromY);
     fromY += 3.5;
-    pdf.text('2/3, KPG Buliding, Jothi Theater Road,', 50, fromY);
-    fromY += 3.5;
-    pdf.text('Valipalayam,', 50, fromY);
-    pdf.text(' Tiruppur,', 68, fromY);
-    fromY += 3.5;
-    pdf.text('TAMIL NADU,', 50, fromY);
-    pdf.text(' 641601', 68, fromY);
+    const fromAddrLines = pdf.splitTextToSize(PACKAGE_SLIP_SELLER_DETAILS[1], 55);
+    pdf.text(fromAddrLines, 50, fromY);
+    fromY += fromAddrLines.length * 3.5;
+    const fromGstLines = pdf.splitTextToSize(PACKAGE_SLIP_SELLER_DETAILS[2], 55);
+    pdf.text(fromGstLines, 50, fromY);
     pdf.setFont(undefined, 'normal');
 
     pdf.setFont(undefined, 'italic');
@@ -1588,11 +1598,11 @@ const exportAllOrdersExcel = () => {
     pdf.setFont(undefined, 'bold');
     pdf.text('Sold By :', 108, 16);
     pdf.setFont(undefined, 'normal');
-    pdf.text('KPG APPARELS', 108, 19);
-    pdf.text('2/3, KPG Buliding, Jothi Theater Road, Valipalayam,', 108, 21);
-    pdf.text('Tiruppur,', 108, 23);
-    pdf.text('TIRUPPUR, TAMIL NADU, 641601', 108, 25);
-    pdf.text('IN', 108, 27);
+    pdf.text(SELLER_DETAILS[0], 108, 19);
+    pdf.text(SELLER_DETAILS[1], 108, 21);
+    pdf.text(SELLER_DETAILS[2], 108, 23);
+    pdf.text(SELLER_DETAILS[3], 108, 25);
+    pdf.text(SELLER_DETAILS[4], 108, 27);
 
     pdf.setFont(undefined, 'bold');
     pdf.text('Billing Address :', 155, 16);
@@ -1601,7 +1611,7 @@ const exportAllOrdersExcel = () => {
       let billY = 19;
       pdf.text(address.fullName || order.user?.name || 'N/A', 155, billY);
       billY += 2.5;
-      const billLine1 = pdf.splitTextToSize(address.addressLine1 || '', 42);
+      const billLine1 = pdf.splitTextToSize(address.addressLine1 || address.address || '', 42);
       pdf.text(billLine1, 155, billY);
       billY += billLine1.length * 2.5;
       if (address.addressLine2) {
@@ -1615,13 +1625,13 @@ const exportAllOrdersExcel = () => {
     }
 
     pdf.setFont(undefined, 'bold');
-    pdf.text('PAN No:', 108, 31);
+    pdf.text('Acc. No:', 108, 31);
     pdf.setFont(undefined, 'normal');
-    pdf.text('AARFK8101F', 120, 31);
+    pdf.text('41202153215', 120, 31);
     pdf.setFont(undefined, 'bold');
-    pdf.text('GST No:', 108, 34);
+    pdf.text('IFSC:', 108, 34);
     pdf.setFont(undefined, 'normal');
-    pdf.text('33AARFK8101F1ZG', 120, 34);
+    pdf.text('SBIN0070328', 120, 34);
 
     pdf.line(108, 37, 202, 37);
 
@@ -1639,7 +1649,7 @@ const exportAllOrdersExcel = () => {
       shipY += 2.5;
       pdf.text(address.mobile || order.user?.phone || 'N/A', 155, shipY);
       shipY += 2.5;
-      const shipLine1 = pdf.splitTextToSize(address.addressLine1 || '', 42);
+      const shipLine1 = pdf.splitTextToSize(address.addressLine1 || address.address || '', 42);
       pdf.text(shipLine1, 155, shipY);
       shipY += shipLine1.length * 2.5;
       if (address.addressLine2) {
@@ -1834,7 +1844,7 @@ const exportAllOrdersExcel = () => {
     // Authorized Signatory
     let footerY = pricingEndY + 4;
     pdf.setFont(undefined, 'bold');
-    pdf.text('For EN3 FASHIONS:', 175, footerY);
+    pdf.text('For SRI GANESH LABELS:', 175, footerY);
     if (signatureUrl) {
       const signatureImg = new Image();
       signatureImg.src = signatureUrl;

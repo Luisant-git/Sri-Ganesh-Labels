@@ -74,14 +74,17 @@ export default function Footer() {
               prompt delivery across India.
             </p>
             <div className="mt-5 space-y-2 text-sm">
-              <a href="tel:+919876543210" className="flex items-center gap-2.5 hover:text-white">
-                <Phone size={15} className="text-accent-400" /> +91 98765 43210
-              </a>
-              <a href="mailto:sales@sriganeshlabels.in" className="flex items-center gap-2.5 hover:text-white">
-                <Mail size={15} className="text-accent-400" /> sales@sriganeshlabels.in
+              <a href="tel:04274030892" className="flex items-center gap-2.5 hover:text-white">
+                <Phone size={15} className="text-accent-400" /> Ph: 0427-4030892
               </a>
               <span className="flex items-center gap-2.5">
-                <MapPin size={15} className="text-accent-400" /> Chennai, Tamil Nadu, India
+                <Phone size={15} className="text-accent-400" /> Cen: 8754030968 · Off: 9443665335
+              </span>
+              <a href="mailto:sriganeshlabelssale@gmail.com" className="flex items-center gap-2.5 hover:text-white">
+                <Mail size={15} className="text-accent-400" /> sriganeshlabelssale@gmail.com
+              </a>
+              <span className="flex items-center gap-2.5">
+                <MapPin size={15} className="text-accent-400" /> 300, Cherry Road, Salem-636007, Tamil Nadu
               </span>
             </div>
             <div className="mt-6 flex gap-3">

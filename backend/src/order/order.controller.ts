@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Body, Param, UseGuards, Request, Patch, Query, BadRequestException } from '@nestjs/common';
+import { Controller, Post, Get, Body, Param, UseGuards, Request, Patch, Query, BadRequestException, NotFoundException } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiBody } from '@nestjs/swagger';
 import { OrderService } from './order.service';
 import { CreateOrderDto } from './dto/create-order.dto';
@@ -36,6 +36,22 @@ export class OrderController {
     return this.orderService.getUserOrders(req.user.userId);
   }
  
+  @Get('public/:orderId')
+  @ApiOperation({ summary: 'Get order details for tracking (public)' })
+  @ApiResponse({ status: 200, description: 'Order retrieved successfully' })
+  @ApiResponse({ status: 404, description: 'Order not found' })
+  async getPublicOrder(@Param('orderId') orderId: string) {
+    const id = parseInt(orderId, 10);
+    if (isNaN(id)) {
+      throw new BadRequestException('Invalid order id');
+    }
+    const order = await this.orderService.getPublicOrder(id);
+    if (!order) {
+      throw new NotFoundException('Order not found');
+    }
+    return order;
+  }
+
   @Get(':orderId')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()

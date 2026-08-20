@@ -17,8 +17,10 @@ export default function CartDrawer() {
     navigate('/cart')
   }
 
-  const progress = Math.min(100, (totals.subtotal / freeShippingThreshold) * 100)
-  const remaining = freeShippingThreshold - totals.subtotal
+  const freeShippingEnabled = freeShippingThreshold > 0
+  const progress = freeShippingEnabled ? Math.min(100, (totals.subtotal / freeShippingThreshold) * 100) : 0
+  const remaining = freeShippingEnabled ? freeShippingThreshold - totals.subtotal : 0
+  const isFreeShipping = freeShippingEnabled && totals.shipping === 0 && shippingFee > 0
 
   return (
     <>
@@ -51,7 +53,7 @@ export default function CartDrawer() {
         </div>
 
         {/* Free shipping bar */}
-        {items.length > 0 && (
+        {freeShippingEnabled && items.length > 0 && (
           <div className="border-b border-slate-100 bg-slate-50 px-5 py-3">
             <p className="flex items-center gap-1.5 text-xs text-slate-600">
               <Truck size={14} className="text-brand-600" />
@@ -154,7 +156,7 @@ export default function CartDrawer() {
               <div className="mt-1 flex items-center justify-between text-xs text-slate-500">
                   <span>Shipping</span>
                   <span className="font-semibold">
-                    {totals.shipping === 0 ? (
+                    {isFreeShipping ? (
                       <>
                         <span className="mr-1 text-slate-400 line-through">{formatINR(shippingFee)}</span>
                         <span className="text-teal-600">FREE</span>

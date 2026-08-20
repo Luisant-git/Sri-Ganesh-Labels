@@ -123,7 +123,7 @@ export default function OrderSuccess() {
             </p>
             <ul className="mt-4 space-y-3">
               {order.items.map((it, i) => (
-                <li key={i} className="flex items-center justify-between gap-3 text-sm">
+                <li key={i} className="flex items-start justify-between gap-3 text-sm">
                   <span className="flex items-center gap-3">
                     <img src={it.image} alt={it.name} className="h-11 w-11 rounded-lg border border-slate-200 object-cover" />
                     <span className="text-slate-700">
@@ -131,17 +131,39 @@ export default function OrderSuccess() {
                       {it.option && it.option !== 'default' && (
                         <span className="block text-xs text-slate-400">{it.option}</span>
                       )}
+                      <span className="mt-0.5 block text-xs text-slate-400">
+                        Qty: {it.qty} × {formatINR(it.price)}
+                      </span>
                     </span>
                   </span>
-                  <span className="whitespace-nowrap font-semibold text-slate-900">
-                    {it.qty} × {formatINR(it.price)}
+                  <span className="whitespace-nowrap text-right font-semibold text-slate-900">
+                    {formatINR(it.price * it.qty)}
                   </span>
                 </li>
               ))}
             </ul>
-            <div className="mt-4 flex items-center justify-between border-t border-dashed border-slate-200 pt-4">
-              <span className="text-sm font-semibold text-slate-700">Order Total</span>
-              <span className="font-display text-xl font-bold text-brand-800">{formatINR(order.totals.total)}</span>
+            <div className="mt-4 space-y-2 border-t border-dashed border-slate-200 pt-4">
+              <div className="flex items-center justify-between text-sm text-slate-600">
+                <span>Subtotal</span>
+                <span className="font-semibold text-slate-900">{formatINR(order.totals.subtotal)}</span>
+              </div>
+              {(order.totals.shipping > 0 || order.totals.shippingRate > 0) && (
+                <div className="flex items-center justify-between text-sm text-slate-600">
+                  <span>Shipping</span>
+                  {order.totals.shipping === 0 ? (
+                    <span className="font-semibold">
+                      <span className="mr-1 text-slate-400 line-through">{formatINR(order.totals.shippingRate)}</span>
+                      <span className="text-teal-600">FREE</span>
+                    </span>
+                  ) : (
+                    <span className="font-semibold text-slate-900">{formatINR(order.totals.shipping)}</span>
+                  )}
+                </div>
+              )}
+              <div className="flex items-center justify-between pt-1 text-sm font-semibold text-slate-700">
+                <span>Order Total</span>
+                <span className="font-display text-xl font-bold text-brand-800">{formatINR(order.totals.total)}</span>
+              </div>
             </div>
           </div>
 

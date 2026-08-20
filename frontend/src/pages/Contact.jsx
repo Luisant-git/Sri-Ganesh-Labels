@@ -7,17 +7,17 @@ const info = [
   {
     icon: Phone,
     title: 'Phone',
-    lines: ['+91 98765 43210', '+91 98765 43211'],
+    lines: ['Ph: 0427-4030892', 'Cen: 8754030968 · Off: 9443665335'],
   },
   {
     icon: Mail,
     title: 'Email',
-    lines: ['sales@sriganeshlabels.in', 'support@sriganeshlabels.in'],
+    lines: ['sriganeshlabelssale@gmail.com'],
   },
   {
     icon: MapPin,
     title: 'Address',
-    lines: ['123, GST Road, Guindy', 'Chennai, Tamil Nadu 600032'],
+    lines: ['Sri Ganesh Labels', '300, Cherry Road, Salem-636007, Tamil Nadu'],
   },
   {
     icon: Clock,

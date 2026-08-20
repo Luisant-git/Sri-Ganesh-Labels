@@ -6,8 +6,8 @@ const CartContext = createContext(null)
 
 const STORAGE_KEY = 'sgl_cart'
 const LAST_ORDER_KEY = 'sgl_last_order'
-export const SHIPPING_FEE = 50
-export const DEFAULT_FREE_SHIPPING_THRESHOLD = 999
+export const SHIPPING_FEE = 0
+export const DEFAULT_FREE_SHIPPING_THRESHOLD = 0
 
 function loadCart() {
   try {
@@ -122,7 +122,7 @@ export function CartProvider({ children }) {
   const totals = useMemo(() => {
     const subtotal = items.reduce((s, i) => s + i.price * i.quantity, 0)
     const discount = 0
-    const shipping = subtotal === 0 ? 0 : subtotal >= freeShippingThreshold ? 0 : appliedShippingFee
+    const shipping = subtotal === 0 ? 0 : freeShippingThreshold > 0 && subtotal >= freeShippingThreshold ? 0 : appliedShippingFee
     const tax = 0
     const total = subtotal + shipping + tax
     const count = items.reduce((s, i) => s + i.quantity, 0)
