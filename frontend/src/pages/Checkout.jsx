@@ -60,10 +60,24 @@ export default function Checkout() {
   const { user } = useAuth()
   const navigate = useNavigate()
 
-  const [form, setForm] = useState({
-    ...initialForm,
-    shippingFullName: user?.name || '',
-    shippingMobile: user?.mobile || '',
+  const [form, setForm] = useState(() => {
+    let lastAddress = null
+    try {
+      const raw = localStorage.getItem('sgl_last_order')
+      if (raw) lastAddress = JSON.parse(raw).address
+    } catch {
+      lastAddress = null
+    }
+    return {
+      ...initialForm,
+      shippingFullName: user?.name || lastAddress?.fullName || '',
+      shippingMobile: user?.mobile || lastAddress?.mobile || '',
+      shippingEmail: lastAddress?.email || '',
+      shippingAddress: lastAddress?.address || '',
+      shippingCity: lastAddress?.city || '',
+      shippingState: lastAddress?.state || '',
+      shippingPincode: lastAddress?.pincode || '',
+    }
   })
   const [errors, setErrors] = useState({})
   const [payment, setPayment] = useState('cod')

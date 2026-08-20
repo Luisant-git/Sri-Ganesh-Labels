@@ -9,6 +9,7 @@ import {
   LogOut,
   Phone,
   LogIn,
+  MapPin,
   Home as HomeIcon,
 } from 'lucide-react'
 import { useCart } from '../context/CartContext'
@@ -57,6 +58,16 @@ export default function Account() {
   const { user, isLoggedIn, openLogin, logout } = useAuth()
 
   const cartCount = getCartCount()
+
+  const [lastOrder] = useState(() => {
+    try {
+      const raw = localStorage.getItem('sgl_last_order')
+      return raw ? JSON.parse(raw) : null
+    } catch {
+      return null
+    }
+  })
+  const shipping = lastOrder?.address
 
   const quickActions = [
     {
@@ -115,18 +126,20 @@ export default function Account() {
         subtitle="Manage your cart, track orders and keep your shopping details in one place."
       />
 
-      <div className="mx-auto mt-8 grid max-w-4xl items-start gap-6 px-4 lg:grid-cols-[300px_1fr]">
+      <div className="mx-auto mt-8 grid max-w-4xl items-stretch gap-6 px-4 lg:grid-cols-[300px_1fr]">
         {/* Left sidebar: profile */}
-        <aside className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-xl shadow-slate-900/5">
-          <div className="flex flex-col items-center border-b border-slate-100 px-6 pb-8 pt-10 text-center">
-            <span className="flex h-24 w-24 items-center justify-center rounded-full bg-brand-100 text-brand-700 ring-4 ring-brand-50">
+        <aside className="flex h-full flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-xl shadow-slate-900/5">
+          <div className="relative flex flex-1 flex-col items-center justify-center border-b border-slate-100 bg-slate-50/70 px-6 py-10 text-center">
+            <div className="pointer-events-none absolute -left-10 -top-12 h-36 w-36 rounded-full bg-brand-100/60 blur-3xl" />
+            <div className="pointer-events-none absolute -bottom-10 -right-10 h-32 w-32 rounded-full bg-accent-100/60 blur-2xl" />
+            <span className="relative flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-brand-600 to-brand-800 text-white shadow-lg shadow-brand-600/25 ring-4 ring-white">
               <User size={44} />
             </span>
-            <h2 className="mt-4 truncate font-display text-xl font-bold text-slate-900">{user.name || 'Hello!'}</h2>
-            <p className="mt-1 flex items-center gap-1.5 text-sm text-slate-500">
+            <h2 className="relative mt-4 max-w-full truncate font-display text-xl font-bold text-slate-900">{user.name || 'Hello!'}</h2>
+            <p className="relative mt-1 flex items-center gap-1.5 text-sm text-slate-500">
               <Phone size={13} className="text-slate-400" /> +91 {user.mobile}
             </p>
-            <span className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-green-100 px-3 py-1 text-[11px] font-semibold text-green-700">
+            <span className="relative mt-3 inline-flex items-center gap-1.5 rounded-full bg-green-100 px-3 py-1 text-[11px] font-semibold text-green-700">
               <ShieldCheck size={13} /> {user.name ? 'Verified Account' : 'Mobile Verified'}
             </span>
           </div>
@@ -144,8 +157,8 @@ export default function Account() {
         </aside>
 
         {/* Right content */}
-        <div className="space-y-6">
-          <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+        <div className="flex">
+          <div className="flex w-full flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
             <div className="flex items-center gap-4 border-b border-slate-100 px-6 py-5">
               <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-accent-500 to-accent-600 text-white shadow-lg shadow-accent-500/25">
                 <ShieldCheck size={22} />
@@ -182,6 +195,32 @@ export default function Account() {
               ))}
             </div>
             <div className="border-t border-slate-100 px-6 py-4">
+              <div className="flex items-center gap-4">
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-teal-50 text-teal-600">
+                  <MapPin size={20} />
+                </span>
+                <div className="flex-1 leading-tight">
+                  <span className="block text-sm font-semibold text-slate-900">Shipping Address</span>
+                  {shipping ? (
+                    <span className="mt-0.5 block truncate text-xs text-slate-500">
+                      {shipping.fullName} · {shipping.address} · {shipping.city}, {shipping.state} - {shipping.pincode}
+                    </span>
+                  ) : (
+                    <span className="mt-0.5 block text-xs text-slate-500">
+                      No address saved yet — add one at checkout.
+                    </span>
+                  )}
+                </div>
+                <Link
+                  to="/checkout"
+                  aria-label="Edit shipping address"
+                  className="shrink-0 text-slate-300 transition-all hover:text-brand-600"
+                >
+                  <ChevronRight size={18} />
+                </Link>
+              </div>
+            </div>
+            <div className="mt-auto border-t border-slate-100 px-6 py-4">
               <Link
                 to="/products"
                 className="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-accent-500 to-accent-600 py-3 text-sm font-bold text-white shadow-lg shadow-accent-500/25 transition-all hover:shadow-accent-500/40 active:scale-[0.98]"

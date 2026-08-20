@@ -192,9 +192,6 @@ export default function About() {
             </span>
             <div>
               <h2 className="font-display text-xl font-bold text-white sm:text-2xl">Quality labels, honest prices</h2>
-              <p className="mt-1 text-sm text-brand-100/80">
-                Start shopping with Sri Ganesh Labels — COD available, no account required.
-              </p>
             </div>
           </div>
           <Link

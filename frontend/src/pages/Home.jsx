@@ -333,9 +333,6 @@ export default function Home() {
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-6 px-4 py-12 text-center lg:flex-row lg:text-left">
           <div>
             <h2 className="font-display text-2xl font-bold text-white sm:text-3xl">Ready to upgrade your packaging?</h2>
-            <p className="mt-2 text-secondary-100/80">
-              Browse premium labels, add to cart and check out in minutes — no account needed.
-            </p>
           </div>
           <div className="flex flex-wrap justify-center gap-3">
             <Link
