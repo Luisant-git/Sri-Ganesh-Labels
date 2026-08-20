@@ -12,41 +12,9 @@ import {
 import ProductCard from '../components/ProductCard'
 import SectionHeading from '../components/SectionHeading'
 import { categories, bestsellers } from '../data/products'
+import { getActiveBanners } from '../api/bannerApi'
 
 const heroCollage = ['/web/hero1.jpg', '/web/hero2.jpg', '/web/hero3.jpg', '/web/hero4.jpg', '/web/hero5.jpg']
-
-const heroSlides = [
-  {
-    image: heroCollage[0],
-    title: 'Premium Labels for Every Product',
-    subtitle:
-      'High-quality labels and stickers designed to make your products look professional and stand out.',
-  },
-  {
-    image: heroCollage[1],
-    title: 'Crisp, Scannable Barcode Labels',
-    subtitle:
-      'Durable barcode and thermal label rolls for retail, warehouse and inventory — printed sharp every time.',
-  },
-  {
-    image: heroCollage[2],
-    title: 'Custom Labels Printed to Your Design',
-    subtitle:
-      'Fully custom labels with your brand design, premium materials and sharp colour reproduction.',
-  },
-  {
-    image: heroCollage[3],
-    title: 'Order Online, Delivered in Days',
-    subtitle:
-      'Free shipping on orders above ₹999, COD available across India and secure online checkout.',
-  },
-  {
-    image: heroCollage[4],
-    title: 'Stickers That Make You Stand Out',
-    subtitle:
-      'Vibrant promotional stickers and specialty sheets with a smooth, durable top coating.',
-  },
-]
 
 const features = [
   { icon: Printer, title: 'Premium Materials', desc: 'Vinyl, thermal and waterproof substrates built to last.' },
@@ -78,27 +46,73 @@ const testimonials = [
 
 export default function Home() {
   const [current, setCurrent] = useState(0)
+  const [banners, setBanners] = useState(null)
+
+  const heroSlides = banners
+    ? banners.map((b) => ({
+        image: b.image,
+        mobileImage: b.mobileImage || null,
+        title: b.title || 'Sri Ganesh Labels',
+        subtitle: '',
+        link: b.link || '/products',
+      }))
+    : []
 
   useEffect(() => {
+    let cancelled = false
+    getActiveBanners()
+      .then((data) => {
+        if (!cancelled) setBanners(Array.isArray(data) && data.length > 0 ? data : [])
+      })
+      .catch(() => {
+        if (!cancelled) setBanners([])
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  useEffect(() => {
+    if (heroSlides.length === 0) return
     const timer = setInterval(() => {
       setCurrent((c) => (c + 1) % heroSlides.length)
     }, 6000)
     return () => clearInterval(timer)
-  }, [])
+  }, [heroSlides.length])
 
   return (
     <div>
       {/* HERO CAROUSEL */}
+      {heroSlides.length > 0 && (
       <section className="relative h-[55vh] min-h-[320px] overflow-hidden sm:h-[60vh] sm:min-h-[420px] md:h-[70vh] lg:h-[85vh] lg:min-h-[500px]">
         {heroSlides.map((slide, i) => (
-          <img
+          <div
             key={i}
-            src={slide.image}
-            alt={`Sri Ganesh Labels ${i + 1}`}
-            className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-1000 ${
+            className={`absolute inset-0 transition-opacity duration-1000 ${
               i === current ? 'opacity-100' : 'opacity-0'
             }`}
-          />
+          >
+            {slide.mobileImage ? (
+              <>
+                <img
+                  src={slide.mobileImage}
+                  alt={`Sri Ganesh Labels ${i + 1}`}
+                  className="absolute inset-0 h-full w-full object-cover md:hidden"
+                />
+                <img
+                  src={slide.image}
+                  alt={`Sri Ganesh Labels ${i + 1}`}
+                  className="absolute inset-0 hidden h-full w-full object-cover md:block"
+                />
+              </>
+            ) : (
+              <img
+                src={slide.image}
+                alt={`Sri Ganesh Labels ${i + 1}`}
+                className="absolute inset-0 h-full w-full object-cover"
+              />
+            )}
+          </div>
         ))}
         <div className="absolute inset-0 bg-gradient-to-r from-brand-950/80 via-brand-900/40 to-transparent" />
 
@@ -116,18 +130,17 @@ export default function Home() {
                   i === current ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
                 }`}
               >
-                <span className="inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.2em] text-accent-400">
-                  {slide.eyebrow}
-                </span>
                 <h1 className="mt-4 font-display text-3xl font-bold leading-tight tracking-tight text-white drop-shadow-lg sm:text-5xl lg:text-6xl">
                   {slide.title}
                 </h1>
+                {slide.subtitle && (
                 <p className="mt-4 max-w-lg text-sm leading-relaxed text-brand-50 drop-shadow sm:text-base">
                   {slide.subtitle}
                 </p>
+              )}
                 <div className="mt-8 flex flex-wrap gap-3">
                   <Link
-                    to="/products"
+                    to={slide.link || '/products'}
                     className="group inline-flex items-center gap-2 rounded-full bg-accent-500 px-7 py-3 text-sm font-semibold text-white shadow-xl shadow-accent-500/40 transition-all duration-200 hover:bg-accent-600 active:scale-95"
                   >
                     <ShoppingBag size={16} />
@@ -160,6 +173,7 @@ export default function Home() {
           ))}
         </div>
       </section>
+      )}
 
       {/* Categories */}
       <section className="mx-auto max-w-7xl px-4 py-16 lg:py-20">
