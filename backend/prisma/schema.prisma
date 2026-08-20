@@ -57,24 +57,11 @@ model User {
   createdAt DateTime @default(now())
   cart      Cart?
   orders    Order[]
-  otps      Otp[]
   wishlistItems WishlistItem[]
   couponUsages CouponUsage[]
   specificCoupons Coupon[] @relation("UserSpecificCoupons")
 }
  
-model Otp {
-  id        Int      @id @default(autoincrement())
-  userId    Int?
-  phone     String
-  otp       String
-  expiresAt DateTime
-  verified  Boolean  @default(false)
-  createdAt DateTime @default(now())
-  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  @@index([phone])
-}
-
 model Admin {
   id        Int      @id @default(autoincrement())
   email     String   @unique

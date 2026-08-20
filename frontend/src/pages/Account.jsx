@@ -128,7 +128,7 @@ export default function Account() {
 
       <div className="mx-auto mt-8 grid max-w-4xl items-stretch gap-6 px-4 lg:grid-cols-[300px_1fr]">
         {/* Left sidebar: profile */}
-        <aside className="flex h-full flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-xl shadow-slate-900/5">
+        <aside className="flex h-full min-w-0 flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-xl shadow-slate-900/5">
           <div className="relative flex flex-1 flex-col items-center justify-center border-b border-slate-100 bg-slate-50/70 px-6 py-10 text-center">
             <div className="pointer-events-none absolute -left-10 -top-12 h-36 w-36 rounded-full bg-brand-100/60 blur-3xl" />
             <div className="pointer-events-none absolute -bottom-10 -right-10 h-32 w-32 rounded-full bg-accent-100/60 blur-2xl" />
@@ -157,13 +157,13 @@ export default function Account() {
         </aside>
 
         {/* Right content */}
-        <div className="flex">
+        <div className="flex min-w-0">
           <div className="flex w-full flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
             <div className="flex items-center gap-4 border-b border-slate-100 px-6 py-5">
               <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-accent-500 to-accent-600 text-white shadow-lg shadow-accent-500/25">
                 <ShieldCheck size={22} />
               </span>
-              <div>
+              <div className="min-w-0">
                 <h3 className="font-display text-base font-bold text-slate-900">
                   Welcome back, {user.name || 'customer'}!
                 </h3>
@@ -183,9 +183,9 @@ export default function Account() {
                   <span className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${accent}`}>
                     <Icon size={20} />
                   </span>
-                  <span className="flex-1 leading-tight">
+                  <span className="flex-1 min-w-0 leading-tight">
                     <span className="block text-sm font-semibold text-slate-900">{title}</span>
-                    <span className="mt-0.5 block text-xs text-slate-500">{desc}</span>
+                    <span className="mt-0.5 block truncate text-xs text-slate-500">{desc}</span>
                   </span>
                   <ChevronRight
                     size={18}
@@ -199,8 +199,8 @@ export default function Account() {
                 <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-teal-50 text-teal-600">
                   <MapPin size={20} />
                 </span>
-                <div className="flex-1 leading-tight">
-                  <span className="block text-sm font-semibold text-slate-900">Shipping Address</span>
+<div className="flex-1 min-w-0 leading-tight">
+                <span className="block text-sm font-semibold text-slate-900">Shipping Address</span>
                   {shipping ? (
                     <span className="mt-0.5 block truncate text-xs text-slate-500">
                       {shipping.fullName} · {shipping.address} · {shipping.city}, {shipping.state} - {shipping.pincode}

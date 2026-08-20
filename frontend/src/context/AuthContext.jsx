@@ -1,22 +1,9 @@
 import { createContext, useContext, useEffect, useState } from 'react'
+import { userLogin, userRegister, userCheck, setToken, clearToken, decodeToken } from '../api/authApi'
 
 const AuthContext = createContext(null)
 
 const AUTH_KEY = 'sgl_auth'
-const USERS_KEY = 'sgl_users'
-
-function loadUsers() {
-  try {
-    const raw = localStorage.getItem(USERS_KEY)
-    return raw ? JSON.parse(raw) : []
-  } catch {
-    return []
-  }
-}
-
-function saveUsers(users) {
-  localStorage.setItem(USERS_KEY, JSON.stringify(users))
-}
 
 function loadUser() {
   try {
@@ -53,37 +40,47 @@ export function AuthProvider({ children }) {
     if (action) action()
   }
 
-  const register = ({ mobile, name, password }) => {
-    const users = loadUsers()
-    if (users.some((u) => u.mobile === mobile)) {
-      return { ok: false, error: 'Mobile number already registered. Please login.' }
+  const register = async ({ mobile, name, password }) => {
+    try {
+      const data = await userRegister(mobile, password, name)
+      setToken(data.access_token)
+      const payload = decodeToken(data.access_token)
+      setUser({ mobile: payload.phone || mobile, name: payload.name || (name || '').trim() || 'User' })
+      setLoginOpen(false)
+      runPending()
+      return { ok: true }
+    } catch (err) {
+      return { ok: false, error: err.message }
     }
-    const newUser = { mobile, name: (name || '').trim(), password }
-    saveUsers([...users, newUser])
-    setUser({ mobile, name: newUser.name })
-    setLoginOpen(false)
-    runPending()
-    return { ok: true }
   }
 
-  const login = ({ mobile, password }) => {
-    const users = loadUsers()
-    const found = users.find((u) => u.mobile === mobile)
-    if (!found) {
-      return { ok: false, error: 'No account found with this mobile number. Please register.' }
+  const login = async ({ mobile, password }) => {
+    try {
+      const data = await userLogin(mobile, password)
+      setToken(data.access_token)
+      const payload = decodeToken(data.access_token)
+      setUser({ mobile: payload.phone || mobile, name: payload.name || 'User' })
+      setLoginOpen(false)
+      runPending()
+      return { ok: true }
+    } catch (err) {
+      return { ok: false, error: err.message }
     }
-    if (found.password !== password) {
-      return { ok: false, error: 'Incorrect password. Please try again.' }
-    }
-    setUser({ mobile, name: found.name || '' })
-    setLoginOpen(false)
-    runPending()
-    return { ok: true }
   }
 
-  const logout = () => setUser(null)
+  const logout = () => {
+    clearToken()
+    setUser(null)
+  }
 
-  const isRegistered = (mobile) => loadUsers().some((u) => u.mobile === mobile)
+  const isRegistered = async (mobile) => {
+    try {
+      const data = await userCheck(mobile)
+      return data.exists
+    } catch {
+      return false
+    }
+  }
 
   const value = {
     user,

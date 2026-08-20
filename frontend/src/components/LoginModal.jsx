@@ -32,14 +32,15 @@ export default function LoginModal() {
     setErrors({})
   }
 
-  const checkMobile = (e) => {
+  const checkMobile = async (e) => {
     e.preventDefault()
     if (!/^\d{10}$/.test(mobile)) {
       setErrors({ mobile: 'Enter a valid 10-digit mobile number' })
       return
     }
     setErrors({})
-    if (isRegistered(mobile)) {
+    const registered = await isRegistered(mobile)
+    if (registered) {
       setStage('pass')
       toast('Welcome back! Enter your password to login.')
     } else {
@@ -48,7 +49,7 @@ export default function LoginModal() {
     }
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     const er = {}
     if (stage === 'signup' && name.trim() && name.trim().length < 3) er.name = 'Name must be at least 3 characters'
@@ -57,7 +58,7 @@ export default function LoginModal() {
     if (Object.keys(er).length > 0) return
 
     if (stage === 'pass') {
-      const res = login({ mobile, password })
+      const res = await login({ mobile, password })
       if (!res.ok) {
         toast(res.error, 'error')
         setErrors({ password: res.error })
@@ -65,7 +66,7 @@ export default function LoginModal() {
       }
       toast('Login successful!')
     } else {
-      const res = register({ mobile, name, password })
+      const res = await register({ mobile, name, password })
       if (!res.ok) {
         toast(res.error, 'error')
         return
