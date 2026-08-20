@@ -40,6 +40,20 @@ export class ProductController {
     return this.productService.search(query);
   }
 
+  @Get('storefront')
+  @ApiOperation({ summary: 'Get active products for the storefront with computed GST pricing' })
+  @ApiResponse({ status: 200, description: 'List of storefront products' })
+  getStorefrontProducts() {
+    return this.productService.getStorefrontProducts();
+  }
+
+  @Get('storefront/:id')
+  @ApiOperation({ summary: 'Get a single active product for the storefront with computed GST pricing' })
+  @ApiResponse({ status: 200, description: 'Storefront product details' })
+  getStorefrontProduct(@Param('id') id: string) {
+    return this.productService.getStorefrontProduct(+id);
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Get product by ID' })
   @ApiResponse({ status: 200, description: 'Product details' })

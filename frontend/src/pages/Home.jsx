@@ -11,7 +11,7 @@ import {
 } from 'lucide-react'
 import ProductCard from '../components/ProductCard'
 import SectionHeading from '../components/SectionHeading'
-import { bestsellers } from '../data/products'
+import { getStorefrontProducts } from '../api/productApi'
 import { getActiveBanners } from '../api/bannerApi'
 import { getCategories } from '../api/categoryApi'
 
@@ -49,6 +49,7 @@ export default function Home() {
   const [current, setCurrent] = useState(0)
   const [banners, setBanners] = useState(null)
   const [apiCategories, setApiCategories] = useState(null)
+  const [featuredProducts, setFeaturedProducts] = useState([])
 
   const heroSlides = banners
     ? banners.map((b) => ({
@@ -82,6 +83,13 @@ export default function Home() {
       })
       .catch(() => {
         if (!cancelled) setApiCategories([])
+      })
+    getStorefrontProducts()
+      .then((data) => {
+        if (!cancelled) setFeaturedProducts(Array.isArray(data) ? data.slice(0, 8) : [])
+      })
+      .catch(() => {
+        if (!cancelled) setFeaturedProducts([])
       })
     return () => {
       cancelled = true
@@ -231,6 +239,7 @@ export default function Home() {
       )}
 
       {/* Featured products */}
+      {featuredProducts.length > 0 && (
       <section className="bg-white py-16 lg:py-20">
         <div className="mx-auto max-w-7xl px-4">
           <div className="text-center">
@@ -248,12 +257,13 @@ export default function Home() {
             </Link>
           </div>
           <div className="mt-8 grid grid-cols-2 gap-4 sm:gap-5 lg:grid-cols-4">
-            {bestsellers.map((p) => (
+            {featuredProducts.map((p) => (
               <ProductCard key={p.id} product={p} centered />
             ))}
           </div>
         </div>
       </section>
+      )}
 
       {/* Offer banner */}
       <section className="mx-auto max-w-7xl px-4 py-16 lg:py-20">

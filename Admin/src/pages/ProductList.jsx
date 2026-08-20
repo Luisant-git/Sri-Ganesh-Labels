@@ -112,38 +112,6 @@ const ProductList = () => {
     }
   };
 
-  const handleNewArrivalsToggle = async (product) => {
-    try {
-      const updatedProduct = { ...product, newArrivals: !product.newArrivals };
-      await updateProduct(product.id, updatedProduct);
-      setProducts(
-        products.map((p) =>
-          p.id === product.id ? updatedProduct : p
-        )
-      );
-      toast.success(`Product ${updatedProduct.newArrivals ? 'added to' : 'removed from'} New Arrivals!`);
-    } catch (err) {
-      console.error("Error updating product:", err);
-      toast.error(`Failed to update product: ${err.message}`);
-    }
-  };
-
-  const handleDiscountToggle = async (product) => {
-    try {
-      const updatedProduct = { ...product, discount: !product.discount };
-      await updateProduct(product.id, updatedProduct);
-      setProducts(
-        products.map((p) =>
-          p.id === product.id ? updatedProduct : p
-        )
-      );
-      toast.success(`Product ${updatedProduct.discount ? 'marked as' : 'removed from'} Offer!`);
-    } catch (err) {
-      console.error("Error updating product:", err);
-      toast.error(`Failed to update product: ${err.message}`);
-    }
-  };
-
   const columns = [
     {
       key: "id",
@@ -173,32 +141,12 @@ const ProductList = () => {
     },
     {
       key: "basePrice",
-      label: "Base Price",
-      render: (value) => `₹${value}`,
-    },
-    {
-      key: "newArrivals",
-      label: "New Arrivals",
-      render: (value, row) => (
-        <input
-          type="checkbox"
-          checked={value || false}
-          onChange={() => handleNewArrivalsToggle(row)}
-          style={{ cursor: 'pointer', width: '18px', height: '18px' }}
-        />
-      ),
-    },
-    {
-      key: "discount",
-      label: "Offer",
-      render: (value, row) => (
-        <input
-          type="checkbox"
-          checked={value || false}
-          onChange={() => handleDiscountToggle(row)}
-          style={{ cursor: 'pointer', width: '18px', height: '18px' }}
-        />
-      ),
+      label: "Price (incl. GST)",
+      render: (value, row) => {
+        const gst = parseFloat(row.gstPercentage) || 0;
+        const total = (parseFloat(value) || 0) * (1 + gst / 100);
+        return `₹${total.toFixed(2)}`;
+      },
     },
     {
       key: "status",
@@ -267,6 +215,10 @@ const ProductList = () => {
         </p>
         <p>
           <strong>Base Price:</strong> ₹{product.basePrice}
+        </p>
+        <p>
+          <strong>Price (incl. GST):</strong> ₹
+          {(parseFloat(product.basePrice) * (1 + (parseFloat(product.gstPercentage) || 0) / 100)).toFixed(2)}
         </p>
         {product.hsnCode && (
           <p>

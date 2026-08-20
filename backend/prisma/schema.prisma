@@ -77,6 +77,7 @@ model Product {
   categoryId    Int
   basePrice     String
   mrp           String?
+  gstPercentage Float ?
   hsnCode       String?
   gallery       Json[]
   status        String   @default("active")

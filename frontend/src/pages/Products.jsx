@@ -1,14 +1,19 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams, Link } from 'react-router-dom'
-import { Search, SlidersHorizontal, PackageX, X, ChevronLeft, ChevronRight, Home as HomeIcon } from 'lucide-react'
+import { Search, SlidersHorizontal, PackageX, X, ChevronLeft, ChevronRight, Home as HomeIcon, Loader2 } from 'lucide-react'
 import ProductCard from '../components/ProductCard'
-import { products, sortOptions } from '../data/products'
-import { formatINR } from '../utils/format'
+import { getStorefrontProducts } from '../api/productApi'
 import { getCategories } from '../api/categoryApi'
+import { formatINR } from '../utils/format'
 
 const PER_PAGE = 8
 const PRICE_MIN = 0
 const PRICE_MAX = 800
+
+const sortOptions = [
+  { value: 'price-asc', label: 'Price: Low to High' },
+  { value: 'price-desc', label: 'Price: High to Low' },
+]
 
 export default function Products() {
   const [searchParams, setSearchParams] = useSearchParams()
@@ -19,6 +24,8 @@ export default function Products() {
   const [page, setPage] = useState(1)
   const [priceRange, setPriceRange] = useState([PRICE_MIN, PRICE_MAX])
   const [cats, setCats] = useState([])
+  const [products, setProducts] = useState([])
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     setLocalSearch(searchQuery)
@@ -26,12 +33,20 @@ export default function Products() {
 
   useEffect(() => {
     let cancelled = false
-    getCategories()
-      .then((data) => {
-        if (!cancelled) setCats(Array.isArray(data) ? data : [])
+    Promise.all([getStorefrontProducts(), getCategories()])
+      .then(([prodData, catData]) => {
+        if (cancelled) return
+        setProducts(Array.isArray(prodData) ? prodData : [])
+        setCats(Array.isArray(catData) ? catData : [])
       })
       .catch(() => {
-        if (!cancelled) setCats([])
+        if (!cancelled) {
+          setProducts([])
+          setCats([])
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false)
       })
     return () => {
       cancelled = true
@@ -102,10 +117,10 @@ export default function Products() {
         list.sort((a, b) => a.id - b.id)
     }
     return list
-  }, [activeCategory, localSearch, sort, priceRange])
+  }, [products, activeCategory, localSearch, sort, priceRange])
 
   const allCats = ['All', ...cats.map((c) => c.name)]
-  const catCount = (name) => cats.find((c) => c.name === name)?.subCategories?.length
+  const catCount = (name) => products.filter((p) => p.category === name).length
   const totalPages = Math.max(1, Math.ceil(filtered.length / PER_PAGE))
   const safePage = Math.min(page, totalPages)
   const pageItems = filtered.slice((safePage - 1) * PER_PAGE, safePage * PER_PAGE)
@@ -191,7 +206,7 @@ export default function Products() {
                         {activeCategory === cat && <span className="text-xs opacity-80">•</span>}
                       </span>
                       {cat !== 'All' && (
-                        <span className="text-xs text-slate-400">{catCount(cat)} sizes</span>
+                        <span className="text-xs text-slate-400">{catCount(cat)} products</span>
                       )}
                     </button>
                   ))}
@@ -285,7 +300,12 @@ export default function Products() {
               </p>
             </div>
 
-            {filtered.length === 0 ? (
+            {loading ? (
+              <div className="mt-6 flex flex-col items-center rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-16 text-center">
+                <Loader2 size={48} className="animate-spin text-brand-700" />
+                <h3 className="mt-4 font-display text-lg font-semibold text-slate-900">Loading products...</h3>
+              </div>
+            ) : filtered.length === 0 ? (
               <div className="mt-6 flex flex-col items-center rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-16 text-center">
                 <PackageX size={48} className="text-slate-300" />
                 <h3 className="mt-4 font-display text-lg font-semibold text-slate-900">No products found</h3>

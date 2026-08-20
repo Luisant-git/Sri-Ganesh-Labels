@@ -31,6 +31,11 @@ export class CreateProductDto {
   @IsString()
   mrp?: string;
 
+  @ApiPropertyOptional({ example: 18 })
+  @IsOptional()
+  @IsNumber()
+  gstPercentage?: number;
+
   @ApiPropertyOptional({ example: '6109' })
   @IsOptional()
   @IsString()

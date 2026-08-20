@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import {
   Minus,
@@ -12,13 +13,28 @@ import {
 import { useCart, FREE_SHIPPING_THRESHOLD } from '../context/CartContext'
 import ProductCard from '../components/ProductCard'
 import BackButton from '../components/BackButton'
-import { products } from '../data/products'
+import { getStorefrontProducts } from '../api/productApi'
 import { formatINR } from '../utils/format'
 import { toast } from '../components/Toast'
 
 export default function Cart() {
   const { items, updateQuantity, removeFromCart, totals } = useCart()
+  const [popular, setPopular] = useState([])
   const navigate = useNavigate()
+
+  useEffect(() => {
+    let cancelled = false
+    getStorefrontProducts()
+      .then((data) => {
+        if (!cancelled) setPopular(Array.isArray(data) ? data.slice(0, 4) : [])
+      })
+      .catch(() => {
+        if (!cancelled) setPopular([])
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   if (items.length === 0) {
     return (
@@ -48,7 +64,7 @@ export default function Cart() {
         <div className="mt-16 w-full">
           <h2 className="font-display text-lg font-bold text-slate-900">Popular right now</h2>
           <div className="mt-5 grid grid-cols-2 gap-4 sm:gap-5 lg:grid-cols-4">
-            {products.slice(0, 4).map((p) => (
+            {popular.map((p) => (
               <ProductCard key={p.id} product={p} />
             ))}
           </div>

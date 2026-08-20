@@ -10,8 +10,8 @@ const AddProduct = () => {
     name: '',
     description: '',
     categoryId: '',
-    mrp: '',
     basePrice: '',
+    gstPercentage: 18,
     hsnCode: '',
     gallery: [],
     status: 'active',
@@ -89,8 +89,8 @@ const AddProduct = () => {
         name: formData.name,
         description: formData.description,
         categoryId: parseInt(formData.categoryId),
-        mrp: formData.mrp,
         basePrice: formData.basePrice,
+        gstPercentage: parseFloat(formData.gstPercentage) || 0,
         hsnCode: formData.hsnCode || null,
         gallery: formData.gallery,
         status: formData.status
@@ -105,8 +105,8 @@ const AddProduct = () => {
         name: '',
         description: '',
         categoryId: '',
-        mrp: '',
         basePrice: '',
+        gstPercentage: 18,
         hsnCode: '',
         gallery: [],
         status: 'active',
@@ -182,30 +182,6 @@ const AddProduct = () => {
                 ))}
               </select>
             </div>
-
-            <div className="form-group">
-              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
-                <input
-                  type="checkbox"
-                  checked={formData.newArrivals}
-                  onChange={(e) => handleInputChange('newArrivals', e.target.checked)}
-                  style={{ width: '18px', height: '18px' }}
-                />
-                <span className="form-label" style={{ margin: 0 }}>Mark as New Arrival</span>
-              </label>
-            </div>
-
-            <div className="form-group">
-              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
-                <input
-                  type="checkbox"
-                  checked={formData.discount}
-                  onChange={(e) => handleInputChange('discount', e.target.checked)}
-                  style={{ width: '18px', height: '18px' }}
-                />
-                <span className="form-label" style={{ margin: 0 }}>Mark as Offer Product</span>
-              </label>
-            </div>
           </div>
 
           <div className="form-section">
@@ -214,18 +190,7 @@ const AddProduct = () => {
             </div>
 
             <div className="form-group">
-              <label className="form-label">MRP</label>
-              <input
-                type="text"
-                className="form-input"
-                value={formData.mrp}
-                onChange={(e) => handleInputChange('mrp', e.target.value)}
-                placeholder="599.00"
-              />
-            </div>
-
-            <div className="form-group">
-              <label className="form-label">Selling Price *</label>
+              <label className="form-label">Rate *</label>
               <input
                 type="text"
                 className="form-input"
@@ -235,6 +200,46 @@ const AddProduct = () => {
                 required
               />
             </div>
+
+            <div className="form-group">
+              <label className="form-label">GST Percentage (%)</label>
+              <input
+                type="number"
+                className="form-input"
+                value={formData.gstPercentage}
+                onChange={(e) => handleInputChange('gstPercentage', e.target.value)}
+                placeholder="18"
+                min="0"
+                max="100"
+                step="0.01"
+              />
+            </div>
+
+            {(() => {
+              const rate = parseFloat(formData.basePrice) || 0
+              const gstPct = parseFloat(formData.gstPercentage) || 0
+              const gstAmount = (rate * gstPct) / 100
+              const totalValue = rate + gstAmount
+              return (
+                <div className="form-group" style={{ background: '#f9fafb', borderRadius: '8px', padding: '12px' }}>
+                  <div style={{ fontSize: '12px', fontWeight: 600, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px' }}>
+                    Calculated Price
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', padding: '3px 0' }}>
+                    <span style={{ color: '#6b7280' }}>Rate (excl. GST)</span>
+                    <span style={{ fontWeight: 600 }}>₹{rate.toFixed(2)}</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', padding: '3px 0' }}>
+                    <span style={{ color: '#6b7280' }}>GST ({gstPct}%)</span>
+                    <span style={{ fontWeight: 600 }}>₹{gstAmount.toFixed(2)}</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px', padding: '6px 0 0', borderTop: '1px solid #e5e7eb', marginTop: '4px' }}>
+                    <span style={{ fontWeight: 600, color: '#111827' }}>Total (incl. GST)</span>
+                    <span style={{ fontWeight: 700, color: '#166534' }}>₹{totalValue.toFixed(2)}</span>
+                  </div>
+                </div>
+              )
+            })()}
 
             <div className="form-group">
               <label className="form-label">HSN Code</label>

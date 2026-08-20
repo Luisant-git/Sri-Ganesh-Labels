@@ -91,4 +91,57 @@ export class ProductService {
       };
     });
   }
+
+  async getStorefrontProducts() {
+    const products = await this.prisma.product.findMany({
+      where: { status: 'active' },
+      include: { category: true },
+      orderBy: { createdAt: 'desc' },
+    });
+    return products.map(product => this.serializeForStorefront(product));
+  }
+
+  async getStorefrontProduct(id: number) {
+    const product = await this.prisma.product.findUnique({
+      where: { id },
+      include: { category: true },
+    });
+    if (!product || product.status !== 'active') {
+      return null;
+    }
+    return this.serializeForStorefront(product);
+  }
+
+  private serializeForStorefront(product: any) {
+    const basePrice = parseFloat(product.basePrice || '0');
+    const gstPercentage = product.gstPercentage || 0;
+    const gstAmount = parseFloat(((basePrice * gstPercentage) / 100).toFixed(2));
+    const totalValue = parseFloat((basePrice + gstAmount).toFixed(2));
+    const gallery = (product.gallery || []) as any[];
+
+    return {
+      id: product.id,
+      name: product.name,
+      description: product.description || '',
+      categoryId: product.categoryId,
+      category: product.category?.name || null,
+      basePrice: product.basePrice,
+      mrp: product.mrp || null,
+      gstPercentage,
+      gstAmount,
+      totalValue,
+      price: totalValue,
+      originalPrice: product.mrp ? parseFloat(product.mrp) : null,
+      hsnCode: product.hsnCode || null,
+      gallery: gallery.map((g: any) => g.url),
+      image: gallery[0]?.url || null,
+      status: product.status,
+      newArrivals: product.newArrivals,
+      discount: product.discount,
+      options: [],
+      stock: 999,
+      createdAt: product.createdAt,
+      updatedAt: product.updatedAt,
+    };
+  }
 }

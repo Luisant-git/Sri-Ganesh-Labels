@@ -10,7 +10,7 @@ import {
 } from 'lucide-react'
 import { useCart } from '../context/CartContext'
 import { useAuth } from '../context/AuthContext'
-import { products } from '../data/products'
+import { getStorefrontProducts } from '../api/productApi'
 import { formatINR } from '../utils/format'
 
 const navLinks = [
@@ -44,9 +44,24 @@ export default function Header() {
   const [query, setQuery] = useState('')
   const [mobileOpen, setMobileOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
+  const [allProducts, setAllProducts] = useState([])
   const { user } = useAuth()
   const navigate = useNavigate()
   const inputRef = useRef(null)
+
+  useEffect(() => {
+    let cancelled = false
+    getStorefrontProducts()
+      .then((data) => {
+        if (!cancelled) setAllProducts(Array.isArray(data) ? data : [])
+      })
+      .catch(() => {
+        if (!cancelled) setAllProducts([])
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 10)
@@ -60,7 +75,7 @@ export default function Header() {
   }, [searchOpen])
 
   const results = query.trim()
-    ? products
+    ? allProducts
         .filter((p) =>
           [p.name, p.category, p.description].join(' ').toLowerCase().includes(query.trim().toLowerCase())
         )

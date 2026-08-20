@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import {
   ShoppingCart,
@@ -7,30 +7,72 @@ import {
   Plus,
   ArrowLeft,
   PackageCheck,
+  Loader2,
 } from 'lucide-react'
 import ProductCard from '../components/ProductCard'
-import { getProductById, getRelatedProducts } from '../data/products'
+import { getStorefrontProduct, getStorefrontProducts } from '../api/productApi'
 import { useCart } from '../context/CartContext'
 import { useAuth } from '../context/AuthContext'
-import { formatINR, formatINRDecimal } from '../utils/format'
+import { formatINR } from '../utils/format'
 import { toast } from '../components/Toast'
 
 export default function ProductDetail() {
   const { id } = useParams()
   const navigate = useNavigate()
-  const product = getProductById(id)
   const { addToCart } = useCart()
   const { isLoggedIn, openLogin } = useAuth()
 
+  const [product, setProduct] = useState(null)
+  const [related, setRelated] = useState([])
+  const [loading, setLoading] = useState(true)
   const [selectedImage, setSelectedImage] = useState(0)
-  const [selectedOption, setSelectedOption] = useState(product?.options?.[0] || '')
+  const [selectedOption, setSelectedOption] = useState('')
   const [qty, setQty] = useState(1)
   const [zoom, setZoom] = useState(false)
+
+  useEffect(() => {
+    let cancelled = false
+    setLoading(true)
+    Promise.all([getStorefrontProduct(id), getStorefrontProducts()])
+      .then(([prod, all]) => {
+        if (cancelled) return
+        setProduct(prod)
+        setSelectedImage(0)
+        setQty(1)
+        if (prod) {
+          setSelectedOption(prod.options?.[0] || '')
+          const same = (all || []).filter((p) => p.id !== prod.id && p.category === prod.category)
+          const others = (all || []).filter((p) => p.id !== prod.id && p.category !== prod.category)
+          setRelated([...same, ...others].slice(0, 4))
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setProduct(null)
+          setRelated([])
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [id])
 
   const gallery = useMemo(
     () => (product ? [product.image, ...(product.gallery || []).filter((g) => g !== product.image)].slice(0, 5) : []),
     [product]
   )
+
+  if (loading) {
+    return (
+      <div className="mx-auto flex max-w-7xl flex-col items-center px-4 py-24 text-center">
+        <Loader2 size={44} className="animate-spin text-brand-700" />
+        <h1 className="mt-4 font-display text-2xl font-bold text-slate-900">Loading product...</h1>
+      </div>
+    )
+  }
 
   if (!product) {
     return (
@@ -47,8 +89,6 @@ export default function ProductDetail() {
       </div>
     )
   }
-
-  const related = getRelatedProducts(product)
 
   const requireLogin = (action) => {
     if (isLoggedIn) action()
@@ -140,37 +180,9 @@ export default function ProductDetail() {
             <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-brand-600">{product.category}</p>
             <h1 className="mt-2 font-display text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">{product.name}</h1>
 
-            {product.rate != null && product.gstPercentage != null && product.totalValue != null ? (
-              <div className="mt-5 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Pricing</p>
-                <div className="mt-3 space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-slate-500">Rate</span>
-                    <span className="font-display text-sm font-bold text-slate-900">
-                      {formatINRDecimal(product.rate * qty)}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-slate-500">GST</span>
-                    <span className="font-display text-sm font-bold text-slate-900">
-                      {product.gstPercentage}%
-                    </span>
-                  </div>
-                </div>
-                <div className="mt-3 flex items-center justify-between border-t border-slate-200 pt-3">
-                  <span className="font-display text-sm font-bold text-slate-900">Total Price</span>
-                  <span className="font-display text-base font-bold text-brand-800">
-                    {formatINRDecimal(product.totalValue * qty)}
-                  </span>
-                </div>
-              </div>
-            ) : (
-              <div className="mt-5 flex items-end gap-3">
-                <span className="font-display text-3xl font-bold text-brand-800 sm:text-4xl">
-                  {formatINR(product.price)}
-                </span>
-              </div>
-            )}
+            <div className="mt-5 flex items-end gap-3">
+              <span className="font-display text-3xl font-bold text-brand-800 sm:text-4xl">{formatINR(product.price)}</span>
+            </div>
 
             <p className="mt-6 text-sm leading-relaxed text-slate-600">{product.description}</p>
 
@@ -217,6 +229,10 @@ export default function ProductDetail() {
                   <Plus size={16} />
                 </button>
               </div>
+              <div className="flex items-baseline gap-2">
+                <span className="text-sm text-slate-500">Total:</span>
+                <span className="font-display text-lg font-bold text-brand-800">{formatINR((product.price || 0) * qty)}</span>
+              </div>
             </div>
 
             {/* CTAs */}
@@ -239,21 +255,23 @@ export default function ProductDetail() {
       </div>
 
       {/* Related products */}
-      <div className="border-t border-slate-200 bg-white py-14">
-        <div className="mx-auto max-w-7xl px-4">
-          <div className="flex items-center justify-between">
-            <h2 className="font-display text-xl font-bold text-slate-900 sm:text-2xl">You may also like</h2>
-            <Link to="/products" className="hidden text-sm font-semibold text-brand-700 transition-colors hover:text-brand-800 sm:block">
-              View all →
-            </Link>
-          </div>
-          <div className="mt-6 grid grid-cols-2 gap-4 sm:gap-5 lg:grid-cols-4">
-            {related.map((p) => (
-              <ProductCard key={p.id} product={p} />
-            ))}
+      {related.length > 0 && (
+        <div className="border-t border-slate-200 bg-white py-14">
+          <div className="mx-auto max-w-7xl px-4">
+            <div className="flex items-center justify-between">
+              <h2 className="font-display text-xl font-bold text-slate-900 sm:text-2xl">You may also like</h2>
+              <Link to="/products" className="hidden text-sm font-semibold text-brand-700 transition-colors hover:text-brand-800 sm:block">
+                View all →
+              </Link>
+            </div>
+            <div className="mt-6 grid grid-cols-2 gap-4 sm:gap-5 lg:grid-cols-4">
+              {related.map((p) => (
+                <ProductCard key={p.id} product={p} />
+              ))}
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   )
 }
