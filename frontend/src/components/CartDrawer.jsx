@@ -4,7 +4,7 @@ import { useCart } from '../context/CartContext'
 import { formatINR } from '../utils/format'
 
 export default function CartDrawer() {
-  const { items, isCartOpen, closeCart, updateQuantity, removeFromCart, totals, freeShippingThreshold } = useCart()
+  const { items, isCartOpen, closeCart, updateQuantity, removeFromCart, totals, freeShippingThreshold, shippingFee } = useCart()
   const navigate = useNavigate()
 
   const goCheckout = () => {
@@ -151,12 +151,19 @@ export default function CartDrawer() {
                 <span className="text-sm text-slate-600">Subtotal</span>
                 <span className="font-display text-lg font-bold text-slate-900">{formatINR(totals.subtotal)}</span>
               </div>
-              {totals.shipping > 0 && (
-                <div className="mt-1 flex items-center justify-between text-xs text-slate-500">
+              <div className="mt-1 flex items-center justify-between text-xs text-slate-500">
                   <span>Shipping</span>
-                  <span>{formatINR(totals.shipping)}</span>
+                  <span className="font-semibold">
+                    {totals.shipping === 0 ? (
+                      <>
+                        <span className="mr-1 text-slate-400 line-through">{formatINR(shippingFee)}</span>
+                        <span className="text-teal-600">FREE</span>
+                      </>
+                    ) : (
+                      formatINR(totals.shipping)
+                    )}
+                  </span>
                 </div>
-              )}
               <button
                 onClick={goCheckout}
                 className="mt-4 w-full rounded-xl bg-brand-700 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-800"

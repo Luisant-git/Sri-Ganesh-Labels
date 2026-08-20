@@ -24,6 +24,7 @@ import { useAuth } from '../context/AuthContext'
 import { formatINR, generateOrderId } from '../utils/format'
 import BackButton from '../components/BackButton'
 import { toast } from '../components/Toast'
+import { getShippingRules, normalizeState } from '../api/shippingApi'
 
 const initialForm = {
   shippingFullName: '',
@@ -85,6 +86,19 @@ export default function Checkout() {
   const [placed, setPlaced] = useState(false)
   const [terms, setTerms] = useState(false)
   const [sameAsShipping, setSameAsShipping] = useState(true)
+  const [shippingRules, setShippingRules] = useState([])
+
+  useEffect(() => {
+    let cancelled = false
+    getShippingRules()
+      .then((data) => {
+        if (!cancelled) setShippingRules(data)
+      })
+      .catch(() => {})
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   useEffect(() => {
     if (user) {
@@ -164,6 +178,12 @@ export default function Checkout() {
     return Object.keys(er).length === 0
   }
 
+  const stateShippingRule = shippingRules.find((r) => r.state === normalizeState(form.shippingState))
+  const baseShippingFee = stateShippingRule ? Number(stateShippingRule.flatShippingRate) : totals.shipping
+  const isFreeShipping = totals.subtotal >= freeShippingThreshold
+  const shippingCharged = isFreeShipping ? 0 : baseShippingFee
+  const orderTotal = totals.subtotal + shippingCharged + totals.tax
+
   const handleSubmit = (e) => {
     e.preventDefault()
     if (placed) return
@@ -200,7 +220,7 @@ export default function Checkout() {
       payment: payment === 'cod' ? 'Cash on Delivery' : 'Online Payment',
       paymentDetail: payment === 'cod' ? 'Pay at your doorstep' : onlineMethod.toUpperCase(),
       items: items.map((i) => ({ name: i.name, option: i.option, qty: i.quantity, price: i.price, image: i.image })),
-      totals,
+      totals: { ...totals, shipping: shippingCharged, total: orderTotal },
       address: shippingAddress,
       billingAddress,
       gstin: form.gstin.trim() || null,
@@ -550,7 +570,14 @@ export default function Checkout() {
                 <div className="flex justify-between">
                   <dt className="text-slate-500">Shipping</dt>
                   <dd className="font-semibold text-slate-900">
-                    {totals.shipping === 0 ? <span className="text-teal-600">FREE</span> : formatINR(totals.shipping)}
+                    {isFreeShipping ? (
+                      <>
+                        <span className="mr-1.5 text-slate-400 line-through">{formatINR(baseShippingFee)}</span>
+                        <span className="text-teal-600">FREE</span>
+                      </>
+                    ) : (
+                      formatINR(shippingCharged)
+                    )}
                   </dd>
                 </div>
                 <div className="flex justify-between">
@@ -561,7 +588,7 @@ export default function Checkout() {
 
               <div className="mt-4 flex items-center justify-between border-t border-dashed border-slate-200 pt-4">
                 <span className="font-display text-base font-bold text-slate-900">Total</span>
-                <span className="font-display text-2xl font-bold text-brand-800">{formatINR(totals.total)}</span>
+                <span className="font-display text-2xl font-bold text-brand-800">{formatINR(orderTotal)}</span>
               </div>
 
               <div className="mt-4 rounded-xl bg-slate-50 px-4 py-3 text-xs text-slate-600">
@@ -596,7 +623,7 @@ export default function Checkout() {
                   </>
                 ) : (
                   <>
-                    <Lock size={17} /> Pay {formatINR(totals.total)} &amp; Place Order
+                    <Lock size={17} /> Pay {formatINR(orderTotal)} &amp; Place Order
                   </>
                 )}
               </button>

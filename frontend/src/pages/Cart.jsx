@@ -13,12 +13,11 @@ import {
 import { useCart } from '../context/CartContext'
 import ProductCard from '../components/ProductCard'
 import BackButton from '../components/BackButton'
-import { getStorefrontProducts } from '../api/productApi'
 import { formatINR } from '../utils/format'
 import { toast } from '../components/Toast'
 
 export default function Cart() {
-  const { items, updateQuantity, removeFromCart, totals, freeShippingThreshold } = useCart()
+  const { items, updateQuantity, removeFromCart, totals, freeShippingThreshold, shippingFee } = useCart()
   const [popular, setPopular] = useState([])
   const navigate = useNavigate()
 
@@ -201,7 +200,14 @@ export default function Cart() {
               <div className="flex justify-between">
                 <dt className="text-slate-500">Shipping</dt>
                 <dd className="font-semibold text-slate-900">
-                  {totals.shipping === 0 ? <span className="text-teal-600">FREE</span> : formatINR(totals.shipping)}
+                  {totals.shipping === 0 ? (
+                    <>
+                      <span className="mr-1.5 text-slate-400 line-through">{formatINR(shippingFee)}</span>
+                      <span className="text-teal-600">FREE</span>
+                    </>
+                  ) : (
+                    formatINR(totals.shipping)
+                  )}
                 </dd>
               </div>
               <div className="flex justify-between">
@@ -228,4 +234,4 @@ export default function Cart() {
       </div>
     </div>
   )
-}
+}import { getStorefrontProducts } from '../api/productApi'
