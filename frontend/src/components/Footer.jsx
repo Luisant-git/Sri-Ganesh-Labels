@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { Phone, Mail, MapPin, ChevronRight } from 'lucide-react'
+import brandLogo from '/images/Favicon-1.png'
 
 const FacebookIcon = (props) => (
   <svg viewBox="0 0 24 24" width={16} height={16} fill="currentColor" {...props}>
@@ -63,7 +64,7 @@ export default function Footer() {
           {/* Brand */}
           <div className="lg:col-span-2">
             <Link to="/" className="flex items-center gap-3">
-              <img src="/web/logo.png" alt="Sri Ganesh Labels" className="h-12 w-12 rounded-xl object-cover" />
+              <img src={brandLogo} alt="Sri Ganesh Labels" className="h-12 w-12 rounded-xl object-cover" />
               <span className="font-display text-lg font-bold text-white">
                 Sri Ganesh <span className="text-accent-400">Labels</span>
               </span>

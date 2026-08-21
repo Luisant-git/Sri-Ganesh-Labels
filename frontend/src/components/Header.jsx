@@ -8,6 +8,7 @@ import {
   X,
   ChevronRight,
 } from 'lucide-react'
+import brandLogo from '/images/Favicon-1.png'
 import { useCart } from '../context/CartContext'
 import { useAuth } from '../context/AuthContext'
 import { getStorefrontProducts } from '../api/productApi'
@@ -108,7 +109,7 @@ export default function Header() {
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-3">
           {/* Logo */}
           <Link to="/" className="flex shrink-0 items-center gap-3" aria-label="Sri Ganesh Labels - Home">
-            <img src="/images/LOgo.png" alt="Sri Ganesh Labels" className="h-17 w-23 object-cover" />
+            <img src={brandLogo} alt="Sri Ganesh Labels" className="h-13 w-17 object-cover" />
             <span className="leading-tight">
               <span className="block font-display text-base font-bold tracking-tight sm:text-lg">
                 <span className="text-brand-700">Sri</span>{' '}
@@ -251,7 +252,7 @@ export default function Header() {
           {/* Drawer header */}
           <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
             <Link to="/" className="flex items-center gap-2.5" onClick={() => setMobileOpen(false)}>
-              <img src="/images/LOgo.png" alt="Sri Ganesh Labels" className="h-9 w-10 object-cover" />
+              <img src={brandLogo} alt="Sri Ganesh Labels" className="h-9 w-10 object-cover" />
               <span className="leading-tight">
                 <span className="block font-display text-sm font-bold tracking-tight">
                   <span className="text-brand-700">Sri</span>{' '}
