@@ -52,6 +52,11 @@ export class CreateProductDto {
   @IsString()
   hsnCode?: string;
 
+  @ApiPropertyOptional({ example: 0.5, description: 'Product weight in kg' })
+  @IsOptional()
+  @IsNumber()
+  weight?: number;
+
   @ApiPropertyOptional({ type: [GalleryDto] })
   @IsOptional()
   @IsArray()

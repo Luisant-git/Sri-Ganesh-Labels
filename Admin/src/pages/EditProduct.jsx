@@ -16,6 +16,7 @@ const EditProduct = () => {
     basePrice: '',
     gstPercentage: 18,
     hsnCode: '',
+    weight: '',
     gallery: [],
     quantityPrices: [],
     status: 'active',
@@ -37,6 +38,7 @@ const EditProduct = () => {
         setFormData({
           ...productData,
           gstPercentage: productData.gstPercentage != null ? productData.gstPercentage : 18,
+          weight: productData.weight != null ? String(productData.weight) : '',
           gallery: productData.gallery || [],
           quantityPrices: (productData.quantityPrices || []).map(t => ({
             quantity: String(t.quantity ?? ''),
@@ -116,6 +118,7 @@ const EditProduct = () => {
         ...formData,
         gstPercentage: parseFloat(formData.gstPercentage) || 0,
         categoryId: parseInt(formData.categoryId),
+        weight: parseFloat(formData.weight) || 0,
         quantityPrices: tiers.value
       }
       
@@ -277,59 +280,74 @@ const EditProduct = () => {
                 placeholder="Enter HSN code (optional)"
               />
             </div>
-          </div>
-        </div>
 
-        <div className="form-section">
-          <div className="section-header">
-            <h3>Quantity Pricing</h3>
-          </div>
-
-          <QuantityPricingEditor
-            tiers={formData.quantityPrices}
-            onChange={(tiers) => handleInputChange('quantityPrices', tiers)}
-            gstPercentage={formData.gstPercentage}
-          />
-        </div>
-
-        <div className="form-section">
-          <div className="section-header">
-            <h3>Gallery Images</h3>
-          </div>
-
-          <div className="image-upload-section">
-            <div className="image-upload-area" onClick={() => document.getElementById('gallery-upload').click()}>
+            <div className="form-group">
+              <label className="form-label">Weight (kg)</label>
               <input
-                type="file"
-                id="gallery-upload"
-                multiple
-                accept="image/*"
-                onChange={handleGalleryUpload}
-                className="image-input"
+                type="number"
+                className="form-input"
+                min="0"
+                step="0.001"
+                value={formData.weight || ''}
+                onChange={(e) => handleInputChange('weight', e.target.value)}
+                placeholder="Enter weight in kg (used for shipping)"
               />
-              <label htmlFor="gallery-upload" className="upload-label">
-                <Upload size={48} />
-                <p>Click to upload gallery images</p>
-                <span>PNG, JPG up to 5MB (Multiple files)</span>
-              </label>
+            </div>
+          </div>
+        </div>
+
+        <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap', alignItems: 'stretch' }}>
+          <div className="form-section" style={{ width: '480px', maxWidth: '100%' }}>
+            <div className="section-header">
+              <h3>Quantity Pricing</h3>
             </div>
 
-            {formData.gallery.length > 0 && (
-              <div className="image-preview-grid">
-                {formData.gallery.map((image, index) => (
-                  <div key={index} className="image-preview">
-                    <img src={image.url} alt="Gallery" />
-                    <button
-                      type="button"
-                      className="remove-image"
-                      onClick={() => removeGalleryImage(index)}
-                    >
-                      <X size={16} />
-                    </button>
-                  </div>
-                ))}
+            <QuantityPricingEditor
+              tiers={formData.quantityPrices}
+              onChange={(tiers) => handleInputChange('quantityPrices', tiers)}
+              gstPercentage={formData.gstPercentage}
+            />
+          </div>
+
+          <div className="form-section" style={{ flex: 1, minWidth: '300px' }}>
+            <div className="section-header">
+              <h3>Gallery Images</h3>
+            </div>
+
+            <div className="image-upload-section">
+              <div className="image-upload-area" onClick={() => document.getElementById('gallery-upload').click()}>
+                <input
+                  type="file"
+                  id="gallery-upload"
+                  multiple
+                  accept="image/*"
+                  onChange={handleGalleryUpload}
+                  className="image-input"
+                />
+                <label htmlFor="gallery-upload" className="upload-label">
+                  <Upload size={48} />
+                  <p>Click to upload gallery images</p>
+                  <span>PNG, JPG up to 5MB (Multiple files)</span>
+                </label>
               </div>
-            )}
+
+              {formData.gallery.length > 0 && (
+                <div className="image-preview-grid">
+                  {formData.gallery.map((image, index) => (
+                    <div key={index} className="image-preview">
+                      <img src={image.url} alt="Gallery" />
+                      <button
+                        type="button"
+                        className="remove-image"
+                        onClick={() => removeGalleryImage(index)}
+                      >
+                        <X size={16} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
 

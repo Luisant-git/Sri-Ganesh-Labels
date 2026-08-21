@@ -14,6 +14,7 @@ const AddProduct = () => {
     basePrice: '',
     gstPercentage: 18,
     hsnCode: '',
+    weight: '',
     gallery: [],
     quantityPrices: [],
     status: 'active',
@@ -118,6 +119,7 @@ const AddProduct = () => {
         basePrice: formData.basePrice,
         gstPercentage: parseFloat(formData.gstPercentage) || 0,
         hsnCode: formData.hsnCode || null,
+        weight: parseFloat(formData.weight) || 0,
         gallery: formData.gallery,
         quantityPrices: tiers.value,
         status: formData.status
@@ -135,6 +137,7 @@ const AddProduct = () => {
         basePrice: '',
         gstPercentage: 18,
         hsnCode: '',
+        weight: '',
         gallery: [],
         quantityPrices: [],
         status: 'active',
@@ -279,26 +282,40 @@ const AddProduct = () => {
                 placeholder="Enter HSN code (optional)"
               />
             </div>
+
+            <div className="form-group">
+              <label className="form-label">Weight (kg)</label>
+              <input
+                type="number"
+                className="form-input"
+                min="0"
+                step="0.001"
+                value={formData.weight}
+                onChange={(e) => handleInputChange('weight', e.target.value)}
+                placeholder="Enter weight in kg (used for shipping)"
+              />
+            </div>
           </div>
 
         </div>
 
-        <div className="form-section">
-          <div className="section-header">
-            <h3>Quantity Pricing</h3>
+        <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap', alignItems: 'stretch' }}>
+          <div className="form-section" style={{ width: '480px', maxWidth: '100%' }}>
+            <div className="section-header">
+              <h3>Quantity Pricing</h3>
+            </div>
+
+            <QuantityPricingEditor
+              tiers={formData.quantityPrices}
+              onChange={(tiers) => handleInputChange('quantityPrices', tiers)}
+              gstPercentage={formData.gstPercentage}
+            />
           </div>
 
-          <QuantityPricingEditor
-            tiers={formData.quantityPrices}
-            onChange={(tiers) => handleInputChange('quantityPrices', tiers)}
-            gstPercentage={formData.gstPercentage}
-          />
-        </div>
-
-        <div className="form-section">
-          <div className="section-header">
-            <h3>Gallery Images</h3>
-          </div>
+          <div className="form-section" style={{ flex: 1, minWidth: '300px' }}>
+            <div className="section-header">
+              <h3>Gallery Images</h3>
+            </div>
 
           <div className="image-upload-section">
             <div className="image-upload-area" onClick={() => document.getElementById('gallery-upload').click()}>
@@ -333,6 +350,7 @@ const AddProduct = () => {
                 ))}
               </div>
             )}
+          </div>
           </div>
         </div>
 

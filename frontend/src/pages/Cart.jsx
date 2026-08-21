@@ -146,6 +146,11 @@ export default function Cart() {
                         {item.option && item.option !== 'default' && (
                           <p className="mt-0.5 text-xs text-slate-500">Option: {item.option}</p>
                         )}
+                        {Number(item.weight) > 0 && (
+                          <p className="mt-0.5 text-xs font-medium text-slate-400">
+                            {(item.weight * item.quantity).toFixed(2)} kg
+                          </p>
+                        )}
                       </div>
                       <p className="whitespace-nowrap font-display text-sm font-bold text-slate-900 sm:text-base">
                         {formatINR(lineTotal)}
@@ -204,14 +209,21 @@ export default function Cart() {
               </div>
               <div className="flex justify-between">
                 <dt className="text-slate-500">Shipping</dt>
-                <dd className="font-semibold text-slate-900">
-                  {isFreeShipping ? (
-                    <>
-                      <span className="mr-1.5 text-slate-400 line-through">{formatINR(shippingFee)}</span>
-                      <span className="text-teal-600">FREE</span>
-                    </>
-                  ) : (
-                    formatINR(totals.shipping)
+                <dd className="text-right">
+                  <span className="font-semibold text-slate-900">
+                    {isFreeShipping ? (
+                      <>
+                        <span className="mr-1.5 text-slate-400 line-through">{formatINR(shippingFee)}</span>
+                        <span className="text-teal-600">FREE</span>
+                      </>
+                    ) : (
+                      formatINR(totals.shipping)
+                    )}
+                  </span>
+                  {totals.totalWeight > 0 && (
+                    <span className="block text-[11px] font-normal italic text-slate-400">
+                      Est. weight {totals.totalWeight.toFixed(2)} kg
+                    </span>
                   )}
                 </dd>
               </div>

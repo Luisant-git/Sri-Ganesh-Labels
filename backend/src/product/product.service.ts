@@ -151,6 +151,7 @@ export class ProductService {
       price: totalValue,
       originalPrice: product.mrp ? parseFloat(product.mrp) : null,
       hsnCode: product.hsnCode || null,
+      weight: Number(product.weight) || 0,
       gallery: gallery.map((g: any) => g.url),
       image: gallery[0]?.url || null,
       quantityPrices,

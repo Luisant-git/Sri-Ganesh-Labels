@@ -203,7 +203,7 @@ export default function ProductDetail() {
             {tiers.length > 0 && (
               <div className="mt-6">
                 <p className="text-sm font-semibold text-slate-900">Quantity Price</p>
-                <div className="mt-2.5 grid gap-2 sm:grid-cols-2">
+                <div className="mt-2.5 flex max-w-md flex-wrap gap-2">
                   {[...tiers]
                     .sort((a, b) => a.quantity - b.quantity)
                     .map((t) => {
@@ -214,22 +214,25 @@ export default function ProductDetail() {
                           key={t.quantity}
                           type="button"
                           onClick={() => setQty(t.quantity)}
-                          className={`flex items-center justify-between rounded-xl border-2 px-4 py-2.5 text-sm transition-all duration-200 ${
+                          className={`flex w-[200px] flex-col gap-1 rounded-xl border px-4 py-3 text-left transition-all duration-200 ${
                             isActive
                               ? 'border-brand-600 bg-brand-50 shadow-md shadow-brand-600/10'
                               : 'border-slate-200 bg-white hover:border-brand-300'
                           }`}
                         >
-                          <span className="font-semibold text-slate-700">Buy {t.quantity}</span>
-                          <span className="text-right">
-                            <span className="block font-bold text-brand-800">{formatINR(t.totalValue ?? t.price)}</span>
-                            <span className="block text-[11px] font-medium text-slate-400">{formatINR(each)} each</span>
+                          <span className="flex items-center justify-between text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+                            Buy {t.quantity}
+                            {isActive && <span className="h-2 w-2 rounded-full bg-brand-600" />}
+                          </span>
+                          <span className="flex items-baseline justify-between gap-1">
+                            <span className="text-sm font-bold text-brand-800">{formatINR(t.totalValue ?? t.price)}</span>
+                            <span className="whitespace-nowrap text-[11px] font-medium text-slate-400">{formatINR(each)}/pc</span>
                           </span>
                         </button>
                       )
                     })}
                 </div>
-                <p className="mt-2 text-xs text-slate-400">Tap a quantity — the amount shown is the total price for that quantity.</p>
+               
               </div>
             )}
 

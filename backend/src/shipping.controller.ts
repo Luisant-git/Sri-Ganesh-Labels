@@ -39,11 +39,12 @@ export class ShippingController {
   }
 
   @Post('calculate')
-  async calculate(@Body() body: { state?: string; subtotal?: number; paymentMethod?: string }) {
+  async calculate(@Body() body: { state?: string; subtotal?: number; paymentMethod?: string; totalWeight?: number }) {
     const subtotal = Number(body?.subtotal || 0)
     const rawState = (body?.state || '').trim()
     const normalized = normalizeState(rawState)
     const isCod = (body?.paymentMethod || 'online') === 'cod'
+    const totalWeight = Math.max(0, Number(body?.totalWeight) || 0)
     const [settings, rules] = await Promise.all([
       this.prisma.appSettings.findFirst(),
       this.prisma.shippingRule.findMany(),
@@ -56,8 +57,28 @@ export class ShippingController {
       ? rules.find((r) => r.state === normalized || normalizeState(r.state) === normalized)
       : undefined
 
-    // Shipping rate comes only from Admin > Shipping Settings (per-state rules)
-    const baseFee = rule ? Number(rule.flatShippingRate) : 0
+    // Weight-based slabs take priority over the flat rate; flat rate is the fallback
+    let baseFee = rule ? Number(rule.flatShippingRate) : 0
+    let appliedWeightKg: number | null = null
+    let weightRateApplied = false
+
+    const weightRates = Array.isArray(rule?.weightRates)
+      ? (rule.weightRates as Array<{ weightKg?: unknown; rate?: unknown }>)
+          .map((w) => ({ weightKg: Number(w?.weightKg) || 0, rate: Number(w?.rate) || 0 }))
+          .filter((w) => w.weightKg > 0 && w.rate >= 0)
+          .sort((a, b) => a.weightKg - b.weightKg)
+      : []
+
+    if (weightRates.length > 0) {
+      // "Up to X kg" slabs: first slab whose limit covers the cart weight wins;
+      // heavier than every slab falls back to the state's flat rate
+      const matched = weightRates.find((w) => totalWeight <= w.weightKg)
+      if (matched) {
+        baseFee = matched.rate
+        appliedWeightKg = matched.weightKg
+        weightRateApplied = true
+      }
+    }
 
     // Free-shipping / COD-charge waivers configured in Admin > Settings
     let isFreeShipping = false
@@ -92,30 +113,35 @@ export class ShippingController {
       freeShippingCodThreshold: codThreshold,
       ruleApplied: !!rule,
       codAvailable: rule ? rule.codAvailable : true,
+      totalWeight,
+      appliedWeightKg,
+      weightRateApplied,
     }
   }
 
   @Post()
-  create(@Body() createShippingDto: { state: string; flatShippingRate: number; codAvailable?: boolean }) {
+  create(@Body() createShippingDto: { state: string; flatShippingRate: number; codAvailable?: boolean; weightRates?: Array<{ weightKg: number; rate: number }> }) {
     return this.prisma.shippingRule.create({
       data: {
         state: normalizeState(createShippingDto.state) as IndianState,
         flatShippingRate: createShippingDto.flatShippingRate,
-        codAvailable: createShippingDto.codAvailable ?? true
+        codAvailable: createShippingDto.codAvailable ?? true,
+        weightRates: (createShippingDto.weightRates ?? undefined) as never
       }
     })
   }
 
   @Put(':id')
-  update(@Param('id') id: string, @Body() updateShippingDto: { state: string; flatShippingRate: number; codAvailable?: boolean }) {
-    return this.prisma.shippingRule.update({
-      where: { id: +id },
-      data: {
-        state: normalizeState(updateShippingDto.state) as IndianState,
-        flatShippingRate: updateShippingDto.flatShippingRate,
-        codAvailable: updateShippingDto.codAvailable ?? true
-      }
-    })
+  update(@Param('id') id: string, @Body() updateShippingDto: { state: string; flatShippingRate: number; codAvailable?: boolean; weightRates?: Array<{ weightKg: number; rate: number }> }) {
+    const data: Record<string, unknown> = {
+      state: normalizeState(updateShippingDto.state) as IndianState,
+      flatShippingRate: updateShippingDto.flatShippingRate,
+      codAvailable: updateShippingDto.codAvailable ?? true
+    }
+    if (updateShippingDto.weightRates !== undefined) {
+      data.weightRates = (updateShippingDto.weightRates.length ? updateShippingDto.weightRates : null) as never
+    }
+    return this.prisma.shippingRule.update({ where: { id: +id }, data })
   }
 
   @Delete(':id')

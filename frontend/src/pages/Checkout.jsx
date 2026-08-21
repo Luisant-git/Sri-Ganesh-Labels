@@ -134,7 +134,7 @@ export default function Checkout() {
   useEffect(() => {
     let cancelled = false
     const timeout = setTimeout(() => {
-      calculateShipping({ state: form.shippingState, subtotal: totals.subtotal, paymentMethod: payment })
+      calculateShipping({ state: form.shippingState, subtotal: totals.subtotal, paymentMethod: payment, totalWeight: totals.totalWeight })
         .then((data) => {
           if (!cancelled) setCalc(data)
         })
@@ -144,7 +144,7 @@ export default function Checkout() {
       cancelled = true
       clearTimeout(timeout)
     }
-  }, [form.shippingState, totals.subtotal, payment])
+  }, [form.shippingState, totals.subtotal, totals.totalWeight, payment])
 
   useEffect(() => {
     if (user) {
@@ -771,6 +771,11 @@ export default function Checkout() {
                       {item.option && item.option !== 'default' && (
                         <span className="block text-[11px] text-slate-400">{item.option}</span>
                       )}
+                      {Number(item.weight) > 0 && (
+                        <span className="block text-[11px] font-medium text-slate-400">
+                          {(item.weight * item.quantity).toFixed(2)} kg
+                        </span>
+                      )}
                     </span>
                     <span className="text-xs font-bold text-slate-900">{formatINR(item.price * item.quantity)}</span>
                   </li>
@@ -784,16 +789,21 @@ export default function Checkout() {
                 </div>
                 <div className="flex justify-between">
                   <dt className="text-slate-500">Shipping</dt>
-                  <dd className="font-semibold text-slate-900">
+                  <dd className="text-right">
                     {isCourierDelivery ? (
-                      <span className="italic text-slate-500">As per courier partner charges</span>
+                      <span className="font-semibold italic text-slate-500">As per courier partner charges</span>
                     ) : isFreeShipping && baseShippingFee > 0 ? (
                       <>
                         <span className="mr-1.5 text-slate-400 line-through">{formatINR(baseShippingFee)}</span>
-                        <span className="text-teal-600">FREE</span>
+                        <span className="font-semibold text-teal-600">FREE</span>
                       </>
                     ) : (
-                      formatINR(shippingCharged)
+                      <span className="font-semibold text-slate-900">{formatINR(shippingCharged)}</span>
+                    )}
+                    {!isCourierDelivery && calc?.weightRateApplied && (
+                      <span className="block text-[11px] font-normal italic text-slate-400">
+                        Est. weight {Number(totals.totalWeight || 0).toFixed(2)} kg · up to {calc.appliedWeightKg} kg slab
+                      </span>
                     )}
                   </dd>
                 </div>

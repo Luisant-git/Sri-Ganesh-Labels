@@ -7,12 +7,12 @@ const styles = {
     borderRadius: '10px',
     overflow: 'hidden',
     marginBottom: '12px',
-    maxWidth: '520px'
+    maxWidth: '420px'
   },
   headerRow: {
     display: 'grid',
-    gridTemplateColumns: '80px 130px 140px 36px',
-    gap: '10px',
+    gridTemplateColumns: '1fr 1.5fr 1.6fr 32px',
+    gap: '8px',
     padding: '10px 14px',
     background: '#f9fafb',
     borderBottom: '1px solid #e5e7eb',
@@ -24,8 +24,8 @@ const styles = {
   },
   row: {
     display: 'grid',
-    gridTemplateColumns: '80px 130px 140px 36px',
-    gap: '10px',
+    gridTemplateColumns: '1fr 1.5fr 1.6fr 32px',
+    gap: '8px',
     padding: '10px 14px',
     alignItems: 'center',
     borderBottom: '1px solid #f3f4f6'
@@ -67,13 +67,14 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    width: '36px',
-    height: '36px',
+    width: '32px',
+    height: '32px',
     border: '1px solid #fecaca',
     background: '#fef2f2',
     color: '#dc2626',
     borderRadius: '8px',
     cursor: 'pointer',
+    flexShrink: 0,
     transition: 'all 0.2s'
   },
   addBtn: {
@@ -108,9 +109,8 @@ const QuantityPricingEditor = ({ tiers = [], onChange, gstPercentage = 0 }) => {
   return (
     <div>
       <p style={{ margin: '0 0 14px', fontSize: '13px', lineHeight: 1.5, color: '#6b7280' }}>
-        Enter the <strong>total price for that quantity</strong> — e.g. Qty 2 = ₹900 means the customer pays
-        ₹900 for 2 pieces (₹450 each). The green column shows what the customer pays including GST.
-        If empty, the main Rate applies to all quantities.
+        Enter the <strong>total price for that quantity</strong> — e.g. Qty 2 = ₹900 total.
+        If empty, the main Rate applies.
       </p>
 
       {tiers.length > 0 && (

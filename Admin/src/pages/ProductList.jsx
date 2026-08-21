@@ -226,8 +226,40 @@ const ProductList = () => {
           </p>
         )}
         <p>
+          <strong>Weight:</strong> {product.weight ? `${product.weight} kg` : "N/A"}
+        </p>
+        <p>
           <strong>Status:</strong> {product.status}
         </p>
+        {Array.isArray(product.quantityPrices) && product.quantityPrices.length > 0 && (
+          <div style={{ marginTop: '10px' }}>
+            <strong>Quantity Pricing (total for qty, excl. GST):</strong>
+            <table style={{ marginTop: '6px', borderCollapse: 'collapse', fontSize: '13px', minWidth: '280px' }}>
+              <thead>
+                <tr style={{ background: '#f9fafb' }}>
+                  <th style={{ border: '1px solid #e5e7eb', padding: '5px 10px', textAlign: 'left' }}>Quantity</th>
+                  <th style={{ border: '1px solid #e5e7eb', padding: '5px 10px', textAlign: 'left' }}>Total Price</th>
+                  <th style={{ border: '1px solid #e5e7eb', padding: '5px 10px', textAlign: 'left' }}>Incl. GST</th>
+                </tr>
+              </thead>
+              <tbody>
+                {[...product.quantityPrices]
+                  .sort((a, b) => a.quantity - b.quantity)
+                  .map((t, i) => {
+                    const rate = parseFloat(t.price) || 0
+                    const gst = rate * ((parseFloat(product.gstPercentage) || 0) / 100)
+                    return (
+                      <tr key={i}>
+                        <td style={{ border: '1px solid #e5e7eb', padding: '5px 10px' }}>{t.quantity}</td>
+                        <td style={{ border: '1px solid #e5e7eb', padding: '5px 10px' }}>₹{rate.toFixed(2)}</td>
+                        <td style={{ border: '1px solid #e5e7eb', padding: '5px 10px' }}>₹{(rate + gst).toFixed(2)}</td>
+                      </tr>
+                    )
+                  })}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   );

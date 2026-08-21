@@ -3,6 +3,7 @@ import { ArrowLeft } from 'lucide-react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import { getShippingRules, updateShippingRule } from '../api/shippingApi'
+import WeightRatesEditor, { buildWeightRates } from '../components/WeightRatesEditor'
 
 const EditShipping = () => {
   const navigate = useNavigate()
@@ -12,6 +13,7 @@ const EditShipping = () => {
     flatShippingRate: '',
     codAvailable: true
   })
+  const [weightRates, setWeightRates] = useState([])
 
   const indianStates = [
     'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh', 'Goa', 'Gujarat', 'Haryana', 'Himachal Pradesh', 'Jharkhand', 'Karnataka', 'Kerala', 'Madhya Pradesh', 'Maharashtra', 'Manipur', 'Meghalaya', 'Mizoram', 'Nagaland', 'Odisha', 'Punjab', 'Rajasthan', 'Sikkim', 'Tamil Nadu', 'Telangana', 'Tripura', 'Uttar Pradesh', 'Uttarakhand', 'West Bengal', 'Andaman and Nicobar Islands', 'Chandigarh', 'Dadra and Nagar Haveli and Daman and Diu', 'Delhi', 'Jammu and Kashmir', 'Ladakh', 'Lakshadweep', 'Puducherry'
@@ -38,6 +40,11 @@ const EditShipping = () => {
           flatShippingRate: rule.flatShippingRate,
           codAvailable: rule.codAvailable ?? true
         })
+        setWeightRates(
+          Array.isArray(rule.weightRates)
+            ? rule.weightRates.map(w => ({ weightKg: String(w.weightKg), rate: String(w.rate) }))
+            : []
+        )
       }
     } catch (error) {
       toast.error('Failed to fetch shipping rule')
@@ -53,17 +60,23 @@ const EditShipping = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    const cleanedWeightRates = buildWeightRates(weightRates)
+    if (weightRates.some(r => r.weightKg !== '' || r.rate !== '') && cleanedWeightRates.length === 0) {
+      toast.error('Enter a valid weight (kg) and rate for each weight row')
+      return
+    }
     try {
       // Convert display format (Tamil Nadu) back to database format (TAMIL_NADU)
       const stateEnum = formData.state
         .toUpperCase()
         .replace(/ /g, '_')
         .replace(/AND/g, 'AND')
-      
+
       await updateShippingRule(id, {
         state: stateEnum,
         flatShippingRate: parseFloat(formData.flatShippingRate),
-        codAvailable: formData.codAvailable
+        codAvailable: formData.codAvailable,
+        weightRates: cleanedWeightRates
       })
       toast.success('Shipping updated successfully!')
       navigate('/shipping-settings')
@@ -120,6 +133,11 @@ const EditShipping = () => {
                   required
                 />
               </div>
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">Weight-based Rates (optional)</label>
+              <WeightRatesEditor rows={weightRates} onChange={setWeightRates} />
             </div>
 
             <div className="form-group">

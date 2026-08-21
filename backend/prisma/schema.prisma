@@ -81,6 +81,7 @@ model Product {
   hsnCode       String?
   gallery       Json[]
   quantityPrices Json?
+  weight        Float    @default(0)
   status        String   @default("active")
   newArrivals   Boolean  @default(false)
   discount      Boolean  @default(false)
@@ -275,6 +276,7 @@ model ShippingRule {
   id               Int      @id @default(autoincrement())
   state            IndianState @unique
   flatShippingRate Float
+  weightRates      Json?
   codAvailable     Boolean  @default(true)
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt

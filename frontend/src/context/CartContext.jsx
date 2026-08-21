@@ -115,15 +115,29 @@ export function CartProvider({ children }) {
     }
   }, [])
 
-  // Shipping rate comes only from Admin > Shipping Settings (per-state rules)
+  // Shipping rate comes from Admin > Shipping Settings; weight slabs take priority over the flat rate
   const appliedShippingFee = useMemo(() => {
     const state = shippingState || lastShippingState()
     if (state) {
       const rule = shippingRules.find((r) => r.state === normalizeState(state))
-      if (rule && rule.flatShippingRate != null) return Number(rule.flatShippingRate)
+      if (rule) {
+        const weightRates = Array.isArray(rule.weightRates)
+          ? rule.weightRates
+              .map((w) => ({ weightKg: Number(w?.weightKg) || 0, rate: Number(w?.rate) || 0 }))
+              .filter((w) => w.weightKg > 0)
+              .sort((a, b) => a.weightKg - b.weightKg)
+          : []
+        if (weightRates.length > 0) {
+          const totalWeight = items.reduce((s, i) => s + (Number(i.weight) || 0) * i.quantity, 0)
+          const matched = weightRates.find((w) => totalWeight <= w.weightKg)
+          if (matched) return matched.rate
+          return Number(rule.flatShippingRate)
+        }
+        if (rule.flatShippingRate != null) return Number(rule.flatShippingRate)
+      }
     }
     return SHIPPING_FEE
-  }, [shippingRules, shippingState])
+  }, [shippingRules, shippingState, items])
 
   const addToCart = (product, quantity = 1, option) => {
     setItems((prev) => {
@@ -151,6 +165,7 @@ export function CartProvider({ children }) {
           originalPrice: product.originalPrice,
           option: option || 'default',
           quantity,
+          weight: Number(product.weight) || 0,
         },
       ]
     })
@@ -184,7 +199,8 @@ export function CartProvider({ children }) {
     const tax = 0
     const total = subtotal + shipping + tax
     const count = items.reduce((s, i) => s + i.quantity, 0)
-    return { subtotal, discount, shipping, tax, total, count }
+    const totalWeight = items.reduce((s, i) => s + (Number(i.weight) || 0) * i.quantity, 0)
+    return { subtotal, discount, shipping, tax, total, count, totalWeight }
   }, [items, freeShippingThreshold, appliedShippingFee])
 
   const getCartTotal = () => totals

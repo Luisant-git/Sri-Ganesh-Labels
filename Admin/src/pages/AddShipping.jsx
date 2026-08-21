@@ -3,6 +3,7 @@ import { ArrowLeft, Truck } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import { createShippingRule } from '../api/shippingApi'
+import WeightRatesEditor, { buildWeightRates } from '../components/WeightRatesEditor'
 
 const AddShipping = () => {
   const navigate = useNavigate()
@@ -11,6 +12,7 @@ const AddShipping = () => {
     flatShippingRate: '',
     codAvailable: true
   })
+  const [weightRates, setWeightRates] = useState([])
 
   const indianStates = [
     'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh', 'Goa', 'Gujarat', 'Haryana', 'Himachal Pradesh', 'Jharkhand', 'Karnataka', 'Kerala', 'Madhya Pradesh', 'Maharashtra', 'Manipur', 'Meghalaya', 'Mizoram', 'Nagaland', 'Odisha', 'Punjab', 'Rajasthan', 'Sikkim', 'Tamil Nadu', 'Telangana', 'Tripura', 'Uttar Pradesh', 'Uttarakhand', 'West Bengal', 'Andaman and Nicobar Islands', 'Chandigarh', 'Dadra and Nagar Haveli and Daman and Diu', 'Delhi', 'Jammu and Kashmir', 'Ladakh', 'Lakshadweep', 'Puducherry'
@@ -25,11 +27,17 @@ const AddShipping = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    const cleanedWeightRates = buildWeightRates(weightRates)
+    if (weightRates.some(r => r.weightKg !== '' || r.rate !== '') && cleanedWeightRates.length === 0) {
+      toast.error('Enter a valid weight (kg) and rate for each weight row')
+      return
+    }
     try {
       await createShippingRule({
         state: formData.state,
         flatShippingRate: parseFloat(formData.flatShippingRate),
-        codAvailable: formData.codAvailable
+        codAvailable: formData.codAvailable,
+        weightRates: cleanedWeightRates
       })
       toast.success('Shipping created successfully!')
       navigate('/shipping-settings')
@@ -86,6 +94,11 @@ const AddShipping = () => {
                   required
                 />
               </div>
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">Weight-based Rates (optional)</label>
+              <WeightRatesEditor rows={weightRates} onChange={setWeightRates} />
             </div>
 
             <div className="form-group">
