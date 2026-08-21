@@ -7,7 +7,6 @@ import { toast } from 'react-toastify';
 const Settings = () => {
   const [signatureUrl, setSignatureUrl] = useState('');
   const [codShippingCharge, setCodShippingCharge] = useState(0);
-  const [shippingFee, setShippingFee] = useState(50);
   const [freeShippingThreshold, setFreeShippingThreshold] = useState('');
   const [freeShippingCodThreshold, setFreeShippingCodThreshold] = useState('');
   const [freeShippingOnlineDeliveryFee, setFreeShippingOnlineDeliveryFee] = useState(false);
@@ -31,9 +30,6 @@ const Settings = () => {
       }
       if (data.codShippingCharge !== undefined) {
         setCodShippingCharge(data.codShippingCharge);
-      }
-      if (data.shippingFee !== undefined) {
-        setShippingFee(data.shippingFee);
       }
       if (data.freeShippingThreshold !== undefined) {
         setFreeShippingThreshold(data.freeShippingThreshold);
@@ -82,7 +78,6 @@ const Settings = () => {
         body: JSON.stringify({ 
           signatureUrl,
           codShippingCharge: parseFloat(codShippingCharge) || 0,
-          shippingFee: parseFloat(shippingFee) || 0,
           freeShippingThreshold: parseFloat(freeShippingThreshold) || 0,
           freeShippingCodThreshold: parseFloat(freeShippingCodThreshold) || 0,
           freeShippingOnlineDeliveryFee: Boolean(freeShippingOnlineDeliveryFee),
@@ -147,24 +142,6 @@ const Settings = () => {
               placeholder="Enter amount (e.g. 50)"
               style={{ padding: '8px 12px', borderRadius: '4px', border: '1px solid #ddd', width: '200px' }}
             />
-          </div>
-
-          <div className="cod-settings-field" style={{ marginBottom: '20px' }}>
-            <label htmlFor="shipping-fee" style={{ display: 'block', marginBottom: '8px', fontWeight: '500' }}>
-              Default Shipping Fee
-            </label>
-            <input
-              type="number"
-              id="shipping-fee"
-              className="form-control"
-              value={shippingFee}
-              onChange={(e) => setShippingFee(e.target.value)}
-              placeholder="Enter amount (e.g. 50)"
-              style={{ padding: '8px 12px', borderRadius: '4px', border: '1px solid #ddd', width: '200px' }}
-            />
-            <span style={{ display: 'block', fontSize: '12px', color: '#666', marginTop: '4px' }}>
-              Flat shipping fee applied when no state-specific rate exists.
-            </span>
           </div>
 
           <button 

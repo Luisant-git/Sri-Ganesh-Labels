@@ -24,7 +24,7 @@ import { useAuth } from '../context/AuthContext'
 import { formatINR, generateOrderId } from '../utils/format'
 import BackButton from '../components/BackButton'
 import { toast } from '../components/Toast'
-import { getShippingRules, calculateShipping } from '../api/shippingApi'
+import { getShippingRules, calculateShipping, normalizeState } from '../api/shippingApi'
 import { syncServerCart, clearServerCart, createOrder } from '../api/orderApi'
 
 const initialForm = {
@@ -60,7 +60,7 @@ const onlineMethods = [
 ]
 
 export default function Checkout() {
-  const { items, totals, clearCart, freeShippingThreshold } = useCart()
+  const { items, totals, clearCart, freeShippingThreshold, setShippingState } = useCart()
   const { user, isLoggedIn, openLogin, updateUserName } = useAuth()
   const navigate = useNavigate()
 
@@ -111,9 +111,13 @@ export default function Checkout() {
   }, [])
 
   useEffect(() => {
+    setShippingState(form.shippingState || '')
+  }, [form.shippingState, setShippingState])
+
+  useEffect(() => {
     let cancelled = false
     const timeout = setTimeout(() => {
-      calculateShipping({ state: form.shippingState, subtotal: totals.subtotal })
+      calculateShipping({ state: form.shippingState, subtotal: totals.subtotal, paymentMethod: payment })
         .then((data) => {
           if (!cancelled) setCalc(data)
         })
@@ -123,7 +127,7 @@ export default function Checkout() {
       cancelled = true
       clearTimeout(timeout)
     }
-  }, [form.shippingState, totals.subtotal])
+  }, [form.shippingState, totals.subtotal, payment])
 
   useEffect(() => {
     if (user) {
@@ -206,11 +210,22 @@ export default function Checkout() {
     return Object.keys(er).length === 0
   }
 
-  const stateShippingRule = shippingRules.find((r) => r.state === (form.shippingState || '').trim().toUpperCase().replace(/\s+/g, '_'))
-  const baseShippingFee = calc ? Number(calc.baseFee) : stateShippingRule ? Number(stateShippingRule.flatShippingRate) : totals.shipping
+  const normalizedShippingState = normalizeState(form.shippingState || '')
+  const stateShippingRule = shippingRules.find((r) => normalizeState(r.state) === normalizedShippingState)
+  const baseShippingFee = calc && calc.baseFee != null
+    ? Number(calc.baseFee)
+    : stateShippingRule
+      ? Number(stateShippingRule.flatShippingRate || 0)
+      : totals.shipping
   const isFreeShipping = calc ? Boolean(calc.isFreeShipping) : freeShippingThreshold > 0 && totals.subtotal >= freeShippingThreshold
   const shippingCharged = isFreeShipping ? 0 : baseShippingFee
-  const orderTotal = totals.subtotal + shippingCharged + totals.tax
+  const codCharge = payment === 'cod' && calc ? Number(calc.codFee || 0) : 0
+  const codAvailableForState = calc ? calc.codAvailable !== false : stateShippingRule ? stateShippingRule.codAvailable !== false : true
+  const orderTotal = totals.subtotal + shippingCharged + codCharge
+
+  useEffect(() => {
+    if (payment === 'cod' && !codAvailableForState) setPayment('online')
+  }, [payment, codAvailableForState])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -253,7 +268,7 @@ export default function Checkout() {
       subtotal: totals.subtotal.toFixed(2),
       deliveryFee: shippingCharged.toFixed(2),
       shippingFee: '0',
-      codFee: '0',
+      codFee: codCharge.toFixed(2),
       total: orderTotal.toFixed(2),
       paymentMethod: payment === 'cod' ? 'cod' : 'online',
       shippingAddress: {
@@ -287,7 +302,7 @@ export default function Checkout() {
           image: i.image,
           productId: i.productId,
         })),
-        totals: { ...totals, shipping: shippingCharged, shippingRate: baseShippingFee, total: orderTotal },
+        totals: { ...totals, shipping: shippingCharged, shippingRate: baseShippingFee, codCharge, total: orderTotal },
         address: shippingAddress,
         billingAddress,
         gstin: form.gstin.trim() || null,
@@ -651,10 +666,18 @@ export default function Checkout() {
                     )}
                   </dd>
                 </div>
-                <div className="flex justify-between">
-                  <dt className="text-slate-500">Tax</dt>
-                  <dd className="font-semibold text-slate-900">{formatINR(0)}</dd>
-                </div>
+                {payment === 'cod' && (
+                  <div className="flex justify-between">
+                    <dt className="text-slate-500">COD Charge</dt>
+                    <dd className="font-semibold text-slate-900">
+                      {codCharge > 0 ? (
+                        formatINR(codCharge)
+                      ) : (
+                        <span className="text-teal-600">FREE</span>
+                      )}
+                    </dd>
+                  </div>
+                )}
               </dl>
 
               <div className="mt-4 flex items-center justify-between border-t border-dashed border-slate-200 pt-4">

@@ -86,6 +86,13 @@ export class CreateOrderDto {
   @Type(() => ShippingAddressDto)
   shippingAddress: ShippingAddressDto;
 
+  @ApiProperty({ type: ShippingAddressDto, required: false })
+  @IsOptional()
+  @IsObject()
+  @ValidateNested()
+  @Type(() => ShippingAddressDto)
+  billingAddress?: ShippingAddressDto;
+
   @ApiProperty({ example: { fee: 50, name: 'Standard Delivery', duration: '3-5 days' } })
   @IsObject()
   deliveryOption: any;

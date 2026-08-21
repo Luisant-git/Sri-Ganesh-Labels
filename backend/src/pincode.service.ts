@@ -4,6 +4,33 @@ import { CreatePincodeDto } from './create-pincode.dto';
 import { UpdatePincodeDto } from './update-pincode.dto';
 import { IndianState } from '@prisma/client';
 
+function normalizeState(value: string): string {
+  const raw = (value || '').trim();
+  if (!raw) return '';
+
+  const compact = raw
+    .toUpperCase()
+    .replace(/&/g, ' AND ')
+    .replace(/[^A-Z0-9\s]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  const aliases: Record<string, string> = {
+    'ANDAMAN AND NICOBAR ISLANDS': 'ANDAMAN_NICOBAR',
+    'DADRA AND NAGAR HAVELI AND DAMAN AND DIU': 'DADRA_NAGAR_HAVELI',
+  };
+
+  if (aliases[compact]) return aliases[compact];
+
+  return compact
+    .replace(/\s+AND\s+/gi, '_')
+    .replace(/\s+/g, '_')
+    .replace(/_+/g, '_')
+    .replace(/^_+|_+$/g, '')
+    .replace(/_ISLANDS$/g, '')
+    .replace(/_CITY$/g, '');
+}
+
 @Injectable()
 export class PincodeService {
   constructor(private prisma: PrismaService) {}
@@ -12,7 +39,7 @@ export class PincodeService {
     return this.prisma.pincode.create({
       data: {
         ...createPincodeDto,
-        state: createPincodeDto.state.toUpperCase().replace(/ /g, '_').replace(/and/g, '').replace(/__/g, '_') as IndianState,
+        state: normalizeState(createPincodeDto.state) as IndianState,
       },
     });
   }
@@ -32,7 +59,7 @@ export class PincodeService {
   update(id: number, updatePincodeDto: UpdatePincodeDto) {
     const data: any = { ...updatePincodeDto };
     if (updatePincodeDto.state) {
-      data.state = updatePincodeDto.state.toUpperCase().replace(/ /g, '_').replace(/and/g, '').replace(/__/g, '_') as IndianState;
+      data.state = normalizeState(updatePincodeDto.state) as IndianState;
     }
     return this.prisma.pincode.update({
       where: { id },

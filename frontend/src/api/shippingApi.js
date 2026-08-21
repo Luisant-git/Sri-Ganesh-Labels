@@ -12,15 +12,32 @@ export const getShippingRules = async () => {
   return Array.isArray(data) ? data : [];
 };
 
-export const normalizeState = (state) =>
-  (state || '')
-    .trim()
+export const normalizeState = (state) => {
+  const raw = (state || '').trim();
+  if (!raw) return '';
+
+  const compact = raw
     .toUpperCase()
+    .replace(/&/g, ' AND ')
+    .replace(/[^A-Z0-9\s]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  const aliases = {
+    'ANDAMAN AND NICOBAR ISLANDS': 'ANDAMAN_NICOBAR',
+    'DADRA AND NAGAR HAVELI AND DAMAN AND DIU': 'DADRA_NAGAR_HAVELI',
+  };
+
+  if (aliases[compact]) return aliases[compact];
+
+  return compact
+    .replace(/\s+AND\s+/gi, '_')
     .replace(/\s+/g, '_')
-    .replace(/[^A-Z0-9_]/g, '')
-    .replace(/_AND_/g, '_')
-    .replace(/^AND_/, '')
-    .replace(/_AND$/, '');
+    .replace(/_+/g, '_')
+    .replace(/^_+|_+$/g, '')
+    .replace(/_ISLANDS$/g, '')
+    .replace(/_CITY$/g, '');
+};
 
 export const calculateShipping = async (payload) => {
   const response = await fetch(`${API_BASE_URL}/shipping/calculate`, {

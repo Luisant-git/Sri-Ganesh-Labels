@@ -3,14 +3,30 @@ import { PrismaService } from './prisma.service'
 import { IndianState } from '@prisma/client'
 
 function normalizeState(value: string): string {
-  return (value || '')
-    .trim()
+  const raw = (value || '').trim()
+  if (!raw) return ''
+
+  const compact = raw
     .toUpperCase()
+    .replace(/&/g, ' AND ')
+    .replace(/[^A-Z0-9\s]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+
+  const aliases: Record<string, string> = {
+    'ANDAMAN AND NICOBAR ISLANDS': 'ANDAMAN_NICOBAR',
+    'DADRA AND NAGAR HAVELI AND DAMAN AND DIU': 'DADRA_NAGAR_HAVELI',
+  }
+
+  if (aliases[compact]) return aliases[compact]
+
+  return compact
+    .replace(/\s+AND\s+/gi, '_')
     .replace(/\s+/g, '_')
-    .replace(/[^A-Z0-9_]/g, '')
-    .replace(/_AND_/g, '_')
-    .replace(/^AND_/, '')
-    .replace(/_AND$/, '')
+    .replace(/_+/g, '_')
+    .replace(/^_+|_+$/g, '')
+    .replace(/_ISLANDS$/g, '')
+    .replace(/_CITY$/g, '')
 }
 
 @Controller('shipping')
@@ -23,33 +39,57 @@ export class ShippingController {
   }
 
   @Post('calculate')
-  async calculate(@Body() body: { state?: string; subtotal?: number }) {
+  async calculate(@Body() body: { state?: string; subtotal?: number; paymentMethod?: string }) {
     const subtotal = Number(body?.subtotal || 0)
     const rawState = (body?.state || '').trim()
     const normalized = normalizeState(rawState)
+    const isCod = (body?.paymentMethod || 'online') === 'cod'
     const [settings, rules] = await Promise.all([
       this.prisma.appSettings.findFirst(),
       this.prisma.shippingRule.findMany(),
     ])
-    const freeShippingThreshold = Number(settings?.freeShippingThreshold || 0)
-    const defaultFee = Number(settings?.shippingFee || 0)
+    const onlineThreshold = Number(settings?.freeShippingThreshold || 0)
+    const codThreshold = Number(settings?.freeShippingCodThreshold || 0)
+    const codChargeSetting = Number(settings?.codShippingCharge || 0)
 
     const rule = normalized
       ? rules.find((r) => r.state === normalized || normalizeState(r.state) === normalized)
       : undefined
 
-    const baseFee = rule ? Number(rule.flatShippingRate) : defaultFee
-    const isFreeShipping = freeShippingThreshold > 0 && subtotal >= freeShippingThreshold
+    // Shipping rate comes only from Admin > Shipping Settings (per-state rules)
+    const baseFee = rule ? Number(rule.flatShippingRate) : 0
+
+    // Free-shipping / COD-charge waivers configured in Admin > Settings
+    let isFreeShipping = false
+    let codFee = 0
+    if (isCod) {
+      codFee = codChargeSetting
+      if (codThreshold > 0 && subtotal >= codThreshold) {
+        if (settings?.freeShippingCombinedDeliveryFee) isFreeShipping = true
+        if (settings?.freeShippingCombinedCodFee) codFee = 0
+      }
+    } else {
+      if (onlineThreshold > 0 && subtotal >= onlineThreshold) {
+        if (settings?.freeShippingOnlineDeliveryFee) isFreeShipping = true
+      } else if (codThreshold > 0 && subtotal >= codThreshold) {
+        if (settings?.freeShippingCombinedDeliveryFee) isFreeShipping = true
+      }
+    }
+
     const shippingFee = isFreeShipping ? 0 : baseFee
-    const remainingForFree = freeShippingThreshold > 0 ? Math.max(0, freeShippingThreshold - subtotal) : 0
+    const activeThreshold = isCod ? codThreshold : onlineThreshold > 0 ? onlineThreshold : codThreshold
+    const remainingForFree = activeThreshold > 0 ? Math.max(0, activeThreshold - subtotal) : 0
 
     return {
       state: rawState,
+      paymentMethod: isCod ? 'cod' : 'online',
       baseFee,
       shippingFee,
+      codFee,
       isFreeShipping,
       remainingForFree,
-      freeShippingThreshold,
+      freeShippingThreshold: onlineThreshold,
+      freeShippingCodThreshold: codThreshold,
       ruleApplied: !!rule,
       codAvailable: rule ? rule.codAvailable : true,
     }
@@ -59,7 +99,7 @@ export class ShippingController {
   create(@Body() createShippingDto: { state: string; flatShippingRate: number; codAvailable?: boolean }) {
     return this.prisma.shippingRule.create({
       data: {
-        state: createShippingDto.state.toUpperCase().replace(/ /g, '_').replace(/and/g, '').replace(/__/g, '_') as IndianState,
+        state: normalizeState(createShippingDto.state) as IndianState,
         flatShippingRate: createShippingDto.flatShippingRate,
         codAvailable: createShippingDto.codAvailable ?? true
       }
@@ -71,7 +111,7 @@ export class ShippingController {
     return this.prisma.shippingRule.update({
       where: { id: +id },
       data: {
-        state: updateShippingDto.state.toUpperCase().replace(/ /g, '_').replace(/and/g, '').replace(/__/g, '_') as IndianState,
+        state: normalizeState(updateShippingDto.state) as IndianState,
         flatShippingRate: updateShippingDto.flatShippingRate,
         codAvailable: updateShippingDto.codAvailable ?? true
       }

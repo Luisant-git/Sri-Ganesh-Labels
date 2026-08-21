@@ -3,13 +3,42 @@ import { PrismaService } from '../prisma.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { CouponService } from '../coupon/coupon.service';
 import { PaymentService } from './payment.service';
+import { EmailService } from '../email/email.service';
+
+function normalizeState(value: string): string {
+  const raw = (value || '').trim();
+  if (!raw) return '';
+
+  const compact = raw
+    .toUpperCase()
+    .replace(/&/g, ' AND ')
+    .replace(/[^A-Z0-9\s]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  const aliases: Record<string, string> = {
+    'ANDAMAN AND NICOBAR ISLANDS': 'ANDAMAN_NICOBAR',
+    'DADRA AND NAGAR HAVELI AND DAMAN AND DIU': 'DADRA_NAGAR_HAVELI',
+  };
+
+  if (aliases[compact]) return aliases[compact];
+
+  return compact
+    .replace(/\s+AND\s+/gi, '_')
+    .replace(/\s+/g, '_')
+    .replace(/_+/g, '_')
+    .replace(/^_+|_+$/g, '')
+    .replace(/_ISLANDS$/g, '')
+    .replace(/_CITY$/g, '');
+}
  
 @Injectable()
 export class OrderService {
   constructor(
     private prisma: PrismaService,
     private couponService: CouponService,
-    private paymentService: PaymentService
+    private paymentService: PaymentService,
+    private emailService: EmailService
   ) {}
  
   async createOrder(userId: number, createOrderDto: CreateOrderDto) {
@@ -66,7 +95,7 @@ export class OrderService {
 
       // Then check state-level COD availability from ShippingRule
       if (shippingAddress.state) {
-        const stateEnum = shippingAddress.state.toUpperCase().replace(/ /g, '_').replace(/and/g, '').replace(/__/g, '_');
+        const stateEnum = normalizeState(shippingAddress.state);
         const shippingRule = await this.prisma.shippingRule.findUnique({
           where: { state: stateEnum as any }
         });
@@ -155,6 +184,18 @@ export class OrderService {
       await this.deductStock((order as any).items);
     }
  
+    const finalOrder = await this.prisma.order.findUnique({
+      where: { id: order.id },
+      include: {
+        items: true,
+        user: { select: { id: true, email: true, name: true, phone: true } }
+      }
+    });
+
+    if (finalOrder) {
+      await this.emailService.sendOrderStatusEmail(finalOrder, 'Placed');
+    }
+
     // Return order with Razorpay order ID for online payments
     return {
       ...order,
@@ -441,7 +482,7 @@ async getOrderStats(startDate?: string, endDate?: string) {
   const order = await this.prisma.order.update({
     where: { id: orderId },
     data: updateData,
-    include: { items: true }
+    include: { items: true, user: { select: { id: true, email: true, name: true, phone: true } } }
   });
 
   // If payment successful, clear cart and send WhatsApp
@@ -460,6 +501,10 @@ async getOrderStats(startDate?: string, endDate?: string) {
     if (existingOrder?.status !== 'Placed') {
       await this.deductStock((order as any).items);
     }
+  }
+
+  if (status) {
+    await this.emailService.sendOrderStatusEmail(order, status);
   }
 
   return order;

@@ -214,10 +214,6 @@ export default function Cart() {
                   )}
                 </dd>
               </div>
-              <div className="flex justify-between">
-                <dt className="text-slate-500">Tax</dt>
-                <dd className="font-semibold text-slate-900">{formatINR(0)}</dd>
-              </div>
             </dl>
             <div className="mt-5 flex items-center justify-between border-t border-dashed border-slate-200 pt-5">
               <span className="font-display text-base font-bold text-slate-900">Grand Total</span>

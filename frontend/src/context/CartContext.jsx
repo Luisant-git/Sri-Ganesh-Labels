@@ -40,8 +40,8 @@ export function CartProvider({ children }) {
   const [items, setItems] = useState(loadCart)
   const [isCartOpen, setIsCartOpen] = useState(false)
   const [freeShippingThreshold, setFreeShippingThreshold] = useState(DEFAULT_FREE_SHIPPING_THRESHOLD)
-  const [shippingFee, setShippingFee] = useState(SHIPPING_FEE)
   const [shippingRules, setShippingRules] = useState([])
+  const [shippingState, setShippingState] = useState('')
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(items))
@@ -101,7 +101,6 @@ export function CartProvider({ children }) {
       .then((data) => {
         if (!cancelled) {
           if (data.freeShippingThreshold != null) setFreeShippingThreshold(Number(data.freeShippingThreshold))
-          if (data.shippingFee != null) setShippingFee(Number(data.shippingFee))
         }
       })
       .catch(() => {})
@@ -115,14 +114,15 @@ export function CartProvider({ children }) {
     }
   }, [])
 
+  // Shipping rate comes only from Admin > Shipping Settings (per-state rules)
   const appliedShippingFee = useMemo(() => {
-    const state = lastShippingState()
+    const state = shippingState || lastShippingState()
     if (state) {
       const rule = shippingRules.find((r) => r.state === normalizeState(state))
       if (rule && rule.flatShippingRate != null) return Number(rule.flatShippingRate)
     }
-    return shippingFee
-  }, [shippingRules, shippingFee])
+    return SHIPPING_FEE
+  }, [shippingRules, shippingState])
 
   const addToCart = (product, quantity = 1, option) => {
     setItems((prev) => {
@@ -194,6 +194,8 @@ export function CartProvider({ children }) {
     freeShippingThreshold,
     shippingFee: appliedShippingFee,
     shippingRules,
+    shippingState,
+    setShippingState,
     isCartOpen,
     openCart,
     closeCart,

@@ -164,6 +164,7 @@ model Order {
   paymentMethod   String
   razorpayPaymentId String?
   shippingAddress Json
+  billingAddress  Json?
   deliveryOption  Json
   invoiceUrl      String?
   packageSlipUrl  String?
