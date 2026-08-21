@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { Upload, X } from 'lucide-react'
 import { toast } from 'react-toastify'
 import { getProduct, updateProduct, getCategories, uploadImage } from '../api'
+import QuantityPricingEditor from '../components/QuantityPricingEditor'
 
 const EditProduct = () => {
   const { id } = useParams()
@@ -16,6 +17,7 @@ const EditProduct = () => {
     gstPercentage: 18,
     hsnCode: '',
     gallery: [],
+    quantityPrices: [],
     status: 'active',
     newArrivals: false,
     discount: false
@@ -36,6 +38,10 @@ const EditProduct = () => {
           ...productData,
           gstPercentage: productData.gstPercentage != null ? productData.gstPercentage : 18,
           gallery: productData.gallery || [],
+          quantityPrices: (productData.quantityPrices || []).map(t => ({
+            quantity: String(t.quantity ?? ''),
+            price: String(t.price ?? '')
+          })),
           newArrivals: productData.newArrivals || false,
           discount: productData.discount || false
         })
@@ -78,15 +84,39 @@ const EditProduct = () => {
     }))
   }
 
+  const buildQuantityPrices = () => {
+    const rows = formData.quantityPrices
+    const cleaned = []
+    for (const row of rows) {
+      const qty = parseInt(row.quantity, 10)
+      const price = parseFloat(row.price)
+      if (row.quantity === '' && row.price === '') continue
+      if (!qty || qty < 1) return { error: 'Quantity must be a whole number of at least 1' }
+      if (isNaN(price) || price < 0) return { error: `Enter a valid rate for quantity ${qty}` }
+      if (cleaned.some(t => t.quantity === qty)) return { error: `Duplicate quantity ${qty} in quantity pricing` }
+      cleaned.push({ quantity: qty, price: price.toFixed(2) })
+    }
+    cleaned.sort((a, b) => a.quantity - b.quantity)
+    return { value: cleaned }
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     setLoading(true)
     
     try {
+      const tiers = buildQuantityPrices()
+      if (tiers.error) {
+        toast.error(tiers.error)
+        setLoading(false)
+        return
+      }
+
       const productData = {
         ...formData,
         gstPercentage: parseFloat(formData.gstPercentage) || 0,
-        categoryId: parseInt(formData.categoryId)
+        categoryId: parseInt(formData.categoryId),
+        quantityPrices: tiers.value
       }
       
       await updateProduct(id, productData)
@@ -178,30 +208,6 @@ const EditProduct = () => {
                 <option value="inactive">Inactive</option>
               </select>
             </div>
-
-            <div className="form-group">
-              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
-                <input
-                  type="checkbox"
-                  checked={formData.newArrivals}
-                  onChange={(e) => handleInputChange('newArrivals', e.target.checked)}
-                  style={{ width: '18px', height: '18px' }}
-                />
-                <span className="form-label" style={{ margin: 0 }}>Mark as New Arrival</span>
-              </label>
-            </div>
-
-            <div className="form-group">
-              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
-                <input
-                  type="checkbox"
-                  checked={formData.discount}
-                  onChange={(e) => handleInputChange('discount', e.target.checked)}
-                  style={{ width: '18px', height: '18px' }}
-                />
-                <span className="form-label" style={{ margin: 0 }}>Mark as Offer Product</span>
-              </label>
-            </div>
           </div>
 
           <div className="form-section">
@@ -272,6 +278,18 @@ const EditProduct = () => {
               />
             </div>
           </div>
+        </div>
+
+        <div className="form-section">
+          <div className="section-header">
+            <h3>Quantity Pricing</h3>
+          </div>
+
+          <QuantityPricingEditor
+            tiers={formData.quantityPrices}
+            onChange={(tiers) => handleInputChange('quantityPrices', tiers)}
+            gstPercentage={formData.gstPercentage}
+          />
         </div>
 
         <div className="form-section">

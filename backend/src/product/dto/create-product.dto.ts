@@ -1,5 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsString, IsNumber, IsOptional, IsArray, IsBoolean } from 'class-validator';
+import { IsString, IsNumber, IsOptional, IsArray, IsBoolean, ValidateNested } from 'class-validator';
+import { Type } from 'class-transformer';
 
 class GalleryDto {
   @ApiProperty({ example: 'https://cdn/img/p1-1.jpg' })
@@ -7,6 +8,16 @@ class GalleryDto {
 }
 
 export { GalleryDto };
+
+export class QuantityPriceDto {
+  @ApiProperty({ example: 1 })
+  @IsNumber()
+  quantity: number;
+
+  @ApiProperty({ example: '499.00' })
+  @IsString()
+  price: string;
+}
 
 export class CreateProductDto {
   @ApiProperty({ example: 'Classic Cotton T-Shirt' })
@@ -45,6 +56,13 @@ export class CreateProductDto {
   @IsOptional()
   @IsArray()
   gallery?: GalleryDto[];
+
+  @ApiPropertyOptional({ type: [QuantityPriceDto], description: 'Quantity-based price tiers' })
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => QuantityPriceDto)
+  quantityPrices?: QuantityPriceDto[];
 
   @ApiPropertyOptional({ example: 'active' })
   @IsOptional()

@@ -80,6 +80,7 @@ model Product {
   gstPercentage Float ?
   hsnCode       String?
   gallery       Json[]
+  quantityPrices Json?
   status        String   @default("active")
   newArrivals   Boolean  @default(false)
   discount      Boolean  @default(false)

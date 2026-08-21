@@ -12,6 +12,7 @@ export class ProductService {
       data: {
         ...createProductDto,
         gallery: createProductDto.gallery as any,
+        quantityPrices: (createProductDto.quantityPrices ?? []) as any,
       },
     });
   }
@@ -54,6 +55,7 @@ export class ProductService {
       data: {
         ...data,
         gallery: data.gallery as any,
+        ...(data.quantityPrices !== undefined ? { quantityPrices: data.quantityPrices as any } : {}),
       },
     });
   }
@@ -119,6 +121,22 @@ export class ProductService {
     const totalValue = parseFloat((basePrice + gstAmount).toFixed(2));
     const gallery = (product.gallery || []) as any[];
 
+    const quantityPrices = ((product.quantityPrices as any[]) || [])
+      .map((t: any) => {
+        const qty = parseInt(t?.quantity, 10);
+        const rate = parseFloat(t?.price);
+        if (!qty || qty < 1 || isNaN(rate) || rate < 0) return null;
+        const tierGst = parseFloat(((rate * gstPercentage) / 100).toFixed(2));
+        return {
+          quantity: qty,
+          price: rate,
+          gstAmount: tierGst,
+          totalValue: parseFloat((rate + tierGst).toFixed(2)),
+        };
+      })
+      .filter(Boolean)
+      .sort((a: any, b: any) => a.quantity - b.quantity);
+
     return {
       id: product.id,
       name: product.name,
@@ -135,6 +153,7 @@ export class ProductService {
       hsnCode: product.hsnCode || null,
       gallery: gallery.map((g: any) => g.url),
       image: gallery[0]?.url || null,
+      quantityPrices,
       status: product.status,
       newArrivals: product.newArrivals,
       discount: product.discount,

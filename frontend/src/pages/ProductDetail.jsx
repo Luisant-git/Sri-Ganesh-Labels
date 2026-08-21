@@ -14,6 +14,7 @@ import { getStorefrontProduct, getStorefrontProducts } from '../api/productApi'
 import { useCart } from '../context/CartContext'
 import { useAuth } from '../context/AuthContext'
 import { formatINR } from '../utils/format'
+import { getTierUnitPrice } from '../utils/pricing'
 import { toast } from '../components/Toast'
 
 export default function ProductDetail() {
@@ -64,6 +65,13 @@ export default function ProductDetail() {
     () => (product ? [product.image, ...(product.gallery || []).filter((g) => g !== product.image)].slice(0, 5) : []),
     [product]
   )
+
+  const tiers = product?.quantityPrices || []
+  const unitPrice = product ? getTierUnitPrice(tiers, product.price, qty) ?? product.price : 0
+  const activeTier = [...tiers]
+    .sort((a, b) => a.quantity - b.quantity)
+    .filter((t) => qty >= t.quantity)
+    .pop()
 
   if (loading) {
     return (
@@ -181,10 +189,49 @@ export default function ProductDetail() {
             <h1 className="mt-2 font-display text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">{product.name}</h1>
 
             <div className="mt-5 flex items-end gap-3">
-              <span className="font-display text-3xl font-bold text-brand-800 sm:text-4xl">{formatINR(product.price)}</span>
+              <span className="font-display text-3xl font-bold text-brand-800 sm:text-4xl">{formatINR(unitPrice)}</span>
+              {activeTier && (
+                <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 ring-1 ring-emerald-200">
+                  {formatINR(activeTier.totalValue)} total for {activeTier.quantity} pcs
+                </span>
+              )}
             </div>
 
             <p className="mt-6 text-sm leading-relaxed text-slate-600">{product.description}</p>
+
+            {/* Quantity pricing tiers */}
+            {tiers.length > 0 && (
+              <div className="mt-6">
+                <p className="text-sm font-semibold text-slate-900">Quantity Price</p>
+                <div className="mt-2.5 grid gap-2 sm:grid-cols-2">
+                  {[...tiers]
+                    .sort((a, b) => a.quantity - b.quantity)
+                    .map((t) => {
+                      const isActive = activeTier && activeTier.quantity === t.quantity
+                      const each = Math.round(((t.totalValue ?? t.price) / t.quantity) * 100) / 100
+                      return (
+                        <button
+                          key={t.quantity}
+                          type="button"
+                          onClick={() => setQty(t.quantity)}
+                          className={`flex items-center justify-between rounded-xl border-2 px-4 py-2.5 text-sm transition-all duration-200 ${
+                            isActive
+                              ? 'border-brand-600 bg-brand-50 shadow-md shadow-brand-600/10'
+                              : 'border-slate-200 bg-white hover:border-brand-300'
+                          }`}
+                        >
+                          <span className="font-semibold text-slate-700">Buy {t.quantity}</span>
+                          <span className="text-right">
+                            <span className="block font-bold text-brand-800">{formatINR(t.totalValue ?? t.price)}</span>
+                            <span className="block text-[11px] font-medium text-slate-400">{formatINR(each)} each</span>
+                          </span>
+                        </button>
+                      )
+                    })}
+                </div>
+                <p className="mt-2 text-xs text-slate-400">Tap a quantity — the amount shown is the total price for that quantity.</p>
+              </div>
+            )}
 
             {/* Options */}
             {product.options?.length > 0 && (
@@ -231,7 +278,7 @@ export default function ProductDetail() {
               </div>
               <div className="flex items-baseline gap-2">
                 <span className="text-sm text-slate-500">Total:</span>
-                <span className="font-display text-lg font-bold text-brand-800">{formatINR((product.price || 0) * qty)}</span>
+                <span className="font-display text-lg font-bold text-brand-800">{formatINR(unitPrice * qty)}</span>
               </div>
             </div>
 

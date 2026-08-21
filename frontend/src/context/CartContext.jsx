@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { getSettings } from '../api/settingsApi'
 import { getShippingRules, normalizeState } from '../api/shippingApi'
+import { getTierUnitPrice } from '../utils/pricing'
 
 const CartContext = createContext(null)
 
@@ -127,21 +128,26 @@ export function CartProvider({ children }) {
   const addToCart = (product, quantity = 1, option) => {
     setItems((prev) => {
       const key = itemKey(product.id, option)
+      const basePrice = product.totalValue ?? product.price
       const existing = prev.find((i) => itemKey(i.productId, i.option) === key)
       if (existing) {
-        return prev.map((i) =>
-          itemKey(i.productId, i.option) === key
-            ? { ...i, quantity: Math.min(i.quantity + quantity, product.stock || 99) }
-            : i
-        )
+        return prev.map((i) => {
+          if (itemKey(i.productId, i.option) !== key) return i
+          const newQty = Math.min(i.quantity + quantity, product.stock || 99)
+          const unit = getTierUnitPrice(i.quantityPrices, i.basePrice ?? basePrice, newQty)
+          return { ...i, quantity: newQty, price: unit ?? i.basePrice ?? i.price }
+        })
       }
+      const unit = getTierUnitPrice(product.quantityPrices, basePrice, quantity) ?? basePrice
       return [
         ...prev,
         {
           productId: product.id,
           name: product.name,
           image: product.image,
-          price: product.totalValue ?? product.price,
+          price: unit,
+          basePrice,
+          quantityPrices: product.quantityPrices || null,
           originalPrice: product.originalPrice,
           option: option || 'default',
           quantity,
@@ -158,9 +164,11 @@ export function CartProvider({ children }) {
   const updateQuantity = (productId, option, quantity) => {
     if (quantity < 1) return
     setItems((prev) =>
-      prev.map((i) =>
-        itemKey(i.productId, i.option) === itemKey(productId, option) ? { ...i, quantity } : i
-      )
+      prev.map((i) => {
+        if (itemKey(i.productId, i.option) !== itemKey(productId, option)) return i
+        const unit = getTierUnitPrice(i.quantityPrices, i.basePrice ?? i.price, quantity)
+        return { ...i, quantity, price: unit ?? i.price }
+      })
     )
   }
 

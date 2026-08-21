@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Upload, X } from 'lucide-react'
 import { toast } from 'react-toastify'
 import { createProduct, getCategories, uploadImage } from '../api'
+import QuantityPricingEditor from '../components/QuantityPricingEditor'
 
 const AddProduct = () => {
   const navigate = useNavigate();
@@ -14,6 +15,7 @@ const AddProduct = () => {
     gstPercentage: 18,
     hsnCode: '',
     gallery: [],
+    quantityPrices: [],
     status: 'active',
     newArrivals: false,
     discount: false
@@ -67,6 +69,23 @@ const AddProduct = () => {
     }))
   }
 
+  const buildQuantityPrices = () => {
+    const rows = formData.quantityPrices
+    const cleaned = []
+    for (const row of rows) {
+      const qty = parseInt(row.quantity, 10)
+      const price = parseFloat(row.price)
+      const empty = (!row.quantity && !row.price) || row.quantity === '' || row.price === ''
+      if (empty) continue
+      if (!qty || qty < 1) return { error: 'Quantity must be a whole number of at least 1' }
+      if (isNaN(price) || price < 0) return { error: `Enter a valid rate for quantity ${qty}` }
+      if (cleaned.some(t => t.quantity === qty)) return { error: `Duplicate quantity ${qty} in quantity pricing` }
+      cleaned.push({ quantity: qty, price: price.toFixed(2) })
+    }
+    cleaned.sort((a, b) => a.quantity - b.quantity)
+    return { value: cleaned }
+  }
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -85,6 +104,13 @@ const AddProduct = () => {
     setError('');
     
     try {
+      const tiers = buildQuantityPrices()
+      if (tiers.error) {
+        toast.error(tiers.error)
+        setLoading(false)
+        return
+      }
+
       const productData = {
         name: formData.name,
         description: formData.description,
@@ -93,13 +119,14 @@ const AddProduct = () => {
         gstPercentage: parseFloat(formData.gstPercentage) || 0,
         hsnCode: formData.hsnCode || null,
         gallery: formData.gallery,
+        quantityPrices: tiers.value,
         status: formData.status
       };
-      
+
       await createProduct(productData);
       toast.success('Product created successfully!');
       navigate('/product-list');
-      
+
       // Reset form
       setFormData({
         name: '',
@@ -109,6 +136,7 @@ const AddProduct = () => {
         gstPercentage: 18,
         hsnCode: '',
         gallery: [],
+        quantityPrices: [],
         status: 'active',
         newArrivals: false,
         discount: false
@@ -253,6 +281,18 @@ const AddProduct = () => {
             </div>
           </div>
 
+        </div>
+
+        <div className="form-section">
+          <div className="section-header">
+            <h3>Quantity Pricing</h3>
+          </div>
+
+          <QuantityPricingEditor
+            tiers={formData.quantityPrices}
+            onChange={(tiers) => handleInputChange('quantityPrices', tiers)}
+            gstPercentage={formData.gstPercentage}
+          />
         </div>
 
         <div className="form-section">
