@@ -48,6 +48,7 @@ export default function OrderSuccess() {
 
   const steps = ['Order Confirmed', 'Processing', 'Packed', 'Shipped', 'Out for Delivery', 'Delivered']
   const currentStep = 0
+  const isCourierDelivery = order.address?.deliveryMethod === 'Courier Partner'
 
   return (
     <div className="bg-slate-50">
@@ -147,10 +148,14 @@ export default function OrderSuccess() {
                 <span>Subtotal</span>
                 <span className="font-semibold text-slate-900">{formatINR(order.totals.subtotal)}</span>
               </div>
-              {(order.totals.shipping > 0 || order.totals.shippingRate > 0) && (
+              {(isCourierDelivery || order.totals.shipping > 0 || order.totals.shippingRate > 0) && (
                 <div className="flex items-center justify-between text-sm text-slate-600">
                   <span>Shipping</span>
-                  {order.totals.shipping === 0 ? (
+                  {isCourierDelivery ? (
+                    <span className="font-semibold italic text-slate-500">
+                      As per {order.address?.courierPartner || 'courier partner'} charges
+                    </span>
+                  ) : order.totals.shipping === 0 ? (
                     <span className="font-semibold">
                       <span className="mr-1 text-slate-400 line-through">{formatINR(order.totals.shippingRate)}</span>
                       <span className="text-teal-600">FREE</span>

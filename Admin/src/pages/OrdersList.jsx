@@ -485,6 +485,14 @@ const [orderStats, setOrderStats] = useState({
     pdf.setFont(undefined, 'normal');
     pdf.text(order.paymentMethod || 'Online', 48, 100);
 
+    const isCourierOrder = address?.deliveryMethod === 'Courier Partner';
+    if (isCourierOrder) {
+      pdf.setFont(undefined, 'bold');
+      pdf.text('Courier Partner:', 15, 105);
+      pdf.setFont(undefined, 'normal');
+      pdf.text(address?.courierPartner || 'As selected by customer', 45, 105);
+    }
+
     const tableTop = 128;
     pdf.setFillColor(220, 220, 220);
     pdf.rect(15, tableTop, 180, 8, 'F');
@@ -608,9 +616,17 @@ const [orderStats, setOrderStats] = useState({
       yPos += 6;
     }
 
-    pdf.text('Delivery Fee:', 30, yPos);
-    pdf.text(`Rs.${deliveryFee.toFixed(2)}`, 190, yPos, { align: 'right' });
-    yPos += 6;
+    if (isCourierOrder) {
+      pdf.text('Delivery Fee:', 30, yPos);
+      pdf.setFont(undefined, 'italic');
+      pdf.text('(As per courier partner charges)', 190, yPos, { align: 'right' });
+      pdf.setFont(undefined, 'normal');
+      yPos += 6;
+    } else {
+      pdf.text('Delivery Fee:', 30, yPos);
+      pdf.text(`Rs.${deliveryFee.toFixed(2)}`, 190, yPos, { align: 'right' });
+      yPos += 6;
+    }
 
     if (shippingFee > 0) {
       pdf.text('Shipping Fee:', 30, yPos);
@@ -847,6 +863,13 @@ const handleUpdateStatus = async () => {
       pdf.text('Landmark:', 20, shipY);
       pdf.setFont(undefined, 'normal');
       pdf.text(capitalizeEachWord(address.landmark || 'N/A'), 50, shipY);
+      if (address.deliveryMethod === 'Courier Partner') {
+        shipY += 7;
+        pdf.setFont(undefined, 'bold');
+        pdf.text('Courier Partner:', 20, shipY);
+        pdf.setFont(undefined, 'normal');
+        pdf.text(address.courierPartner || 'N/A', 55, shipY);
+      }
     }
 
     pdf.setFontSize(12);

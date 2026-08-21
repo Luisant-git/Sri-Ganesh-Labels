@@ -114,6 +114,8 @@ const normalizeOrder = (o) => {
       state: address.state || '',
       pincode: address.pincode || '',
       mobile: address.mobile || '',
+      deliveryMethod: address.deliveryMethod || '',
+      courierPartner: address.courierPartner || null,
     },
     invoiceUrl: o.invoiceUrl || null,
     gstin: o.gstin || '',
@@ -375,10 +377,14 @@ export default function OrderTracking() {
                         <span>Subtotal</span>
                         <span>{formatINR(order.totals.subtotal)}</span>
                       </div>
-                      {(order.totals.shipping > 0 || order.totals.shippingRate > 0) && (
+                      {(order.address?.deliveryMethod === 'Courier Partner' || order.totals.shipping > 0 || order.totals.shippingRate > 0) && (
                         <div className="flex justify-between">
                           <span>Shipping</span>
-                          {order.totals.shipping === 0 ? (
+                          {order.address?.deliveryMethod === 'Courier Partner' ? (
+                            <span className="font-semibold italic text-slate-500">
+                              As per {order.address.courierPartner || 'courier partner'} charges
+                            </span>
+                          ) : order.totals.shipping === 0 ? (
                             <span className="font-semibold">
                               <span className="mr-1 text-slate-400 line-through">{formatINR(order.totals.shippingRate)}</span>
                               <span className="text-teal-600">FREE</span>

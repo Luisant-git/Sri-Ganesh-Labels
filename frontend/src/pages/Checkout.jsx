@@ -26,6 +26,7 @@ import BackButton from '../components/BackButton'
 import { toast } from '../components/Toast'
 import { getShippingRules, calculateShipping, normalizeState } from '../api/shippingApi'
 import { syncServerCart, clearServerCart, createOrder } from '../api/orderApi'
+import API_BASE_URL from '../api/config'
 
 const initialForm = {
   shippingFullName: '',
@@ -97,12 +98,28 @@ export default function Checkout() {
   const [sameAsShipping, setSameAsShipping] = useState(true)
   const [shippingRules, setShippingRules] = useState([])
   const [calc, setCalc] = useState(null)
+  const [deliveryMethod, setDeliveryMethod] = useState('door')
+  const [courierPartners, setCourierPartners] = useState([])
+  const [courierPartnerId, setCourierPartnerId] = useState('')
 
   useEffect(() => {
     let cancelled = false
     getShippingRules()
       .then((data) => {
         if (!cancelled) setShippingRules(data)
+      })
+      .catch(() => {})
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  useEffect(() => {
+    let cancelled = false
+    fetch(`${API_BASE_URL}/courier-partners`)
+      .then((r) => r.json())
+      .then((data) => {
+        if (!cancelled && Array.isArray(data)) setCourierPartners(data)
       })
       .catch(() => {})
     return () => {
@@ -221,7 +238,10 @@ export default function Checkout() {
   const shippingCharged = isFreeShipping ? 0 : baseShippingFee
   const codCharge = payment === 'cod' && calc ? Number(calc.codFee || 0) : 0
   const codAvailableForState = calc ? calc.codAvailable !== false : stateShippingRule ? stateShippingRule.codAvailable !== false : true
-  const orderTotal = totals.subtotal + shippingCharged + codCharge
+  const isCourierDelivery = deliveryMethod === 'courier'
+  const selectedCourier = courierPartners.find((c) => String(c.id) === String(courierPartnerId)) || null
+  const effectiveShippingCharged = isCourierDelivery ? 0 : shippingCharged
+  const orderTotal = totals.subtotal + effectiveShippingCharged + codCharge
 
   useEffect(() => {
     if (payment === 'cod' && !codAvailableForState) setPayment('online')
@@ -240,6 +260,10 @@ export default function Checkout() {
       openLogin()
       return
     }
+    if (isCourierDelivery && !selectedCourier) {
+      toast('Please select a courier partner', 'error')
+      return
+    }
     setPlaced(true)
 
     const shippingAddress = {
@@ -251,6 +275,8 @@ export default function Checkout() {
       city: form.shippingCity,
       state: form.shippingState,
       pincode: form.shippingPincode,
+      deliveryMethod: isCourierDelivery ? 'Courier Partner' : 'Door Delivery',
+      courierPartner: isCourierDelivery && selectedCourier ? selectedCourier.name : null,
     }
     const billingAddress = sameAsShipping
       ? { ...shippingAddress }
@@ -266,7 +292,7 @@ export default function Checkout() {
 
     const orderPayload = {
       subtotal: totals.subtotal.toFixed(2),
-      deliveryFee: shippingCharged.toFixed(2),
+      deliveryFee: effectiveShippingCharged.toFixed(2),
       shippingFee: '0',
       codFee: codCharge.toFixed(2),
       total: orderTotal.toFixed(2),
@@ -280,8 +306,14 @@ export default function Checkout() {
         state: form.shippingState,
         pincode: form.shippingPincode,
         mobile: form.shippingMobile,
+        deliveryMethod: isCourierDelivery ? 'Courier Partner' : 'Door Delivery',
+        courierPartner: isCourierDelivery && selectedCourier ? selectedCourier.name : null,
       },
-      deliveryOption: { fee: shippingCharged, name: 'Standard Delivery', duration: '3-5 days' },
+      deliveryOption: {
+        fee: effectiveShippingCharged,
+        name: isCourierDelivery ? `Courier Partner - ${selectedCourier?.name || ''}`.trim() : 'Standard Delivery',
+        duration: '3-5 days',
+      },
     }
 
     try {
@@ -302,7 +334,7 @@ export default function Checkout() {
           image: i.image,
           productId: i.productId,
         })),
-        totals: { ...totals, shipping: shippingCharged, shippingRate: baseShippingFee, codCharge, total: orderTotal },
+        totals: { ...totals, shipping: effectiveShippingCharged, shippingRate: baseShippingFee, codCharge, total: orderTotal },
         address: shippingAddress,
         billingAddress,
         gstin: form.gstin.trim() || null,
@@ -557,10 +589,107 @@ export default function Checkout() {
               )}
             </section>
 
-            {/* Payment */}
+            {/* Delivery Method */}
             <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
               <div className="flex items-center gap-3">
                 <span className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-700 text-sm font-bold text-white">3</span>
+                <h2 className="font-display text-lg font-bold text-slate-900">Select Delivery Method</h2>
+              </div>
+
+              <div className="mt-6 grid gap-4 sm:grid-cols-2">
+                <button
+                  type="button"
+                  onClick={() => setDeliveryMethod('door')}
+                  className={`flex items-start gap-4 rounded-2xl border-2 p-5 text-left transition-all duration-200 ${
+                    deliveryMethod === 'door'
+                      ? 'border-brand-600 bg-brand-50 shadow-lg shadow-brand-600/10'
+                      : 'border-slate-200 bg-white hover:border-brand-300'
+                  }`}
+                >
+                  <span
+                    className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl transition-colors ${
+                      deliveryMethod === 'door' ? 'bg-brand-700 text-white' : 'bg-slate-100 text-slate-500'
+                    }`}
+                  >
+                    <Truck size={20} />
+                  </span>
+                  <span className="flex-1">
+                    <span className="flex items-center justify-between">
+                      <span className="font-display text-sm font-bold text-slate-900">Door Delivery</span>
+                      <span className={`flex h-5 w-5 items-center justify-center rounded-full border-2 ${deliveryMethod === 'door' ? 'border-brand-600' : 'border-slate-300'}`}>
+                        {deliveryMethod === 'door' && <span className="h-2.5 w-2.5 rounded-full bg-brand-600" />}
+                      </span>
+                    </span>
+                    <span className="mt-1 block text-xs leading-relaxed text-slate-500">
+                      Shipping calculated by location.
+                    </span>
+                  </span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setDeliveryMethod('courier')}
+                  className={`flex items-start gap-4 rounded-2xl border-2 p-5 text-left transition-all duration-200 ${
+                    deliveryMethod === 'courier'
+                      ? 'border-brand-600 bg-brand-50 shadow-lg shadow-brand-600/10'
+                      : 'border-slate-200 bg-white hover:border-brand-300'
+                  }`}
+                >
+                  <span
+                    className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl transition-colors ${
+                      deliveryMethod === 'courier' ? 'bg-brand-700 text-white' : 'bg-slate-100 text-slate-500'
+                    }`}
+                  >
+                    <Building2 size={20} />
+                  </span>
+                  <span className="flex-1">
+                    <span className="flex items-center justify-between">
+                      <span className="font-display text-sm font-bold text-slate-900">Courier Partner</span>
+                      <span className={`flex h-5 w-5 items-center justify-center rounded-full border-2 ${deliveryMethod === 'courier' ? 'border-brand-600' : 'border-slate-300'}`}>
+                        {deliveryMethod === 'courier' && <span className="h-2.5 w-2.5 rounded-full bg-brand-600" />}
+                      </span>
+                    </span>
+                    <span className="mt-1 block text-xs leading-relaxed text-slate-500">
+                      Shipping as per courier partner charges.
+                    </span>
+                  </span>
+                </button>
+              </div>
+
+              {deliveryMethod === 'courier' && (
+                <div className="mt-5 rounded-xl border border-dashed border-slate-300 bg-slate-50 p-4">
+                  <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Choose a courier partner</p>
+                  {courierPartners.length === 0 ? (
+                    <p className="mt-3 text-sm italic text-slate-500">No courier partners are available right now. Please choose Door Delivery.</p>
+                  ) : (
+                    <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                      {courierPartners.map((cp) => (
+                        <button
+                          key={cp.id}
+                          type="button"
+                          onClick={() => setCourierPartnerId(String(cp.id))}
+                          className={`rounded-xl border-2 px-4 py-3 text-left transition-all duration-150 ${
+                            String(courierPartnerId) === String(cp.id)
+                              ? 'border-brand-600 bg-white shadow-md shadow-brand-600/10'
+                              : 'border-slate-200 bg-white hover:border-brand-300'
+                          }`}
+                        >
+                          <span className="block text-sm font-bold text-slate-900">{cp.name}</span>
+                          {cp.trackingLink && (
+                            <span className="mt-0.5 block truncate text-[11px] text-slate-400">{cp.trackingLink}</span>
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </section>
+
+            {/* Payment */}
+            <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+              <div className="flex items-center gap-3">
+                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-700 text-sm font-bold text-white">4</span>
                 <h2 className="font-display text-lg font-bold text-slate-900">Select Payment Method</h2>
               </div>
 
@@ -656,7 +785,9 @@ export default function Checkout() {
                 <div className="flex justify-between">
                   <dt className="text-slate-500">Shipping</dt>
                   <dd className="font-semibold text-slate-900">
-                    {isFreeShipping && baseShippingFee > 0 ? (
+                    {isCourierDelivery ? (
+                      <span className="italic text-slate-500">As per courier partner charges</span>
+                    ) : isFreeShipping && baseShippingFee > 0 ? (
                       <>
                         <span className="mr-1.5 text-slate-400 line-through">{formatINR(baseShippingFee)}</span>
                         <span className="text-teal-600">FREE</span>
@@ -685,17 +816,31 @@ export default function Checkout() {
                 <span className="font-display text-2xl font-bold text-brand-800">{formatINR(orderTotal)}</span>
               </div>
 
-              <div className="mt-4 rounded-xl bg-slate-50 px-4 py-3 text-xs text-slate-600">
-                <span className="font-semibold text-slate-900">Payment method:</span>{' '}
-                {payment === 'cod' ? (
-                  <span className="flex items-center gap-1.5 font-medium text-teal-600">
-                    <Wallet size={13} /> Cash on Delivery
-                  </span>
-                ) : (
-                  <span className="flex items-center gap-1.5 font-medium text-brand-700">
-                    <CreditCard size={13} /> Online Payment
-                  </span>
-                )}
+              <div className="mt-4 space-y-1.5 rounded-xl bg-slate-50 px-4 py-3 text-xs text-slate-600">
+                <p>
+                  <span className="font-semibold text-slate-900">Delivery method:</span>{' '}
+                  {isCourierDelivery ? (
+                    <span className="flex items-center gap-1.5 font-medium text-brand-700">
+                      <Building2 size={13} /> Courier Partner{selectedCourier ? ` - ${selectedCourier.name}` : ''}
+                    </span>
+                  ) : (
+                    <span className="flex items-center gap-1.5 font-medium text-brand-700">
+                      <Truck size={13} /> Door Delivery
+                    </span>
+                  )}
+                </p>
+                <p>
+                  <span className="font-semibold text-slate-900">Payment method:</span>{' '}
+                  {payment === 'cod' ? (
+                    <span className="flex items-center gap-1.5 font-medium text-teal-600">
+                      <Wallet size={13} /> Cash on Delivery
+                    </span>
+                  ) : (
+                    <span className="flex items-center gap-1.5 font-medium text-brand-700">
+                      <CreditCard size={13} /> Online Payment
+                    </span>
+                  )}
+                </p>
               </div>
 
               <button
