@@ -632,7 +632,7 @@ export default function Checkout() {
                 {items.map((item) => (
                   <li key={`${item.productId}::${item.option}`} className="flex items-center gap-3">
                     <div className="relative shrink-0">
-                      <img src={item.image} alt={item.name} className="h-12 w-12 rounded-lg border border-slate-200 object-cover" />
+                      <img src={item.image} alt={item.name} loading="lazy" className="h-12 w-12 rounded-lg border border-slate-200 object-cover" />
                       <span className="absolute -right-1.5 -top-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-brand-700 px-1 text-[10px] font-bold text-white">
                         {item.quantity}
                       </span>

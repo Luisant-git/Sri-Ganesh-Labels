@@ -129,6 +129,7 @@ export default function Cart() {
                     <img
                       src={item.image}
                       alt={item.name}
+                      loading="lazy"
                       className="h-20 w-20 rounded-xl border border-slate-200 object-cover sm:h-24 sm:w-24"
                     />
                   </Link>

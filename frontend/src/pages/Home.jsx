@@ -116,23 +116,27 @@ export default function Home() {
       {/* HERO CAROUSEL */}
       {heroSlides.length > 0 && (
       <section className="relative h-[55vh] min-h-[320px] overflow-hidden sm:h-[60vh] sm:min-h-[420px] md:h-[70vh] lg:h-[85vh] lg:min-h-[500px]">
-        {heroSlides.map((slide, i) => (
+        {heroSlides.map((slide, i) => {
+          const near = Math.abs(i - current) <= 1
+          return (
           <div
             key={i}
             className={`absolute inset-0 transition-opacity duration-1000 ${
               i === current ? 'opacity-100' : 'opacity-0'
             }`}
           >
-            {slide.mobileImage ? (
+            {near && (slide.mobileImage ? (
               <>
                 <img
                   src={slide.mobileImage}
                   alt={`Sri Ganesh Labels ${i + 1}`}
+                  loading={i === 0 ? 'eager' : 'lazy'}
                   className="absolute inset-0 h-full w-full object-cover md:hidden"
                 />
                 <img
                   src={slide.image}
                   alt={`Sri Ganesh Labels ${i + 1}`}
+                  loading={i === 0 ? 'eager' : 'lazy'}
                   className="absolute inset-0 hidden h-full w-full object-cover md:block"
                 />
               </>
@@ -140,11 +144,13 @@ export default function Home() {
               <img
                 src={slide.image}
                 alt={`Sri Ganesh Labels ${i + 1}`}
+                loading={i === 0 ? 'eager' : 'lazy'}
                 className="absolute inset-0 h-full w-full object-cover"
               />
-            )}
+            ))}
           </div>
-        ))}
+          )
+        })}
         <div className="absolute inset-0 bg-gradient-to-r from-brand-950/80 via-brand-900/40 to-transparent" />
 
         {/* Text overlay */}
@@ -308,6 +314,7 @@ export default function Home() {
                   key={src}
                   src={src}
                   alt="Labels offer"
+                  loading="lazy"
                   className={`aspect-[3/4] w-full rounded-2xl border-2 border-white/25 object-cover shadow-xl ${
                     i === 1 ? '-translate-y-3' : i === 2 ? 'translate-y-3' : ''
                   }`}

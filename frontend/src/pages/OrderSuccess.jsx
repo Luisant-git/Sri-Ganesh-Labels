@@ -125,7 +125,7 @@ export default function OrderSuccess() {
               {order.items.map((it, i) => (
                 <li key={i} className="flex items-start justify-between gap-3 text-sm">
                   <span className="flex items-center gap-3">
-                    <img src={it.image} alt={it.name} className="h-11 w-11 rounded-lg border border-slate-200 object-cover" />
+                    <img src={it.image} alt={it.name} loading="lazy" className="h-11 w-11 rounded-lg border border-slate-200 object-cover" />
                     <span className="text-slate-700">
                       {it.name}
                       {it.option && it.option !== 'default' && (

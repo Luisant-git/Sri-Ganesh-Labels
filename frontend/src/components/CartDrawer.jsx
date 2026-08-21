@@ -94,7 +94,7 @@ export default function CartDrawer() {
                 {items.map((item) => (
                   <li key={`${item.productId}::${item.option}`} className="flex gap-3">
                     <Link to={`/products/${item.productId}`} onClick={closeCart} className="shrink-0">
-                      <img src={item.image} alt={item.name} className="h-16 w-16 rounded-xl object-cover" />
+                      <img src={item.image} alt={item.name} loading="lazy" className="h-16 w-16 rounded-xl object-cover" />
                     </Link>
                     <div className="flex flex-1 flex-col">
                       <div className="flex items-start justify-between gap-2">

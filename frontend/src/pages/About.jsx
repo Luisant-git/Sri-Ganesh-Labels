@@ -101,11 +101,13 @@ export default function About() {
             <img
               src="/web/hero2.jpg"
               alt="Sri Ganesh Labels printing"
+              loading="lazy"
               className="aspect-[4/3] w-full rounded-3xl border border-slate-200 object-cover shadow-2xl"
             />
             <img
               src="/web/hero1.jpg"
               alt="Label production"
+              loading="lazy"
               className="absolute -bottom-8 -right-4 hidden w-48 rounded-2xl border-4 border-white object-cover shadow-2xl sm:block lg:-right-8"
             />
           </div>

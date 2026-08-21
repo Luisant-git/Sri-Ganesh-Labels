@@ -205,7 +205,7 @@ export default function Header() {
                           onClick={() => setSearchOpen(false)}
                           className="flex items-center gap-3 rounded-lg px-2 py-2.5 transition-colors hover:bg-brand-50"
                         >
-                          <img src={p.image} alt={p.name} className="h-12 w-12 rounded-lg object-cover" />
+                          <img src={p.image} alt={p.name} loading="lazy" className="h-12 w-12 rounded-lg object-cover" />
                           <span className="flex-1">
                             <span className="block text-sm font-semibold text-slate-900">{p.name}</span>
                             <span className="text-xs text-slate-500">{p.category}</span>

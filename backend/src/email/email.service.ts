@@ -7,8 +7,8 @@ import * as os from 'os';
 @Injectable()
 export class EmailService {
   private transporter: nodemailer.Transporter;
-  private readonly email = process.env.EMAIL_USER;
-  private readonly password = process.env.EMAIL_PASSWORD;
+  private readonly email = (process.env.EMAIL_USER || '').trim();
+  private readonly password = (process.env.EMAIL_PASSWORD || '').replace(/\s+/g, '').trim();
 
   constructor(private prisma: PrismaService) {
     if (!this.email || !this.password) {
@@ -16,10 +16,15 @@ export class EmailService {
     }
 
     this.transporter = nodemailer.createTransport({
-      service: 'gmail',
+      host: 'smtp.gmail.com',
+      port: 465,
+      secure: true,
       auth: {
         user: this.email,
         pass: this.password,
+      },
+      tls: {
+        rejectUnauthorized: false,
       },
     });
   }
@@ -220,8 +225,13 @@ export class EmailService {
     try {
       await this.transporter.sendMail(mailOptions);
       console.log(`Order status email sent for order #${order?.id} (${finalStatus}) to ${customerEmail}`);
-    } catch (error) {
-      console.error(`Failed to send order status email for order #${order?.id}:`, error);
+    } catch (error: any) {
+      console.error(`Failed to send order status email for order #${order?.id}:`, {
+        message: error?.message,
+        code: error?.code,
+        responseCode: error?.responseCode,
+      });
+      throw error;
     }
   }
 

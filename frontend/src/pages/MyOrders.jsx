@@ -237,7 +237,7 @@ export default function MyOrders() {
                         }`}
                       >
                         {it.image ? (
-                          <img src={it.image} alt={it.name} className="h-full w-full object-cover" />
+                          <img src={it.image} alt={it.name} loading="lazy" className="h-full w-full object-cover" />
                         ) : (
                           <Package size={18} />
                         )}

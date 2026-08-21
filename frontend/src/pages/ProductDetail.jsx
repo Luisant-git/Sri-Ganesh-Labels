@@ -169,7 +169,7 @@ export default function ProductDetail() {
                       : 'border-slate-200 opacity-80 hover:border-brand-300 hover:opacity-100'
                   }`}
                 >
-                  <img src={img} alt={`${product.name} ${i + 1}`} className="aspect-square w-full object-cover" />
+                  <img src={img} alt={`${product.name} ${i + 1}`} loading="lazy" className="aspect-square w-full object-cover" />
                 </button>
               ))}
             </div>

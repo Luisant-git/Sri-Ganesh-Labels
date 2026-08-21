@@ -278,6 +278,7 @@ export default function OrderTracking() {
                       <img
                         src={it.image}
                         alt={it.name}
+                        loading="lazy"
                         className="h-12 w-12 rounded-full border-2 border-white object-cover transition-transform duration-200 hover:scale-110"
                       />
                     </Link>
@@ -322,6 +323,7 @@ export default function OrderTracking() {
                             <img
                               src={it.image}
                               alt={it.name}
+                              loading="lazy"
                               className="h-14 w-14 shrink-0 rounded-lg border border-slate-200 object-cover"
                             />
                           )}
