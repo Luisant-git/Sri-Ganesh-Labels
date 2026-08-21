@@ -32,6 +32,7 @@ const initialForm = {
   shippingMobile: '',
   shippingEmail: '',
   shippingAddress: '',
+  shippingLandmark: '',
   shippingCity: '',
   shippingState: '',
   shippingPincode: '',
@@ -39,6 +40,7 @@ const initialForm = {
   billingFullName: '',
   billingMobile: '',
   billingAddress: '',
+  billingLandmark: '',
   billingCity: '',
   billingState: '',
   billingPincode: '',
@@ -59,23 +61,30 @@ const onlineMethods = [
 
 export default function Checkout() {
   const { items, totals, clearCart, freeShippingThreshold } = useCart()
-  const { user, isLoggedIn, openLogin } = useAuth()
+  const { user, isLoggedIn, openLogin, updateUserName } = useAuth()
   const navigate = useNavigate()
 
   const [form, setForm] = useState(() => {
     let lastAddress = null
     try {
       const raw = localStorage.getItem('sgl_last_order')
-      if (raw) lastAddress = JSON.parse(raw).address
+      if (raw) {
+        const parsed = JSON.parse(raw)
+        if (parsed.userMobile === user?.mobile) lastAddress = parsed.address
+      }
     } catch {
       lastAddress = null
     }
     return {
       ...initialForm,
-      shippingFullName: user?.name && user.name.trim() && user.name.trim() !== 'User' ? user.name : '',
+      shippingFullName:
+        (user?.name && user.name.trim() && user.name.trim() !== 'User' ? user.name : '') ||
+        lastAddress?.fullName ||
+        '',
       shippingMobile: user?.mobile || lastAddress?.mobile || '',
       shippingEmail: lastAddress?.email || '',
       shippingAddress: lastAddress?.address || '',
+      shippingLandmark: lastAddress?.landmark || '',
       shippingCity: lastAddress?.city || '',
       shippingState: lastAddress?.state || '',
       shippingPincode: lastAddress?.pincode || '',
@@ -85,7 +94,6 @@ export default function Checkout() {
   const [payment, setPayment] = useState('cod')
   const [onlineMethod, setOnlineMethod] = useState('upi')
   const [placed, setPlaced] = useState(false)
-  const [terms, setTerms] = useState(false)
   const [sameAsShipping, setSameAsShipping] = useState(true)
   const [shippingRules, setShippingRules] = useState([])
   const [calc, setCalc] = useState(null)
@@ -161,6 +169,7 @@ export default function Checkout() {
         billingFullName: f.shippingFullName,
         billingMobile: f.shippingMobile,
         billingAddress: f.shippingAddress,
+        billingLandmark: f.shippingLandmark,
         billingCity: f.shippingCity,
         billingState: f.shippingState,
         billingPincode: f.shippingPincode,
@@ -193,7 +202,6 @@ export default function Checkout() {
       if (!/^\d{6}$/.test(form.billingPincode)) er.billingPincode = 'Enter a valid 6-digit pincode'
     }
 
-    if (!terms) er.terms = 'Please accept the terms to place your order'
     setErrors(er)
     return Object.keys(er).length === 0
   }
@@ -224,6 +232,7 @@ export default function Checkout() {
       mobile: form.shippingMobile,
       email: form.shippingEmail,
       address: form.shippingAddress,
+      landmark: form.shippingLandmark,
       city: form.shippingCity,
       state: form.shippingState,
       pincode: form.shippingPincode,
@@ -234,6 +243,7 @@ export default function Checkout() {
           fullName: form.billingFullName,
           mobile: form.billingMobile,
           address: form.billingAddress,
+          landmark: form.billingLandmark,
           city: form.billingCity,
           state: form.billingState,
           pincode: form.billingPincode,
@@ -250,7 +260,7 @@ export default function Checkout() {
         fullName: form.shippingFullName,
         addressLine1: form.shippingAddress,
         addressLine2: '',
-        landmark: '',
+        landmark: form.shippingLandmark,
         city: form.shippingCity,
         state: form.shippingState,
         pincode: form.shippingPincode,
@@ -262,6 +272,7 @@ export default function Checkout() {
     try {
       await syncServerCart(items)
       const backendOrder = await createOrder(orderPayload)
+      if (form.shippingFullName.trim()) updateUserName(form.shippingFullName.trim())
       const order = {
         id: backendOrder.id ? String(backendOrder.id) : generateOrderId(),
         date: new Date().toISOString(),
@@ -281,7 +292,7 @@ export default function Checkout() {
         billingAddress,
         gstin: form.gstin.trim() || null,
       }
-      localStorage.setItem('sgl_last_order', JSON.stringify(order))
+      localStorage.setItem('sgl_last_order', JSON.stringify({ ...order, userMobile: user?.mobile || null }))
       clearCart()
       await clearServerCart()
       if (payment === 'cod') {
@@ -329,7 +340,7 @@ export default function Checkout() {
           <input
             value={form[`${prefix}FullName`]}
             onChange={setField(`${prefix}FullName`)}
-            placeholder="e.g. Ravi Kumar"
+            placeholder="e.g. John Doe"
             className={`${inputCls(`${prefix}FullName`)} pl-10`}
           />
         </div>
@@ -373,12 +384,26 @@ export default function Checkout() {
           <textarea
             value={form[`${prefix}Address`]}
             onChange={setField(`${prefix}Address`)}
-            placeholder="House no, street, area, landmark"
+            placeholder="House no, street, area"
             rows={2}
             className={`${inputCls(`${prefix}Address`)} resize-none pl-10`}
           />
         </div>
         {errors[`${prefix}Address`] && <p className="mt-1 text-xs text-rose-500">{errors[`${prefix}Address`]}</p>}
+      </div>
+      <div className="sm:col-span-2">
+        <label className="mb-1.5 block text-xs font-semibold text-slate-700">
+          Landmark <span className="font-normal text-slate-400">(Optional)</span>
+        </label>
+        <div className="relative">
+          <Landmark size={15} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+          <input
+            value={form[`${prefix}Landmark`]}
+            onChange={setField(`${prefix}Landmark`)}
+            placeholder="e.g. Near Bustand"
+            className={`${inputCls(`${prefix}Landmark`)} pl-10`}
+          />
+        </div>
       </div>
       <div>
         <label className="mb-1.5 block text-xs font-semibold text-slate-700">City *</label>
@@ -581,23 +606,6 @@ export default function Checkout() {
                   </span>
                 </button>
               </div>
-
-              <label className="mt-6 flex items-start gap-3 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={terms}
-                  onChange={(e) => {
-                    setTerms(e.target.checked)
-                    if (errors.terms) setErrors((er) => ({ ...er, terms: null }))
-                  }}
-                  className="mt-0.5 h-4 w-4 rounded border-slate-300 text-brand-700 accent-brand-700"
-                />
-                <span className="text-xs leading-relaxed text-slate-600">
-                  I agree to the <span className="font-semibold text-brand-700">Terms &amp; Conditions</span> and
-                  <span className="font-semibold text-brand-700"> Privacy Policy</span>. By placing this order I confirm the delivery details are correct.
-                </span>
-              </label>
-              {errors.terms && <p className="mt-1.5 text-xs text-rose-500">{errors.terms}</p>}
             </section>
           </div>
 

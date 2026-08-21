@@ -78,14 +78,16 @@ export class OrderService {
     }
   
     // Determine order status
-    const orderStatus = createOrderDto.paymentMethod === 'online' ? 'Pending' : 'Placed';
+    // RAZORPAY DISABLED (temporarily): treat every order as Placed until real keys are added
+    // const orderStatus = createOrderDto.paymentMethod === 'online' ? 'Pending' : 'Placed';
+    const orderStatus = 'Placed';
  
     // Create Razorpay order for online payments
-    let razorpayOrderId: string | null = null;
-    if (createOrderDto.paymentMethod === 'online') {
-      const razorpayOrder = await this.paymentService.createOrder(parseFloat(createOrderDto.total));
-      razorpayOrderId = razorpayOrder.id;
-    }
+    // let razorpayOrderId: string | null = null;
+    // if (createOrderDto.paymentMethod === 'online') {
+    //   const razorpayOrder = await this.paymentService.createOrder(parseFloat(createOrderDto.total));
+    //   razorpayOrderId = razorpayOrder.id;
+    // }
 
     // Update user's shipping address (excluding mobile number)
     const shippingAddressToSave = {
@@ -99,10 +101,11 @@ export class OrderService {
       // Note: mobile number is excluded from profile update
     };
 
-    // Update user's profile with new shipping address
+    // Update user's profile with new shipping address and keep account name in sync
     await this.prisma.user.update({
       where: { id: userId },
       data: {
+        name: createOrderDto.shippingAddress.fullName?.trim() || undefined,
         shippingAddress: shippingAddressToSave
       }
     });
@@ -155,7 +158,7 @@ export class OrderService {
     // Return order with Razorpay order ID for online payments
     return {
       ...order,
-      razorpayOrderId
+      // razorpayOrderId
     };
   }
  

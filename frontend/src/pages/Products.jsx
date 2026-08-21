@@ -206,7 +206,9 @@ export default function Products() {
                         {activeCategory === cat && <span className="text-xs opacity-80">•</span>}
                       </span>
                       {cat !== 'All' && (
-                        <span className="text-xs text-slate-400">{catCount(cat)} products</span>
+                        <span className="text-xs text-slate-400">
+                          {catCount(cat)} {catCount(cat) === 1 ? 'size' : 'sizes'}
+                        </span>
                       )}
                     </button>
                   ))}

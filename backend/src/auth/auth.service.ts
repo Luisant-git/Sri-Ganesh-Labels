@@ -29,7 +29,7 @@ export class AuthService {
     if (existing) throw new ConflictException('Mobile number already registered. Please login.');
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = await this.prisma.user.create({
-      data: { phone, password: hashedPassword, name: name || 'User' },
+      data: { phone, password: hashedPassword, name: (name || '').trim() },
     });
     return this.generateToken(user.id, user.email || '', 'user', user.phone || undefined, user.name || undefined);
   }

@@ -108,6 +108,7 @@ async findAll(
           status: true,
           total: true,
           createdAt: true,
+          shippingAddress: true,
         },
       },
     },
@@ -118,25 +119,35 @@ async findAll(
 
   const total = await this.prisma.user.count({ where });
 
-  const data = users.map((user) => ({
-    id: user.id,
-    name: user.name || 'N/A',
-    email: user.email || 'N/A',
-    phone: user.phone || 'N/A',
-    ordersCount: user.orders.length, // ✅ only valid orders
-    totalSpent: user.orders.reduce(
-      (sum, order) => sum + parseFloat(order.total || '0'),
-      0
-    ),
-    status: user.isActive ? 'Active' : 'Inactive',
-    joinDate: user.createdAt,
-    lastOrder:
-      user.orders.length > 0
-        ? user.orders.sort(
-            (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
-          )[0].createdAt
-        : null,
-  }));
+  const data = users.map((user) => {
+    const sortedOrders = [...user.orders].sort(
+      (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
+    );
+    const latestShippingName =
+      sortedOrders[0]?.shippingAddress &&
+      typeof sortedOrders[0].shippingAddress === 'object' &&
+      (sortedOrders[0].shippingAddress as any).fullName
+        ? (sortedOrders[0].shippingAddress as any).fullName
+        : '';
+    const name =
+      user.name && user.name.trim() && user.name !== 'User'
+        ? user.name
+        : latestShippingName || 'N/A';
+    return {
+      id: user.id,
+      name,
+      email: user.email || 'N/A',
+      phone: user.phone || 'N/A',
+      ordersCount: user.orders.length, // ✅ only valid orders
+      totalSpent: user.orders.reduce(
+        (sum, order) => sum + parseFloat(order.total || '0'),
+        0
+      ),
+      status: user.isActive ? 'Active' : 'Inactive',
+      joinDate: user.createdAt,
+      lastOrder: sortedOrders.length > 0 ? sortedOrders[0].createdAt : null,
+    };
+  });
 
   return {
     data,

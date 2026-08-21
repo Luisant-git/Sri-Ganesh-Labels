@@ -4,6 +4,7 @@ import { userLogin, userRegister, userCheck, setToken, clearToken, decodeToken }
 const AuthContext = createContext(null)
 
 const AUTH_KEY = 'sgl_auth'
+const LAST_ORDER_KEY = 'sgl_last_order'
 
 function loadUser() {
   try {
@@ -45,7 +46,8 @@ export function AuthProvider({ children }) {
       const data = await userRegister(mobile, password, name)
       setToken(data.access_token)
       const payload = decodeToken(data.access_token)
-      setUser({ mobile: payload.phone || mobile, name: payload.name || (name || '').trim() || 'User' })
+      setUser({ mobile: payload.phone || mobile, name: (payload.name || (name || '').trim() || '').trim() })
+      window.dispatchEvent(new CustomEvent('sgl:login', { detail: { mobile } }))
       setLoginOpen(false)
       runPending()
       return { ok: true }
@@ -59,7 +61,8 @@ export function AuthProvider({ children }) {
       const data = await userLogin(mobile, password)
       setToken(data.access_token)
       const payload = decodeToken(data.access_token)
-      setUser({ mobile: payload.phone || mobile, name: payload.name || 'User' })
+      setUser({ mobile: payload.phone || mobile, name: (payload.name || '').trim() })
+      window.dispatchEvent(new CustomEvent('sgl:login', { detail: { mobile } }))
       setLoginOpen(false)
       runPending()
       return { ok: true }
@@ -69,8 +72,14 @@ export function AuthProvider({ children }) {
   }
 
   const logout = () => {
+    window.dispatchEvent(new CustomEvent('sgl:logout', { detail: { mobile: user?.mobile } }))
     clearToken()
+    localStorage.removeItem(LAST_ORDER_KEY)
     setUser(null)
+  }
+
+  const updateUserName = (name) => {
+    setUser((u) => (u ? { ...u, name } : u))
   }
 
   const isRegistered = async (mobile) => {
@@ -88,6 +97,7 @@ export function AuthProvider({ children }) {
     register,
     login,
     logout,
+    updateUserName,
     isRegistered,
     loginOpen,
     openLogin,

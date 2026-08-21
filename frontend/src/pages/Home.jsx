@@ -50,6 +50,7 @@ export default function Home() {
   const [banners, setBanners] = useState(null)
   const [apiCategories, setApiCategories] = useState(null)
   const [featuredProducts, setFeaturedProducts] = useState([])
+  const [allProducts, setAllProducts] = useState([])
 
   const heroSlides = banners
     ? banners.map((b) => ({
@@ -65,7 +66,7 @@ export default function Home() {
     id: c.id,
     name: c.name,
     image: c.image,
-    count: c.subCategories?.length || 0,
+    count: allProducts.filter((p) => p.category === c.name).length,
   }))
 
   useEffect(() => {
@@ -86,10 +87,16 @@ export default function Home() {
       })
     getStorefrontProducts()
       .then((data) => {
-        if (!cancelled) setFeaturedProducts(Array.isArray(data) ? data.slice(0, 8) : [])
+        if (cancelled) return
+        const list = Array.isArray(data) ? data : []
+        setAllProducts(list)
+        setFeaturedProducts(list.slice(0, 8))
       })
       .catch(() => {
-        if (!cancelled) setFeaturedProducts([])
+        if (!cancelled) {
+          setAllProducts([])
+          setFeaturedProducts([])
+        }
       })
     return () => {
       cancelled = true
@@ -226,7 +233,7 @@ export default function Home() {
               <div className="absolute inset-x-0 bottom-0 flex items-center justify-between p-4">
                 <div>
                   <p className="font-display text-sm font-semibold text-white sm:text-base">{cat.name}</p>
-                  <p className="text-xs text-brand-100/80">{cat.count} sizes</p>
+                  <p className="text-xs text-brand-100/80">{cat.count} size{cat.count !== 1 ? 's' : ''}</p>
                 </div>
                 <span className="flex h-8 w-8 items-center justify-center rounded-full bg-accent-500 text-white opacity-0 transition-all duration-300 group-hover:opacity-100">
                   <ArrowRight size={15} />

@@ -62,7 +62,8 @@ export default function Account() {
   const [lastOrder] = useState(() => {
     try {
       const raw = localStorage.getItem('sgl_last_order')
-      return raw ? JSON.parse(raw) : null
+      const parsed = raw ? JSON.parse(raw) : null
+      return parsed && parsed.userMobile === user?.mobile ? parsed : null
     } catch {
       return null
     }
@@ -135,7 +136,7 @@ export default function Account() {
             <span className="relative flex h-24 w-24 items-center justify-center rounded-full bg-gradient-to-br from-brand-600 to-brand-800 text-white shadow-lg shadow-brand-600/25 ring-4 ring-white">
               <User size={44} />
             </span>
-            <h2 className="relative mt-4 max-w-full truncate font-display text-xl font-bold text-slate-900">{user.name || 'Hello!'}</h2>
+            <h2 className="relative mt-4 max-w-full truncate font-display text-xl font-bold text-slate-900">{user.name?.trim() || ''}</h2>
             <p className="relative mt-1 flex items-center gap-1.5 text-sm text-slate-500">
               <Phone size={13} className="text-slate-400" /> +91 {user.mobile}
             </p>
@@ -165,7 +166,7 @@ export default function Account() {
               </span>
               <div className="min-w-0">
                 <h3 className="font-display text-base font-bold text-slate-900">
-                  Welcome back, {user.name || 'customer'}!
+                  Welcome back{user.name?.trim() ? `, ${user.name.trim()}` : ''}!
                 </h3>
                 <p className="text-xs text-slate-500">Manage your orders and cart in one place.</p>
               </div>

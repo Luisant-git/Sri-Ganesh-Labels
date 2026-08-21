@@ -270,12 +270,17 @@ export default function OrderTracking() {
               <div className="flex flex-wrap items-center gap-4 p-5 sm:p-6">
                 <div className="flex -space-x-3">
                   {order.items.slice(0, 3).map((it, i) => (
-                    <img
+                    <Link
                       key={i}
-                      src={it.image}
-                      alt={it.name}
-                      className="h-12 w-12 rounded-full border-2 border-white object-cover"
-                    />
+                      to={it.productId ? `/products/${it.productId}` : '#'}
+                      className="pointer-events-auto"
+                    >
+                      <img
+                        src={it.image}
+                        alt={it.name}
+                        className="h-12 w-12 rounded-full border-2 border-white object-cover transition-transform duration-200 hover:scale-110"
+                      />
+                    </Link>
                   ))}
                 </div>
                 <div className="min-w-0 flex-1">
@@ -305,11 +310,21 @@ export default function OrderTracking() {
                     <div className="space-y-3">
                       {order.items.map((it, i) => (
                         <div key={i} className="flex gap-3">
-                          <img
-                            src={it.image}
-                            alt={it.name}
-                            className="h-14 w-14 rounded-lg border border-slate-200 object-cover"
-                          />
+                          {it.productId ? (
+                            <Link to={`/products/${it.productId}`} className="shrink-0">
+                              <img
+                                src={it.image}
+                                alt={it.name}
+                                className="h-14 w-14 rounded-lg border border-slate-200 object-cover transition-transform duration-200 hover:scale-105"
+                              />
+                            </Link>
+                          ) : (
+                            <img
+                              src={it.image}
+                              alt={it.name}
+                              className="h-14 w-14 shrink-0 rounded-lg border border-slate-200 object-cover"
+                            />
+                          )}
                           <div className="min-w-0 flex-1">
                             <p className="text-sm font-medium text-slate-800">{it.name}</p>
                             {it.option && it.option !== 'default' && <p className="text-xs text-slate-400">{it.option}</p>}

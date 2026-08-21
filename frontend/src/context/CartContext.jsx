@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useMemo, useState } from 'react'
+import { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { getSettings } from '../api/settingsApi'
 import { getShippingRules, normalizeState } from '../api/shippingApi'
 
@@ -8,6 +8,8 @@ const STORAGE_KEY = 'sgl_cart'
 const LAST_ORDER_KEY = 'sgl_last_order'
 export const SHIPPING_FEE = 0
 export const DEFAULT_FREE_SHIPPING_THRESHOLD = 0
+
+const userCartKey = (mobile) => `sgl_cart_user_${mobile}`
 
 function loadCart() {
   try {
@@ -44,6 +46,54 @@ export function CartProvider({ children }) {
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(items))
   }, [items])
+
+  const itemsRef = useRef(items)
+  useEffect(() => {
+    itemsRef.current = items
+  }, [items])
+
+  useEffect(() => {
+    const onLogout = (e) => {
+      const mobile = e.detail?.mobile
+      if (mobile) {
+        localStorage.setItem(userCartKey(mobile), JSON.stringify(itemsRef.current))
+      }
+      setItems([])
+      localStorage.removeItem(STORAGE_KEY)
+    }
+    const onLogin = (e) => {
+      const mobile = e.detail?.mobile
+      if (!mobile) return
+      let saved = []
+      try {
+        const raw = localStorage.getItem(userCartKey(mobile))
+        saved = raw ? JSON.parse(raw) : []
+      } catch {
+        saved = []
+      }
+      if (!Array.isArray(saved)) return
+      setItems((prev) => {
+        const merged = [...prev]
+        for (const s of saved) {
+          if (!s || !s.productId) continue
+          const key = itemKey(s.productId, s.option)
+          const existing = merged.find((i) => itemKey(i.productId, i.option) === key)
+          if (existing) {
+            existing.quantity = Math.max(existing.quantity, s.quantity || 1)
+          } else {
+            merged.push(s)
+          }
+        }
+        return merged
+      })
+    }
+    window.addEventListener('sgl:logout', onLogout)
+    window.addEventListener('sgl:login', onLogin)
+    return () => {
+      window.removeEventListener('sgl:logout', onLogout)
+      window.removeEventListener('sgl:login', onLogin)
+    }
+  }, [])
 
   useEffect(() => {
     let cancelled = false
