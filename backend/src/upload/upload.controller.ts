@@ -1,9 +1,10 @@
-import { Controller, Post, Delete, Body, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { Controller, Post, Delete, Body, UseInterceptors, UploadedFile, Req } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
 import { unlink, readdir } from 'fs/promises';
 import { join } from 'path';
+import type { Request } from 'express';
 
 @Controller('upload')
 export class UploadController {
@@ -22,12 +23,16 @@ export class UploadController {
       },
     }),
   }))
-  uploadImage(@UploadedFile() file: Express.Multer.File) {
-    const baseUrl = process.env.UPLOAD_URL || 'http://localhost:4062/uploads';
-    const timestamp = Date.now();
+  uploadImage(@UploadedFile() file: Express.Multer.File, @Req() req: Request) {
+    const requestHost = req.get('host');
+    const requestBase = req.protocol && requestHost ? `${req.protocol}://${requestHost}` : undefined;
+    const configuredBase = process.env.UPLOAD_URL || process.env.API_BASE_URL || process.env.APP_URL || process.env.PUBLIC_URL || requestBase || 'http://localhost:5000';
+    const baseUrl = configuredBase.replace(/\/$/, '').replace(/\/uploads$/, '');
+    const uploadsBaseUrl = `${baseUrl}/uploads`;
+
     return {
       filename: file.filename,
-      url: `${baseUrl}/${file.filename}?t=${timestamp}`,
+      url: `${uploadsBaseUrl}/${file.filename}`,
     };
   }
 

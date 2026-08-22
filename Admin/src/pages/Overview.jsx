@@ -171,7 +171,7 @@ const Overview = () => {
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', backgroundColor: '#a5d6a7', padding: '10px', borderRadius: '8px' }}>
           <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 700, color: '#111827', textAlign: 'center', width: '100%' }}>
-            !!EN3 {salesComparisonType === 'yearly' ? 'Monthwise' : salesComparisonType === 'monthly' ? 'Weekwise' : 'Daywise'} Sales !!
+            Sri Ganesh Labels {salesComparisonType === 'yearly' ? 'Monthwise' : salesComparisonType === 'monthly' ? 'Weekwise' : 'Daywise'} Sales
           </h3>
           <div style={{ display: 'flex', gap: '8px', flexShrink: 0, alignItems: 'center' }}>
             <button

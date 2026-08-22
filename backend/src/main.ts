@@ -17,10 +17,17 @@ async function bootstrap() {
   app.use(bodyParser.json({ limit: '10mb' }));
   app.use(bodyParser.urlencoded({ limit: '10mb', extended: true }));
   app.useGlobalPipes(new ValidationPipe());
-  app.useStaticAssets('uploads', { 
+  app.useStaticAssets('uploads', {
     prefix: '/uploads/',
+    maxAge: 31536000,
     setHeaders: (res, path) => {
-      if (path.endsWith('.pdf')) {
+      const lowerPath = path.toLowerCase();
+      if (lowerPath.endsWith('.jpg') || lowerPath.endsWith('.jpeg') || lowerPath.endsWith('.png') || lowerPath.endsWith('.webp') || lowerPath.endsWith('.avif') || lowerPath.endsWith('.gif') || lowerPath.endsWith('.svg')) {
+        res.set('Cache-Control', 'public, max-age=31536000, immutable');
+        return;
+      }
+
+      if (lowerPath.endsWith('.pdf')) {
         res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
         res.set('Pragma', 'no-cache');
         res.set('Expires', '0');
