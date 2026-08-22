@@ -206,7 +206,7 @@ export class OrderService {
   async getUserOrders(userId: number) {
     return this.prisma.order.findMany({
       where: { userId },
-      include: { items: true },
+      include: { items: { include: { product: { select: { weight: true } } } } },
       orderBy: { createdAt: 'desc' }
     });
   }
@@ -214,20 +214,20 @@ export class OrderService {
   async getOrderById(userId: number, orderId: number) {
     return this.prisma.order.findFirst({
       where: { id: orderId, userId },
-      include: { items: true }
+      include: { items: { include: { product: { select: { weight: true } } } } }
     });
   }
 
   async getPublicOrder(orderId: number) {
     return this.prisma.order.findUnique({
       where: { id: orderId },
-      include: { items: true }
+      include: { items: { include: { product: { select: { weight: true } } } } }
     });
   }
  
   async getAllOrders() {
     return this.prisma.order.findMany({
-      include: { items: true, user: { select: { id: true, email: true, name: true, phone: true } } },
+      include: { items: { include: { product: { select: { weight: true } } } }, user: { select: { id: true, email: true, name: true, phone: true } } },
       orderBy: { createdAt: 'desc' }
     });
   }
@@ -514,7 +514,7 @@ async getOrderStats(startDate?: string, endDate?: string) {
     return this.prisma.order.update({
       where: { id: orderId },
       data: { shippingAddress },
-      include: { items: true },
+      include: { items: { include: { product: { select: { weight: true } } } } },
     });
   }
 
@@ -555,7 +555,7 @@ async getOrderStats(startDate?: string, endDate?: string) {
         subtotal: newSubtotal.toFixed(2),
         total: newTotal.toFixed(2),
       },
-      include: { items: true },
+      include: { items: { include: { product: { select: { weight: true } } } } },
     });
   }
 
@@ -604,7 +604,7 @@ async getOrderStats(startDate?: string, endDate?: string) {
     return this.prisma.order.update({ 
       where: { id: orderId }, 
       data: updateData,
-      include: { items: true } 
+      include: { items: { include: { product: { select: { weight: true } } } } } 
     });
   }
 

@@ -331,6 +331,8 @@ const [orderStats, setOrderStats] = useState({
       price: parseFloat(addProductPrice) || parseFloat(sizeObj?.price) || parseFloat(prod.basePrice) || 0,
       quantity: parseInt(addProductQty) || 1,
       hsnCode: prod.hsnCode || '',
+      weight: Number(prod.weight) || 0,
+      product: { weight: Number(prod.weight) || 0 },
     };
     setEditItems(prev => [...prev, newItem]);
     setAddProductSearch('');
@@ -2156,6 +2158,13 @@ const statusCounts = getStatusCounts();
       hour12: true,
     });
 
+  const getItemWeightKg = (item) => Number(item?.weight ?? item?.product?.weight) || 0;
+  const getItemTotalWeightKg = (item) => getItemWeightKg(item) * (Number(item?.quantity) || 1);
+  const getOrderTotalWeightKg = (orderOrItems) => {
+    const items = Array.isArray(orderOrItems) ? orderOrItems : orderOrItems?.items;
+    return (items || []).reduce((sum, item) => sum + getItemTotalWeightKg(item), 0);
+  };
+
   const baseColumns = [
     { key: "id", label: "Order ID", render: (value) => <span style={{whiteSpace: 'nowrap'}}>#ORD-{value}</span> },
     {
@@ -2196,6 +2205,11 @@ const statusCounts = getStatusCounts();
         }, 0) || 0;
         return totalQty;
       },
+    },
+    {
+      key: "items",
+      label: "Weight",
+      render: (value) => `${getOrderTotalWeightKg(value).toFixed(2)} kg`,
     },
     { key: "total", label: "Final Total", render: (value) => `₹${value}` },
     {
@@ -3013,6 +3027,7 @@ const statusCounts = getStatusCounts();
                     <p><strong>Discount:</strong> -₹{selectedOrder.discount}</p>
                   )}
                   <p><strong>Total:</strong> ₹{editingItems ? (editItems.reduce((sum, item) => sum + (parseFloat(item.price) || 0) * (parseInt(item.quantity) || 1), 0) - (parseFloat(selectedOrder.discount) || 0) + (parseFloat(selectedOrder.deliveryFee) || 0) + (parseFloat(selectedOrder.shippingFee) || 0) + (parseFloat(selectedOrder.codFee) || 0)).toFixed(2) : selectedOrder.total}</p>
+                  <p><strong>Total Weight:</strong> {getOrderTotalWeightKg(editingItems ? editItems : selectedOrder).toFixed(2)} kg</p>
                   {selectedOrder.chargedWeight > 0 && (
                     <p><strong>Weight (Admin):</strong> {selectedOrder.chargedWeight} g</p>
                   )}
@@ -3260,6 +3275,7 @@ const statusCounts = getStatusCounts();
                         <div style={{ width: '100%' }}>
                           <p><strong>{item.name}</strong></p>
                           <p>Bundle | Qty: {item.quantity} × ₹{item.price}</p>
+                          {getItemWeightKg(item) > 0 && <p>Weight: {getItemTotalWeightKg(item).toFixed(2)} kg</p>}
                           <div style={{ display: 'flex', gap: '10px', marginTop: '10px', flexWrap: 'wrap' }}>
                             {item.bundleItems?.map((bundle, bIdx) => (
                               <div key={bIdx} style={{ textAlign: 'center' }}>
@@ -3407,6 +3423,9 @@ const statusCounts = getStatusCounts();
                                   </p>
                                 )}
                                 <p>Qty: {item.quantity} × ₹{item.price}</p>
+                                {getItemWeightKg(item) > 0 && (
+                                  <p>Weight: {getItemTotalWeightKg(item).toFixed(2)} kg</p>
+                                )}
                                 {selectedOrder.status !== 'Delivered' && selectedOrder.status !== 'Cancelled' && selectedOrder.status !== 'Abandoned' && (
                                   <button
                                     onClick={async () => {

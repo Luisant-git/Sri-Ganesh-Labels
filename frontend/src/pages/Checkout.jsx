@@ -333,6 +333,7 @@ export default function Checkout() {
           originalPrice: i.originalPrice,
           image: i.image,
           productId: i.productId,
+          weight: Number(i.weight) || 0,
         })),
         totals: { ...totals, shipping: effectiveShippingCharged, shippingRate: baseShippingFee, codCharge, total: orderTotal },
         address: shippingAddress,

@@ -109,6 +109,9 @@ export default function CartDrawer() {
                           {item.option !== 'default' && (
                             <p className="mt-0.5 text-xs text-slate-500">{item.option}</p>
                           )}
+                          {Number(item.weight) > 0 && (
+                            <p className="mt-0.5 text-xs text-slate-400">{(Number(item.weight) * item.quantity).toFixed(2)} kg</p>
+                          )}
                         </div>
                         <button
                           onClick={() => removeFromCart(item.productId, item.option)}
@@ -153,6 +156,12 @@ export default function CartDrawer() {
                 <span className="text-sm text-slate-600">Subtotal</span>
                 <span className="font-display text-lg font-bold text-slate-900">{formatINR(totals.subtotal)}</span>
               </div>
+              {totals.totalWeight > 0 && (
+                <div className="mt-1 flex items-center justify-between text-xs text-slate-500">
+                  <span>Total Weight</span>
+                  <span className="font-semibold">{totals.totalWeight.toFixed(2)} kg</span>
+                </div>
+              )}
               <div className="mt-1 flex items-center justify-between text-xs text-slate-500">
                   <span>Shipping</span>
                   <span className="font-semibold">

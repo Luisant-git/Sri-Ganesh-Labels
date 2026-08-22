@@ -135,6 +135,11 @@ export default function OrderSuccess() {
                       <span className="mt-0.5 block text-xs text-slate-400">
                         Qty: {it.qty} × {formatINR(it.price)}
                       </span>
+                      {Number(it.weight) > 0 && (
+                        <span className="mt-0.5 block text-xs text-slate-400">
+                          Weight: {(Number(it.weight) * it.qty).toFixed(2)} kg
+                        </span>
+                      )}
                     </span>
                   </span>
                   <span className="whitespace-nowrap text-right font-semibold text-slate-900">
@@ -165,6 +170,10 @@ export default function OrderSuccess() {
                   )}
                 </div>
               )}
+              <div className="flex items-center justify-between text-sm text-slate-600">
+                <span>Total Weight</span>
+                <span className="font-semibold text-slate-900">{order.items.reduce((s, i) => s + (Number(i.weight) || 0) * i.qty, 0).toFixed(2)} kg</span>
+              </div>
               <div className="flex items-center justify-between pt-1 text-sm font-semibold text-slate-700">
                 <span>Order Total</span>
                 <span className="font-display text-xl font-bold text-brand-800">{formatINR(order.totals.total)}</span>

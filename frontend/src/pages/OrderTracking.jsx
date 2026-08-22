@@ -94,6 +94,7 @@ const normalizeOrder = (o) => {
     originalPrice: 0,
     image: it.imageUrl || '',
     productId: it.productId,
+    weight: Number(it.weight ?? it.product?.weight) || 0,
   }))
   return {
     id: o.id,
@@ -294,7 +295,7 @@ export default function OrderTracking() {
                     </span>
                   </div>
                   <p className="mt-0.5 text-xs text-slate-500">
-                    {order.items.length} items · {formatDate(order.date)}
+                    {order.items.length} items · {order.items.reduce((s, i) => s + (Number(i.weight) || 0) * i.qty, 0).toFixed(2)} kg · {formatDate(order.date)}
                   </p>
                 </div>
                 <div className="text-right">
@@ -333,6 +334,9 @@ export default function OrderTracking() {
                             <p className="text-sm font-medium text-slate-800">{it.name}</p>
                             {it.option && it.option !== 'default' && <p className="text-xs text-slate-400">{it.option}</p>}
                             <p className="text-xs text-slate-500">Qty {it.qty} × {formatINR(it.price)}</p>
+                            {Number(it.weight) > 0 && (
+                              <p className="text-xs text-slate-400">Weight: {(Number(it.weight) * it.qty).toFixed(2)} kg</p>
+                            )}
                           </div>
                           <p className="text-sm font-semibold text-slate-900">
                             {formatINR(it.price * it.qty)}
@@ -394,6 +398,10 @@ export default function OrderTracking() {
                           )}
                         </div>
                       )}
+                      <div className="flex justify-between">
+                        <span>Total Weight</span>
+                        <span className="font-semibold text-slate-900">{order.items.reduce((s, i) => s + (Number(i.weight) || 0) * i.qty, 0).toFixed(2)} kg</span>
+                      </div>
                       <div className="flex justify-between font-semibold text-brand-800">
                         <span>Total</span>
                         <span>{formatINR(order.totals.total)}</span>

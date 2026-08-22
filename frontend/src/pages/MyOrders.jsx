@@ -61,6 +61,7 @@ const normalizeOrder = (o) => {
     qty: it.quantity || 1,
     price: Number(it.price) || 0,
     image: it.imageUrl || '',
+    weight: Number(it.weight ?? it.product?.weight) || 0,
   }))
   return {
     id: o.id,
@@ -259,7 +260,7 @@ export default function MyOrders() {
                       </span>
                     </div>
                     <p className="mt-1 text-xs text-slate-500">
-                      {formatDate(o.date)} · {o.items.reduce((s, i) => s + i.qty, 0)} item{o.items.reduce((s, i) => s + i.qty, 0) !== 1 ? 's' : ''} · {o.payment}
+                      {formatDate(o.date)} · {o.items.reduce((s, i) => s + i.qty, 0)} item{o.items.reduce((s, i) => s + i.qty, 0) !== 1 ? 's' : ''} · {o.items.reduce((s, i) => s + (Number(i.weight) || 0) * i.qty, 0).toFixed(2)} kg · {o.payment}
                     </p>
                     <p className="mt-1 truncate text-xs text-slate-400">
                       {o.items.map((i) => i.name).join(', ')}
