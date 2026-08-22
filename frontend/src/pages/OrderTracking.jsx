@@ -381,12 +381,12 @@ export default function OrderTracking() {
                         <span>Subtotal</span>
                         <span>{formatINR(order.totals.subtotal)}</span>
                       </div>
-                      {(order.address?.deliveryMethod === 'Courier Partner' || order.totals.shipping > 0 || order.totals.shippingRate > 0) && (
+                      {(order.address?.deliveryMethod === 'Courier Partner' || order.address?.deliveryMethod === 'Pickup at Hub' || order.totals.shipping > 0 || order.totals.shippingRate > 0) && (
                         <div className="flex justify-between">
                           <span>Shipping</span>
-                          {order.address?.deliveryMethod === 'Courier Partner' ? (
+                          {order.address?.deliveryMethod === 'Courier Partner' || order.address?.deliveryMethod === 'Pickup at Hub' ? (
                             <span className="font-semibold italic text-slate-500">
-                              As per {order.address.courierPartner || 'courier partner'} charges
+                              You have to pickup at our partners hub
                             </span>
                           ) : order.totals.shipping === 0 ? (
                             <span className="font-semibold">

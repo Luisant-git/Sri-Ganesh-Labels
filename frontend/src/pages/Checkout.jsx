@@ -261,7 +261,7 @@ export default function Checkout() {
       return
     }
     if (isCourierDelivery && !selectedCourier) {
-      toast('Please select a courier partner', 'error')
+      toast('Please select a pickup hub partner', 'error')
       return
     }
     setPlaced(true)
@@ -275,7 +275,7 @@ export default function Checkout() {
       city: form.shippingCity,
       state: form.shippingState,
       pincode: form.shippingPincode,
-      deliveryMethod: isCourierDelivery ? 'Courier Partner' : 'Door Delivery',
+      deliveryMethod: isCourierDelivery ? 'Pickup at Hub' : 'Door Delivery',
       courierPartner: isCourierDelivery && selectedCourier ? selectedCourier.name : null,
     }
     const billingAddress = sameAsShipping
@@ -306,12 +306,33 @@ export default function Checkout() {
         state: form.shippingState,
         pincode: form.shippingPincode,
         mobile: form.shippingMobile,
-        deliveryMethod: isCourierDelivery ? 'Courier Partner' : 'Door Delivery',
+        deliveryMethod: isCourierDelivery ? 'Pickup at Hub' : 'Door Delivery',
         courierPartner: isCourierDelivery && selectedCourier ? selectedCourier.name : null,
       },
+      billingAddress: sameAsShipping
+        ? {
+            fullName: form.shippingFullName,
+            addressLine1: form.shippingAddress,
+            addressLine2: '',
+            landmark: form.shippingLandmark,
+            city: form.shippingCity,
+            state: form.shippingState,
+            pincode: form.shippingPincode,
+            mobile: form.shippingMobile,
+          }
+        : {
+            fullName: form.billingFullName,
+            addressLine1: form.billingAddress,
+            addressLine2: '',
+            landmark: form.billingLandmark,
+            city: form.billingCity,
+            state: form.billingState,
+            pincode: form.billingPincode,
+            mobile: form.billingMobile,
+          },
       deliveryOption: {
         fee: effectiveShippingCharged,
-        name: isCourierDelivery ? `Courier Partner - ${selectedCourier?.name || ''}`.trim() : 'Standard Delivery',
+        name: isCourierDelivery ? `Pickup at Hub - ${selectedCourier?.name || ''}`.trim() : 'Standard Delivery',
         duration: '3-5 days',
       },
     }
@@ -645,13 +666,13 @@ export default function Checkout() {
                   </span>
                   <span className="flex-1">
                     <span className="flex items-center justify-between">
-                      <span className="font-display text-sm font-bold text-slate-900">Courier Partner</span>
+                      <span className="font-display text-sm font-bold text-slate-900">Pickup at Hub</span>
                       <span className={`flex h-5 w-5 items-center justify-center rounded-full border-2 ${deliveryMethod === 'courier' ? 'border-brand-600' : 'border-slate-300'}`}>
                         {deliveryMethod === 'courier' && <span className="h-2.5 w-2.5 rounded-full bg-brand-600" />}
                       </span>
                     </span>
                     <span className="mt-1 block text-xs leading-relaxed text-slate-500">
-                      Shipping as per courier partner charges.
+                      You have to pickup at our partners hub.
                     </span>
                   </span>
                 </button>
@@ -659,9 +680,9 @@ export default function Checkout() {
 
               {deliveryMethod === 'courier' && (
                 <div className="mt-5 rounded-xl border border-dashed border-slate-300 bg-slate-50 p-4">
-                  <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Choose a courier partner</p>
+                  <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Choose a pickup hub</p>
                   {courierPartners.length === 0 ? (
-                    <p className="mt-3 text-sm italic text-slate-500">No courier partners are available right now. Please choose Door Delivery.</p>
+                    <p className="mt-3 text-sm italic text-slate-500">No pickup hubs are available right now. Please choose Door Delivery.</p>
                   ) : (
                     <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                       {courierPartners.map((cp) => (
@@ -676,9 +697,6 @@ export default function Checkout() {
                           }`}
                         >
                           <span className="block text-sm font-bold text-slate-900">{cp.name}</span>
-                          {cp.trackingLink && (
-                            <span className="mt-0.5 block truncate text-[11px] text-slate-400">{cp.trackingLink}</span>
-                          )}
                         </button>
                       ))}
                     </div>
@@ -792,7 +810,7 @@ export default function Checkout() {
                   <dt className="text-slate-500">Shipping</dt>
                   <dd className="text-right">
                     {isCourierDelivery ? (
-                      <span className="font-semibold italic text-slate-500">As per courier partner charges</span>
+                      <span className="font-semibold italic text-slate-500">You have to pickup at our partners hub</span>
                     ) : isFreeShipping && baseShippingFee > 0 ? (
                       <>
                         <span className="mr-1.5 text-slate-400 line-through">{formatINR(baseShippingFee)}</span>
@@ -832,7 +850,7 @@ export default function Checkout() {
                   <span className="font-semibold text-slate-900">Delivery method:</span>{' '}
                   {isCourierDelivery ? (
                     <span className="flex items-center gap-1.5 font-medium text-brand-700">
-                      <Building2 size={13} /> Courier Partner{selectedCourier ? ` - ${selectedCourier.name}` : ''}
+                      <Building2 size={13} /> Pickup at Hub{selectedCourier ? ` - ${selectedCourier.name}` : ''}
                     </span>
                   ) : (
                     <span className="flex items-center gap-1.5 font-medium text-brand-700">

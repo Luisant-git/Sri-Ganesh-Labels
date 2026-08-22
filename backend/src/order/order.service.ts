@@ -153,6 +153,7 @@ export class OrderService {
         total: createOrderDto.total,
         paymentMethod: createOrderDto.paymentMethod,
         shippingAddress: JSON.parse(JSON.stringify(createOrderDto.shippingAddress)),
+        billingAddress: createOrderDto.billingAddress ? JSON.parse(JSON.stringify(createOrderDto.billingAddress)) : JSON.parse(JSON.stringify(createOrderDto.shippingAddress)),
         deliveryOption: JSON.parse(JSON.stringify(createOrderDto.deliveryOption)),
         items: {
           create: cart.items.map(item => ({

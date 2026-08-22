@@ -48,7 +48,8 @@ export default function OrderSuccess() {
 
   const steps = ['Order Confirmed', 'Processing', 'Packed', 'Shipped', 'Out for Delivery', 'Delivered']
   const currentStep = 0
-  const isCourierDelivery = order.address?.deliveryMethod === 'Courier Partner'
+  const isCourierDelivery =
+    order.address?.deliveryMethod === 'Courier Partner' || order.address?.deliveryMethod === 'Pickup at Hub'
 
   return (
     <div className="bg-slate-50">
@@ -158,7 +159,7 @@ export default function OrderSuccess() {
                   <span>Shipping</span>
                   {isCourierDelivery ? (
                     <span className="font-semibold italic text-slate-500">
-                      As per {order.address?.courierPartner || 'courier partner'} charges
+                      You have to pickup at our partners hub
                     </span>
                   ) : order.totals.shipping === 0 ? (
                     <span className="font-semibold">
