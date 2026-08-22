@@ -16,6 +16,9 @@ import MyOrders from './pages/MyOrders'
 import Contact from './pages/Contact'
 import Account from './pages/Account'
 import NotFound from './pages/NotFound'
+import PrivacyPolicy from './pages/PrivacyPolicy'
+import TermsConditions from './pages/TermsConditions'
+import ShippingReturnPolicy from './pages/ShippingReturnPolicy'
 
 export default function App() {
   return (
@@ -37,6 +40,9 @@ export default function App() {
               <Route path="/my-orders" element={<MyOrders />} />
               <Route path="/contact" element={<Contact />} />
               <Route path="/account" element={<Account />} />
+              <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+              <Route path="/terms-conditions" element={<TermsConditions />} />
+              <Route path="/shipping-return-policy" element={<ShippingReturnPolicy />} />
               <Route path="*" element={<NotFound />} />
             </Route>
           </Routes>

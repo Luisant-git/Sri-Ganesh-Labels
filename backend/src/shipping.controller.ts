@@ -70,9 +70,12 @@ export class ShippingController {
       : []
 
     if (weightRates.length > 0) {
-      // "Up to X kg" slabs: first slab whose limit covers the cart weight wins;
-      // heavier than every slab falls back to the state's flat rate
-      const matched = weightRates.find((w) => totalWeight <= w.weightKg)
+      // Use the largest weight slab that is less than or equal to the order weight.
+      // This matches the business rule where 0.7kg uses the 0.5kg rate and 1.5kg uses the 1kg rate.
+      const matched = [...weightRates]
+        .filter((w) => totalWeight >= w.weightKg)
+        .sort((a, b) => b.weightKg - a.weightKg)[0]
+
       if (matched) {
         baseFee = matched.rate
         appliedWeightKg = matched.weightKg

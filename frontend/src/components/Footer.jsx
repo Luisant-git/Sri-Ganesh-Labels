@@ -45,10 +45,9 @@ const shopLinks = [
 
 const serviceLinks = [
   { label: 'Contact Us', to: '/contact' },
-  { label: 'Shipping', to: '/contact' },
-  { label: 'Returns', to: '/contact' },
-  { label: 'Privacy Policy', to: '/contact' },
-  { label: 'Terms & Conditions', to: '/contact' },
+  { label: 'Shipping & Return Policy', to: '/shipping-return-policy' },
+  { label: 'Privacy Policy', to: '/privacy-policy' },
+  { label: 'Terms & Conditions', to: '/terms-conditions' },
 ]
 
 const accountLinks = [

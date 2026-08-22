@@ -129,7 +129,10 @@ export function CartProvider({ children }) {
           : []
         if (weightRates.length > 0) {
           const totalWeight = items.reduce((s, i) => s + (Number(i.weight) || 0) * i.quantity, 0)
-          const matched = weightRates.find((w) => totalWeight <= w.weightKg)
+          const matched = [...weightRates]
+            .filter((w) => totalWeight >= w.weightKg)
+            .sort((a, b) => b.weightKg - a.weightKg)[0]
+
           if (matched) return matched.rate
           return Number(rule.flatShippingRate)
         }

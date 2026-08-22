@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from 'react'
-import { Search, Plus, Edit, Trash2, Truck } from 'lucide-react'
+import { Search, Plus, Edit, Trash2, Truck, Eye, X } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import DataTable from '../components/DataTable'
 import { getShippingRules, deleteShippingRule } from '../api/shippingApi'
+import './ShippingSettings.scss'
 
 const ShippingSettings = () => {
   const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState('')
   const [shippingList, setShippingList] = useState([])
+  const [viewModal, setViewModal] = useState({ open: false, data: null })
 
   useEffect(() => {
     fetchShippingRules()
@@ -37,6 +39,22 @@ const ShippingSettings = () => {
         toast.error('Failed to delete shipping rule')
       }
     }
+  }
+
+  const formatWeightRules = (weightRules) => {
+    if (!Array.isArray(weightRules) || weightRules.length === 0) {
+      return 'No weight-based rules'
+    }
+
+    return weightRules
+      .slice()
+      .sort((a, b) => Number(a.weightKg) - Number(b.weightKg))
+      .map((rule) => {
+        const weight = Number(rule.weightKg)
+        const weightLabel = Number.isInteger(weight) ? `${weight} kg` : `${weight.toFixed(2)} kg`
+        return `${weightLabel} = ₹${Number(rule.rate).toFixed(2)}`
+      })
+      .join(' • ')
   }
 
   const columns = [
@@ -76,6 +94,9 @@ const ShippingSettings = () => {
       label: 'Actions',
       render: (_, row) => (
         <div className="action-buttons">
+          <button className="action-btn view" onClick={() => setViewModal({ open: true, data: row })} title="View">
+            <Eye size={16} />
+          </button>
           <button className="action-btn edit" onClick={() => handleEdit(row.id)} title="Edit">
             <Edit size={16} />
           </button>
@@ -119,6 +140,51 @@ const ShippingSettings = () => {
         searchTerm={searchTerm}
         searchKey="state"
       />
+
+      {viewModal.open && (
+        <div className="modal-backdrop" onClick={() => setViewModal({ open: false, data: null })}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <button className="modal-close" onClick={() => setViewModal({ open: false, data: null })}>
+              <X size={20} />
+            </button>
+            <div className="modal-content view-modal" style={{ maxHeight: '80vh', overflowY: 'auto' }}>
+              <h2>Shipping Rule Details</h2>
+              <div className="modal-product-info">
+                <p><strong>State:</strong> {viewModal.data?.state}</p>
+                <p><strong>Flat Shipping Rate:</strong> ₹{viewModal.data?.flatShippingRate}</p>
+                <p><strong>COD Available:</strong> {viewModal.data?.codAvailable ? 'Yes' : 'No'}</p>
+                {Array.isArray(viewModal.data?.weightRates) && viewModal.data.weightRates.length > 0 && (
+                  <>
+                    <p><strong>Weight Rules:</strong></p>
+                    <table className="weight-table">
+                      <thead>
+                        <tr>
+                          <th>Weight</th>
+                          <th>Rate</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {viewModal.data.weightRates
+                          .slice()
+                          .sort((a, b) => Number(a.weightKg) - Number(b.weightKg))
+                          .map((rule, index) => {
+                            const weight = Number(rule.weightKg)
+                            return (
+                              <tr key={`${weight}-${index}`}>
+                                <td>{Number.isInteger(weight) ? `${weight} kg` : `${weight.toFixed(2)} kg`}</td>
+                                <td>₹{Number(rule.rate).toFixed(2)}</td>
+                              </tr>
+                            )
+                          })}
+                      </tbody>
+                    </table>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 };
