@@ -159,6 +159,10 @@ export default function ProductDetail() {
               <img
                 src={gallery[selectedImage]}
                 alt={product.name}
+                loading="eager"
+                decoding="async"
+                width={800}
+                height={800}
                 className="aspect-square w-full object-cover transition-transform duration-300"
                 style={{
                   transformOrigin: `${zoom ? 'var(--mx, 50%) var(--my, 50%)' : 'center'}`,
@@ -177,7 +181,15 @@ export default function ProductDetail() {
                       : 'border-slate-200 opacity-80 hover:border-brand-300 hover:opacity-100'
                   }`}
                 >
-                  <img src={img} alt={`${product.name} ${i + 1}`} loading="lazy" className="aspect-square w-full object-cover" />
+                  <img
+                    src={img}
+                    alt={`${product.name} ${i + 1}`}
+                    loading="lazy"
+                    decoding="async"
+                    width={200}
+                    height={200}
+                    className="aspect-square w-full object-cover"
+                  />
                 </button>
               ))}
             </div>

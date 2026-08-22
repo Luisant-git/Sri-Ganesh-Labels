@@ -53,7 +53,13 @@
 }
 
 html {
-  scroll-behavior: smooth;
+  scroll-behavior: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
 }
 
 body {
@@ -61,6 +67,26 @@ body {
   color: #1e293b;
   background-color: #f8fafc;
   -webkit-font-smoothing: antialiased;
+}
+
+img,
+video {
+  max-width: 100%;
+  display: block;
+}
+
+img {
+  content-visibility: auto;
+  contain-intrinsic-size: 1200px 800px;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+}
+
+section,
+article,
+main {
+  content-visibility: auto;
+  contain-intrinsic-size: 1200px 600px;
 }
 
 .font-display {

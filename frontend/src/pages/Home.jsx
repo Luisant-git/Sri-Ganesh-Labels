@@ -131,12 +131,16 @@ export default function Home() {
                   src={slide.mobileImage}
                   alt={`Sri Ganesh Labels ${i + 1}`}
                   loading={i === 0 ? 'eager' : 'lazy'}
+                  decoding="async"
+                  fetchPriority={i === 0 ? 'high' : 'auto'}
                   className="absolute inset-0 h-full w-full object-cover md:hidden"
                 />
                 <img
                   src={slide.image}
                   alt={`Sri Ganesh Labels ${i + 1}`}
                   loading={i === 0 ? 'eager' : 'lazy'}
+                  decoding="async"
+                  fetchPriority={i === 0 ? 'high' : 'auto'}
                   className="absolute inset-0 hidden h-full w-full object-cover md:block"
                 />
               </>
@@ -145,6 +149,8 @@ export default function Home() {
                 src={slide.image}
                 alt={`Sri Ganesh Labels ${i + 1}`}
                 loading={i === 0 ? 'eager' : 'lazy'}
+                decoding="async"
+                fetchPriority={i === 0 ? 'high' : 'auto'}
                 className="absolute inset-0 h-full w-full object-cover"
               />
             ))}
@@ -232,6 +238,9 @@ export default function Home() {
                   src={cat.image}
                   alt={cat.name}
                   loading="lazy"
+                  decoding="async"
+                  width={600}
+                  height={450}
                   className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
                 />
               </div>

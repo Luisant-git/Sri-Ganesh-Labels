@@ -40,6 +40,9 @@ export default function ProductCard({ product, centered = false }) {
           src={product.image}
           alt={product.name}
           loading="lazy"
+          decoding="async"
+          width={400}
+          height={300}
           className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-slate-900/10 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
