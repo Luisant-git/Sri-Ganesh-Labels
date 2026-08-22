@@ -3423,7 +3423,10 @@ const statusCounts = getStatusCounts();
                               </div>
                             ) : (
                               <>
-                                <p>Size: {item.size}, Color: {item.color}</p>
+                                {(() => {
+                                  const displayVariant = [item.size, item.color].filter(Boolean).join(', ');
+                                  return displayVariant ? <p>{displayVariant}</p> : null;
+                                })()}
                                 {item.sizeVariantId && (
                                   <p style={{ fontSize: '14px', color: '#111', fontFamily: 'monospace', background: '#fef3c7', padding: '4px 8px', borderRadius: '4px', display: 'inline-block', marginTop: '4px' }}>
                                     Variant ID: <strong style={{ fontWeight: '900', fontSize: '16px' }}>{item.sizeVariantId}</strong>
