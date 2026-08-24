@@ -1,29 +1,45 @@
 import { Controller, Post, Delete, Body, UseInterceptors, UploadedFile, Req } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
-import { extname } from 'path';
-import { unlink, readdir } from 'fs/promises';
-import { join } from 'path';
+import { memoryStorage } from 'multer';
+import { extname, join } from 'path';
+import { unlink, readdir, writeFile } from 'fs/promises';
 import type { Request } from 'express';
+import * as sharp from 'sharp';
 
 @Controller('upload')
 export class UploadController {
   @Post('image')
   @UseInterceptors(FileInterceptor('image', {
-    storage: diskStorage({
-      destination: './uploads',
-      filename: (req, file, cb) => {
-        const originalName = file.originalname;
-        if (originalName.startsWith('invoice-') || originalName.startsWith('packageslip-')) {
-          cb(null, originalName);
-        } else {
-          const randomName = Array(32).fill(null).map(() => (Math.round(Math.random() * 16)).toString(16)).join('');
-          cb(null, `${randomName}${extname(file.originalname)}`);
-        }
-      },
-    }),
+    storage: memoryStorage(),
   }))
-  uploadImage(@UploadedFile() file: Express.Multer.File, @Req() req: Request) {
+  async uploadImage(@UploadedFile() file: Express.Multer.File, @Req() req: Request) {
+    const originalName = file.originalname;
+    let filename: string;
+    let buffer = file.buffer;
+
+    if (originalName.startsWith('invoice-') || originalName.startsWith('packageslip-')) {
+      filename = originalName;
+    } else {
+      const randomName = Array(32).fill(null).map(() => (Math.round(Math.random() * 16)).toString(16)).join('');
+      if (file.mimetype && file.mimetype.startsWith('image/')) {
+        filename = `${randomName}.webp`;
+        try {
+          buffer = await sharp(file.buffer)
+            .resize({ width: 1200, withoutEnlargement: true })
+            .webp({ quality: 80 })
+            .toBuffer();
+        } catch (e) {
+          console.error('Sharp processing failed:', e);
+          filename = `${randomName}${extname(originalName)}`;
+        }
+      } else {
+        filename = `${randomName}${extname(originalName)}`;
+      }
+    }
+
+    const filePath = join('./uploads', filename);
+    await writeFile(filePath, buffer);
+
     const requestHost = req.get('host');
     const requestBase = req.protocol && requestHost ? `${req.protocol}://${requestHost}` : undefined;
     const configuredBase = process.env.UPLOAD_URL || process.env.API_BASE_URL || process.env.APP_URL || process.env.PUBLIC_URL || requestBase || 'http://localhost:5000';
@@ -31,8 +47,8 @@ export class UploadController {
     const uploadsBaseUrl = `${baseUrl}/uploads`;
 
     return {
-      filename: file.filename,
-      url: `${uploadsBaseUrl}/${file.filename}`,
+      filename: filename,
+      url: `${uploadsBaseUrl}/${filename}`,
     };
   }
 
