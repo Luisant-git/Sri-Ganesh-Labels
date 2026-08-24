@@ -61,10 +61,14 @@ export default function ProductDetail() {
     }
   }, [id])
 
-  const gallery = useMemo(
-    () => (product ? [product.image, ...(product.gallery || []).filter((g) => g !== product.image)].slice(0, 5) : []),
-    [product]
-  )
+  const gallery = useMemo(() => {
+    if (!product) return []
+    const rawGallery = product.gallery || []
+    const mainImg = product.image || rawGallery[0]?.url || (typeof rawGallery[0] === 'string' ? rawGallery[0] : null)
+    const allUrls = rawGallery.map((g) => (typeof g === 'string' ? g : g?.url)).filter(Boolean)
+    const otherImgs = allUrls.filter((url) => url !== mainImg)
+    return [mainImg, ...otherImgs].filter(Boolean).slice(0, 5)
+  }, [product])
 
   const tiers = product?.quantityPrices || []
   const unitPrice = product ? getTierUnitPrice(tiers, product.price, qty) ?? product.price : 0
@@ -161,10 +165,14 @@ export default function ProductDetail() {
                 alt={product.name}
                 loading="eager"
                 decoding="async"
-                width={800}
-                height={800}
-                className="aspect-square w-full object-cover transition-transform duration-300"
+                fetchPriority="high"
+                width="800"
+                height="800"
+                className="transition-transform duration-300"
                 style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'contain',
                   transformOrigin: `${zoom ? 'var(--mx, 50%) var(--my, 50%)' : 'center'}`,
                   transform: zoom ? 'scale(1.7)' : 'scale(1)',
                 }}
@@ -186,8 +194,8 @@ export default function ProductDetail() {
                     alt={`${product.name} ${i + 1}`}
                     loading="lazy"
                     decoding="async"
-                    width={200}
-                    height={200}
+                    width="80"
+                    height="80"
                     className="aspect-square w-full object-cover"
                   />
                 </button>

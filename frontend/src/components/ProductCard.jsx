@@ -37,13 +37,19 @@ export default function ProductCard({ product, centered = false }) {
     <div className="group relative flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-brand-200 hover:shadow-xl hover:shadow-brand-900/5">
       <Link to={`/products/${product.id}`} className="relative block aspect-[4/3] overflow-hidden bg-slate-100">
         <img
-          src={product.image}
+          src={product.gallery?.[0]?.url || product.image}
           alt={product.name}
           loading="lazy"
           decoding="async"
-          width={400}
-          height={300}
-          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+          fetchPriority="low"
+          width="400"
+          height="400"
+          className="transition-transform duration-500 group-hover:scale-110"
+          style={{
+            width: "100%",
+            height: "100%",
+            objectFit: "contain",
+          }}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-slate-900/10 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
       </Link>

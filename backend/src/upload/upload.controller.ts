@@ -9,9 +9,14 @@ import sharp = require('sharp');
 @Controller('upload')
 export class UploadController {
   @Post('image')
-  @UseInterceptors(FileInterceptor('image', {
-    storage: memoryStorage(),
-  }))
+  @UseInterceptors(
+    FileInterceptor('image', {
+      storage: memoryStorage(),
+      limits: {
+        fileSize: 10 * 1024 * 1024, // 10 MB upload limit
+      },
+    }),
+  )
   async uploadImage(@UploadedFile() file: Express.Multer.File, @Req() req: Request) {
     const originalName = file.originalname;
     let filename: string;
@@ -25,8 +30,17 @@ export class UploadController {
         filename = `${randomName}.webp`;
         try {
           buffer = await sharp(file.buffer)
-            .resize({ width: 1200, withoutEnlargement: true })
-            .webp({ quality: 80 })
+            .rotate()
+            .resize({
+              width: 1200,
+              height: 1200,
+              fit: 'inside',
+              withoutEnlargement: true,
+            })
+            .webp({
+              quality: 80,
+              effort: 4,
+            })
             .toBuffer();
         } catch (e) {
           console.error('Sharp processing failed:', e);
