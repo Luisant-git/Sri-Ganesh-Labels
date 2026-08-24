@@ -4,7 +4,7 @@ import { memoryStorage } from 'multer';
 import { extname, join } from 'path';
 import { unlink, readdir, writeFile } from 'fs/promises';
 import type { Request } from 'express';
-import * as sharp from 'sharp';
+import sharp = require('sharp');
 
 @Controller('upload')
 export class UploadController {
