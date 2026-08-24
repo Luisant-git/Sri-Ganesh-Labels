@@ -330,7 +330,7 @@ const AddProduct = () => {
               <label htmlFor="gallery-upload" className="upload-label">
                 <Upload size={48} />
                 <p>Click to upload gallery images</p>
-                <span>PNG, JPG up to 5MB (Multiple files)</span>
+                <span>PNG, JPG up to 10MB (Multiple files)</span>
               </label>
             </div>
 
