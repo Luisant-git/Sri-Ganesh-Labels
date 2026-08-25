@@ -47,10 +47,18 @@ const testimonials = [
 
 export default function Home() {
   const [current, setCurrent] = useState(0)
-  const [banners, setBanners] = useState(null)
-  const [apiCategories, setApiCategories] = useState(null)
-  const [featuredProducts, setFeaturedProducts] = useState([])
-  const [allProducts, setAllProducts] = useState([])
+  const [banners, setBanners] = useState(() => {
+    try { const cached = localStorage.getItem('sgl_banners'); return cached ? JSON.parse(cached) : null } catch { return null }
+  })
+  const [apiCategories, setApiCategories] = useState(() => {
+    try { const cached = localStorage.getItem('sgl_categories'); return cached ? JSON.parse(cached) : null } catch { return null }
+  })
+  const [allProducts, setAllProducts] = useState(() => {
+    try { const cached = localStorage.getItem('sgl_all_products'); return cached ? JSON.parse(cached) : [] } catch { return [] }
+  })
+  const [featuredProducts, setFeaturedProducts] = useState(() => {
+    try { const cached = localStorage.getItem('sgl_featured_products'); return cached ? JSON.parse(cached) : [] } catch { return [] }
+  })
 
   const heroSlides = banners
     ? banners.map((b) => ({
@@ -73,14 +81,22 @@ export default function Home() {
     let cancelled = false
     getActiveBanners()
       .then((data) => {
-        if (!cancelled) setBanners(Array.isArray(data) && data.length > 0 ? data : [])
+        if (!cancelled) {
+          const b = Array.isArray(data) && data.length > 0 ? data : []
+          setBanners(b)
+          try { localStorage.setItem('sgl_banners', JSON.stringify(b)) } catch {}
+        }
       })
       .catch(() => {
         if (!cancelled) setBanners([])
       })
     getCategories()
       .then((data) => {
-        if (!cancelled) setApiCategories(Array.isArray(data) && data.length > 0 ? data : [])
+        if (!cancelled) {
+          const c = Array.isArray(data) && data.length > 0 ? data : []
+          setApiCategories(c)
+          try { localStorage.setItem('sgl_categories', JSON.stringify(c)) } catch {}
+        }
       })
       .catch(() => {
         if (!cancelled) setApiCategories([])
@@ -91,6 +107,10 @@ export default function Home() {
         const list = Array.isArray(data) ? data : []
         setAllProducts(list)
         setFeaturedProducts(list.slice(0, 8))
+        try {
+          localStorage.setItem('sgl_all_products', JSON.stringify(list))
+          localStorage.setItem('sgl_featured_products', JSON.stringify(list.slice(0, 8)))
+        } catch {}
       })
       .catch(() => {
         if (!cancelled) {
