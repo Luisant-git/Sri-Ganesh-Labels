@@ -23,9 +23,9 @@ import { getPublicOrder } from '../api/orderApi'
 
 const STORE = {
   name: 'Sri Ganesh Labels',
-  address: '300, Cherry Road, Salem-636007, Tamil Nadu',
-  phone: 'Ph: 0427-4030892 · Cen: 8754030968 · Off: 9443665335',
-  email: 'sriganeshlabelssale@gmail.com',
+  address: '1&2, Sri Ayyappan Nagar, Mookaneri Adikarai, Salem 636008',
+  phone: 'Off: 0427 2221968 · Mob: 87540 30968, 93441 44992',
+  email: 'sriganeshlabelssalem@gmail.com',
 }
 
 const STEPS = [

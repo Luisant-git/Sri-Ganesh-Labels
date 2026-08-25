@@ -7,17 +7,17 @@ const info = [
   {
     icon: Phone,
     title: 'Phone',
-    lines: ['Ph: 0427-4030892', 'Cen: 8754030968 · Off: 9443665335'],
+    lines: ['Off: 0427 2221968', 'Mob: 87540 30968, 93441 44992'],
   },
   {
     icon: Mail,
     title: 'Email',
-    lines: ['sriganeshlabelssale@gmail.com'],
+    lines: ['sriganeshlabelssalem@gmail.com'],
   },
   {
     icon: MapPin,
     title: 'Address',
-    lines: ['Sri Ganesh Labels', '300, Cherry Road, Salem-636007, Tamil Nadu'],
+    lines: ['Sri Ganesh Labels', '1&2, Sri Ayyappan Nagar, Mookaneri Adikarai, Salem 636008'],
   },
   {
     icon: Clock,
@@ -180,10 +180,11 @@ export default function Contact() {
         <div className="mt-10 overflow-hidden rounded-2xl border border-slate-200 shadow-sm">
           <iframe
             title="Sri Ganesh Labels location"
-            src="https://www.google.com/maps?q=Chennai,+Tamil+Nadu,+India&output=embed"
+            src="https://www.google.com/maps/embed?pb=!1m13!1m8!1m3!1d3907.1606452106985!2d78.180109!3d11.683025!3m2!1i1024!2i768!4f13.1!3m2!1m1!2zMTHCsDQwJzU4LjkiTiA3OMKwMTAnNDguNCJF!5e0!3m2!1sen!2sus!4v1787655591750!5m2!1sen!2sus"
             className="h-80 w-full border-0"
+            allowFullScreen=""
             loading="lazy"
-            referrerPolicy="no-referrer-when-downgrade"
+            referrerPolicy="strict-origin-when-cross-origin"
           />
         </div>
       </section>

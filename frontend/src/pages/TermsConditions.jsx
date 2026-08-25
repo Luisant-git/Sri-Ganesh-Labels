@@ -50,7 +50,7 @@ const sections = [
   },
   {
     title: '8. Contact',
-    body: ['Sri Ganesh Labels, 300, Cherry Road, Salem – 636007, Tamil Nadu.', 'Phone: 0427-4030892 · Email: sriganeshlabelssale@gmail.com'],
+    body: ['Sri Ganesh Labels, 1&2, Sri Ayyappan Nagar, Mookaneri Adikarai, Salem 636008.', 'Phone: 0427 2221968 · Email: sriganeshlabelssalem@gmail.com'],
   },
 ]
 

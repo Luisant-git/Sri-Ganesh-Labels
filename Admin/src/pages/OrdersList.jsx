@@ -45,7 +45,7 @@ const SELLER_DETAILS = [
 
 const PACKAGE_SLIP_SELLER_DETAILS = [
   'SRI GANESH LABELS',
-  '300, Cherry Road, Salem-636007, Tamil Nadu',
+  '1&2, Sri Ayyappan Nagar, Mookaneri Adikarai, Salem 636008',
   'GST No: 33ANCPK9033A1ZK',
 ];
 
