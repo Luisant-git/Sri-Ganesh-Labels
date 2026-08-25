@@ -1,13 +1,19 @@
 import * as nodemailer from 'nodemailer';
 import { EmailService } from './email.service';
 
+jest.mock('nodemailer', () => ({
+  createTransport: jest.fn(),
+}));
+
 describe('EmailService order email templates', () => {
   it('sends a received message with order details for placed orders', async () => {
     const sendMail = jest.fn().mockResolvedValue({});
-    jest.spyOn(nodemailer, 'createTransport').mockReturnValue({
+    (nodemailer.createTransport as jest.Mock).mockReturnValue({
       sendMail,
     } as any);
 
+    process.env.EMAIL_USER = 'test@example.com';
+    process.env.EMAIL_PASSWORD = 'password';
     const service = new EmailService({} as any);
 
     await service.sendOrderStatusEmail(

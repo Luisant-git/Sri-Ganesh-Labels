@@ -39,9 +39,6 @@ export default function ProductCard({ product, centered = false }) {
         <img
           src={product.gallery?.[0]?.url || product.image}
           alt={product.name}
-          loading="lazy"
-          decoding="async"
-          fetchPriority="low"
           width="400"
           height="400"
           className="transition-transform duration-500 group-hover:scale-110"
