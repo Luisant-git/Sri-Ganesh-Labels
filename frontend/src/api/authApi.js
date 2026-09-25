@@ -34,11 +34,11 @@ const post = async (url, body) => {
   return data;
 };
 
-export const userRegister = async (mobile, password, name) =>
-  post('/auth/user/register', { mobile, password, name });
+export const userRegister = async (mobile, name) =>
+  post('/auth/user/register', { mobile, name });
 
-export const userLogin = async (mobile, password) =>
-  post('/auth/user/login', { mobile, password });
+export const userLogin = async (mobile) =>
+  post('/auth/user/login', { mobile });
 
 export const userCheck = async (mobile) =>
   post('/auth/user/check', { mobile });

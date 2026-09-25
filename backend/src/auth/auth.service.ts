@@ -23,20 +23,19 @@ export class AuthService {
     });
   }
 
-  async registerUser(mobile: string, password: string, name?: string) {
+  async registerUser(mobile: string, name?: string) {
     const phone = this.normalizePhone(mobile);
     const existing = await this.findUserByPhone(phone);
     if (existing) throw new ConflictException('Mobile number already registered. Please login.');
-    const hashedPassword = await bcrypt.hash(password, 10);
     const user = await this.prisma.user.create({
-      data: { phone, password: hashedPassword, name: (name || '').trim() },
+      data: { phone, name: (name || '').trim() },
     });
     return this.generateToken(user.id, user.email || '', 'user', user.phone || undefined, user.name || undefined);
   }
  
-  async loginUser(mobile: string, password: string) {
+  async loginUser(mobile: string) {
     const user = await this.findUserByPhone(mobile);
-    if (!user || !user.password || !await bcrypt.compare(password, user.password)) {
+    if (!user) {
       throw new UnauthorizedException('Invalid credentials');
     }
     return this.generateToken(user.id, user.email || '', 'user', user.phone || undefined, user.name || undefined);

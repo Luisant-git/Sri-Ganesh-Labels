@@ -41,9 +41,9 @@ export function AuthProvider({ children }) {
     if (action) action()
   }
 
-  const register = async ({ mobile, name, password }) => {
+  const register = async ({ mobile, name }) => {
     try {
-      const data = await userRegister(mobile, password, name)
+      const data = await userRegister(mobile, name)
       setToken(data.access_token)
       const payload = decodeToken(data.access_token)
       setUser({ mobile: payload.phone || mobile, name: (payload.name || (name || '').trim() || '').trim() })
@@ -56,9 +56,9 @@ export function AuthProvider({ children }) {
     }
   }
 
-  const login = async ({ mobile, password }) => {
+  const login = async ({ mobile }) => {
     try {
-      const data = await userLogin(mobile, password)
+      const data = await userLogin(mobile)
       setToken(data.access_token)
       const payload = decodeToken(data.access_token)
       setUser({ mobile: payload.phone || mobile, name: (payload.name || '').trim() })

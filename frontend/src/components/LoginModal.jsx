@@ -1,14 +1,13 @@
 import { useState } from 'react'
-import { X, Lock, User, ShieldCheck, LogIn, UserPlus, ArrowLeft } from 'lucide-react'
+import { X, User, ShieldCheck, LogIn, UserPlus, ArrowLeft } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { toast } from './Toast'
 
 export default function LoginModal() {
   const { loginOpen, closeLogin, login, register, isRegistered } = useAuth()
-  const [stage, setStage] = useState('mobile') // 'mobile' | 'pass' | 'signup'
+  const [stage, setStage] = useState('mobile') // 'mobile' | 'signup'
   const [mobile, setMobile] = useState('')
   const [name, setName] = useState('')
-  const [password, setPassword] = useState('')
   const [errors, setErrors] = useState({})
 
   if (!loginOpen) return null
@@ -17,7 +16,6 @@ export default function LoginModal() {
     setStage('mobile')
     setMobile('')
     setName('')
-    setPassword('')
     setErrors({})
   }
 
@@ -28,7 +26,6 @@ export default function LoginModal() {
 
   const goBack = () => {
     setStage('mobile')
-    setPassword('')
     setErrors({})
   }
 
@@ -41,8 +38,13 @@ export default function LoginModal() {
     setErrors({})
     const registered = await isRegistered(mobile)
     if (registered) {
-      setStage('pass')
-      toast('Welcome back! Enter your password to login.')
+      const res = await login({ mobile })
+      if (!res.ok) {
+        toast(res.error, 'error')
+        return
+      }
+      toast('Login successful!')
+      reset()
     } else {
       setStage('signup')
       toast('New number! Create your account to continue.')
@@ -53,26 +55,15 @@ export default function LoginModal() {
     e.preventDefault()
     const er = {}
     if (stage === 'signup' && name.trim() && name.trim().length < 3) er.name = 'Name must be at least 3 characters'
-    if (!password || password.length < 4) er.password = 'Password must be at least 4 characters'
     setErrors(er)
     if (Object.keys(er).length > 0) return
 
-    if (stage === 'pass') {
-      const res = await login({ mobile, password })
-      if (!res.ok) {
-        toast(res.error, 'error')
-        setErrors({ password: res.error })
-        return
-      }
-      toast('Login successful!')
-    } else {
-      const res = await register({ mobile, name, password })
-      if (!res.ok) {
-        toast(res.error, 'error')
-        return
-      }
-      toast('Account created & logged in!')
+    const res = await register({ mobile, name })
+    if (!res.ok) {
+      toast(res.error, 'error')
+      return
     }
+    toast('Account created & logged in!')
     reset()
   }
 
@@ -106,8 +97,6 @@ export default function LoginModal() {
           <p className="relative mt-1.5 text-sm text-slate-500">
             {stage === 'mobile'
               ? 'Enter your mobile number to continue'
-              : stage === 'pass'
-              ? 'Enter your password to login'
               : 'Create your account to start shopping'}
           </p>
         </div>
@@ -163,6 +152,7 @@ export default function LoginModal() {
                         value={name}
                         onChange={(e) => setName(e.target.value)}
                         placeholder="Your name"
+                        autoFocus
                         className={`${fieldCls('name')} pl-10`}
                       />
                     </div>
@@ -170,30 +160,12 @@ export default function LoginModal() {
                   </div>
                 )}
 
-                <div>
-                  <label className="text-xs font-semibold text-slate-600">
-                    {stage === 'signup' ? 'Create Password' : 'Password'}
-                  </label>
-                  <div className={inputWrapCls}>
-                    <Lock size={16} className="pointer-events-none absolute left-4 text-secondary-600" />
-                    <input
-                      type="password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder="Enter password"
-                      autoFocus
-                      className={`${fieldCls('password')} pl-10`}
-                    />
-                  </div>
-                  {errors.password && <p className="mt-1 text-xs text-rose-500">{errors.password}</p>}
-                </div>
-
                 <button
                   type="submit"
                   className="mt-1 flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-accent-500 to-accent-600 py-3.5 text-sm font-bold text-white shadow-lg shadow-accent-500/30 transition-all hover:shadow-accent-500/40 active:scale-[0.98]"
                 >
-                  {stage === 'pass' ? <LogIn size={16} /> : <UserPlus size={16} />}
-                  {stage === 'pass' ? 'Login' : 'Create Account'}
+                  <UserPlus size={16} />
+                  Create Account
                 </button>
               </form>
             )}

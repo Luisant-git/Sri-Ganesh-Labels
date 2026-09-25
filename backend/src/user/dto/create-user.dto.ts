@@ -11,9 +11,7 @@ export class CreateUserDto {
     @IsString()
     name?: string;
 
-    @ApiProperty({ example: 'password123' })
-    @IsString()
-    password: string;
+
 
     @ApiPropertyOptional({ example: true })
     @IsOptional()

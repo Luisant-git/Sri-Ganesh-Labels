@@ -8,11 +8,7 @@ class UserAuthDto {
   @IsString()
   mobile: string;
  
-  @ApiProperty({ example: 'password123' })
-  @IsString()
-  password: string;
- 
-  @ApiPropertyOptional({ example: 'John Doe' })
+@ApiPropertyOptional({ example: 'John Doe' })
   @IsString()
   @IsOptional()
   name?: string;
@@ -52,15 +48,15 @@ export class AuthController {
   @Post('user/register')
   @ApiOperation({ summary: 'Register new user' })
   @ApiResponse({ status: 201, type: TokenResponse })
-  async registerUser(@Body() { mobile, password, name }: UserAuthDto) {
-    return this.authService.registerUser(mobile, password, name);
+  async registerUser(@Body() { mobile, name }: UserAuthDto) {
+    return this.authService.registerUser(mobile, name);
   }
  
   @Post('user/login')
   @ApiOperation({ summary: 'User login' })
   @ApiResponse({ status: 200, type: TokenResponse })
-  async loginUser(@Body() { mobile, password }: UserAuthDto) {
-    return this.authService.loginUser(mobile, password);
+  async loginUser(@Body() { mobile }: UserAuthDto) {
+    return this.authService.loginUser(mobile);
   }
  
   @Post('user/check')
