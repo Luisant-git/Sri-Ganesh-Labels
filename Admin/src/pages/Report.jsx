@@ -222,8 +222,8 @@ const Reports = () => {
 
   const formatCurrency = (value) => {
     const num = parseFloat(value);
-    if (isNaN(num)) return '₹0.00';
-    return `₹${num.toFixed(2)}`;
+    if (isNaN(num)) return '₹0';
+    return `₹${Math.round(num)}`;
   };
 
   const formatNumber = (value) => {
@@ -389,16 +389,16 @@ const Reports = () => {
       'Payment Method': '',
       'Items': excelData.reduce((sum, r) => sum + (r['Items'] || 0), 0),
       'Quantity': excelData.reduce((sum, r) => sum + (r['Quantity'] || 0), 0),
-      'Subtotal': parseFloat(excelData.reduce((sum, r) => sum + (r['Subtotal'] || 0), 0).toFixed(2)),
-      'Delivery Fee': parseFloat(excelData.reduce((sum, r) => sum + (r['Delivery Fee'] || 0), 0).toFixed(2)),
-      'COD Fee': parseFloat(excelData.reduce((sum, r) => sum + (r['COD Fee'] || 0), 0).toFixed(2)),
-      'Discount': parseFloat(excelData.reduce((sum, r) => sum + (r['Discount'] || 0), 0).toFixed(2)),
-      'Total': parseFloat(excelData.reduce((sum, r) => sum + (r['Total'] || 0), 0).toFixed(2)),
-      'COD/online commission (Admin)': parseFloat(excelData.reduce((sum, r) => sum + (r['COD/online commission (Admin)'] || 0), 0).toFixed(2)),
-      'Settlement AMT': parseFloat(excelData.reduce((sum, r) => sum + (r['Settlement AMT'] || 0), 0).toFixed(2)),
+      'Subtotal': Math.round(excelData.reduce((sum, r) => sum + (r['Subtotal'] || 0), 0)),
+      'Delivery Fee': Math.round(excelData.reduce((sum, r) => sum + (r['Delivery Fee'] || 0), 0)),
+      'COD Fee': Math.round(excelData.reduce((sum, r) => sum + (r['COD Fee'] || 0), 0)),
+      'Discount': Math.round(excelData.reduce((sum, r) => sum + (r['Discount'] || 0), 0)),
+      'Total': Math.round(excelData.reduce((sum, r) => sum + (r['Total'] || 0), 0)),
+      'COD/online commission (Admin)': Math.round(excelData.reduce((sum, r) => sum + (r['COD/online commission (Admin)'] || 0), 0)),
+      'Settlement AMT': Math.round(excelData.reduce((sum, r) => sum + (r['Settlement AMT'] || 0), 0)),
       'Weight (gms)': '',
-      'Courier Charge': parseFloat(excelData.reduce((sum, r) => sum + (r['Courier Charge'] || 0), 0).toFixed(2)),
-      'Total profit': parseFloat(excelData.reduce((sum, r) => sum + (r['Total profit'] || 0), 0).toFixed(2)),
+      'Courier Charge': Math.round(excelData.reduce((sum, r) => sum + (r['Courier Charge'] || 0), 0)),
+      'Total profit': Math.round(excelData.reduce((sum, r) => sum + (r['Total profit'] || 0), 0)),
       'Cancel Reason': ''
     };
     
@@ -580,13 +580,13 @@ const Reports = () => {
                 <div className="stat-content">
                   <h3>₹{(() => {
                     const baseValue = salesSummary.totalBaseValue || 0;
-                    return baseValue.toFixed(2);
+                    return Math.round(baseValue);
                   })()}</h3>
                   <p style={{ marginBottom: '4px' }}>Total Base Value (Products)</p>
                   <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', fontSize: '10px', color: '#9ca3af', fontWeight: '500' }}>
-                    <span>COD: ₹{(salesSummary.totalCodBaseValue || 0).toFixed(2)}</span>
+                    <span>COD: ₹{Math.round(salesSummary.totalCodBaseValue || 0)}</span>
                     <span style={{ color: '#d1d5db' }}>|</span>
-                    <span>Online: ₹{((salesSummary.totalBaseValue || 0) - (salesSummary.totalCodBaseValue || 0)).toFixed(2)}</span>
+                    <span>Online: ₹{Math.round((salesSummary.totalBaseValue || 0) - (salesSummary.totalCodBaseValue || 0))}</span>
                   </div>
                 </div>
               </div>
@@ -595,12 +595,12 @@ const Reports = () => {
                   <Receipt size={24} />
                 </div>
                 <div className="stat-content">
-                  <h3>₹{salesSummary.totalValue?.toFixed(2) || '0.00'}</h3>
+                  <h3>₹{Math.round(salesSummary.totalValue || 0)}</h3>
                   <p style={{ marginBottom: '4px' }}>Total Value</p>
                   <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', fontSize: '10px', color: '#9ca3af', fontWeight: '500' }}>
-                    <span>COD: ₹{salesSummary.totalCodValue?.toFixed(2) || '0.00'}</span>
+                    <span>COD: ₹{Math.round(salesSummary.totalCodValue || 0)}</span>
                     <span style={{ color: '#d1d5db' }}>|</span>
-                    <span>Online: ₹{((salesSummary.totalValue || 0) - (salesSummary.totalCodValue || 0))?.toFixed(2) || '0.00'}</span>
+                    <span>Online: ₹{Math.round((salesSummary.totalValue || 0) - (salesSummary.totalCodValue || 0))}</span>
                   </div>
                 </div>
               </div>
@@ -637,15 +637,15 @@ const Reports = () => {
                   <Truck size={24} />
                 </div>
                 <div className="stat-content">
-                  <h3>₹{salesSummary.totalShippingValue?.toFixed(2) || '0.00'}</h3>
+                  <h3>₹{Math.round(salesSummary.totalShippingValue || 0)}</h3>
                   <p style={{ marginBottom: '4px' }}>Shipped Value</p>
                   <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', fontSize: '10px', color: '#9ca3af', fontWeight: '500' }}>
-                    <span>COD: ₹{salesSummary.totalCodShipping?.toFixed(2) || '0.00'}</span>
+                    <span>COD: ₹{Math.round(salesSummary.totalCodShipping || 0)}</span>
                     <span style={{ color: '#d1d5db' }}>|</span>
-                    <span>Online: ₹{salesSummary.totalOnlineShipping?.toFixed(2) || '0.00'}</span>
+                    <span>Online: ₹{Math.round(salesSummary.totalOnlineShipping || 0)}</span>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'center', gap: '4px', fontSize: '9px', color: '#ef4444', fontWeight: '600', marginTop: '4px' }}>
-                    <span>COD Return: ₹{salesSummary.totalCodReturnShipping?.toFixed(2) || '0.00'}</span>
+                    <span>COD Return: ₹{Math.round(salesSummary.totalCodReturnShipping || 0)}</span>
                   </div>
                 </div>
               </div>
@@ -670,7 +670,7 @@ const Reports = () => {
                   <Receipt size={24} />
                 </div>
                 <div className="stat-content">
-                  <h3>₹{salesSummary.totalDiscount?.toFixed(2) || '0.00'}</h3>
+                  <h3>₹{Math.round(salesSummary.totalDiscount || 0)}</h3>
                   <p>Total Discount</p>
                 </div>
               </div>

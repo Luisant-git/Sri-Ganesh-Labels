@@ -148,7 +148,7 @@ const QuantityPricingEditor = ({ tiers = [], onChange, gstPercentage = 0 }) => {
                   aria-label="Rate excluding GST"
                 />
                 <div style={hasRate ? styles.gstCell : styles.gstCellEmpty}>
-                  {hasRate ? `₹${inclGst.toFixed(2)}` : 'Enter a rate'}
+                  {hasRate ? `₹${Math.round(inclGst)}` : 'Enter a rate'}
                 </div>
                 <button
                   type="button"

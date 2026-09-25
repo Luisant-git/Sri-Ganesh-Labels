@@ -104,7 +104,7 @@ const ProductSalesReport = () => {
       'Current Stock': filteredProducts.reduce((sum, p) => sum + p.currentStock, 0),
       'Sale Stock': filteredProducts.reduce((sum, p) => sum + p.saleStock, 0),
       'Price': '',
-      'Total Sales Amount': filteredProducts.reduce((sum, p) => sum + p.totalSalesAmount, 0).toFixed(2)
+      'Total Sales Amount': Math.round(filteredProducts.reduce((sum, p) => sum + p.totalSalesAmount, 0))
     };
 
     excelData.push({});
@@ -289,7 +289,7 @@ const ProductSalesReport = () => {
             options={[
               ...uniquePrices.map(price => ({
                 value: String(price),
-                label: `₹${price}`
+                label: `₹${Math.round(parseFloat(price) || 0)}`
               }))
             ]}
           />
@@ -439,7 +439,7 @@ const ProductSalesReport = () => {
               <TrendingUp size={24} />
             </div>
             <div className="stat-content">
-              <h3>₹{filteredProducts.reduce((sum, p) => sum + p.totalSalesAmount, 0).toFixed(2)}</h3>
+              <h3>₹{Math.round(filteredProducts.reduce((sum, p) => sum + p.totalSalesAmount, 0))}</h3>
               <p>Total Sales Amount</p>
             </div>
           </div>
@@ -459,7 +459,7 @@ const ProductSalesReport = () => {
               {colorFilter && <span><strong>Color:</strong> {colorFilter}</span>}
               {sizeFilter && <span><strong>Size:</strong> {sizeFilter}</span>}
               {variantFilter && <span><strong>Variant ID:</strong> {variantFilter}</span>}
-              {priceFilter && <span><strong>Price:</strong> ₹{priceFilter}</span>}
+              {priceFilter && <span><strong>Price:</strong> ₹{Math.round(parseFloat(priceFilter) || 0)}</span>}
               {searchTerm && <span><strong>Search:</strong> {searchTerm}</span>}
             </div>
           </div>
@@ -535,7 +535,7 @@ const ProductSalesReport = () => {
                       {product.saleStock}
                     </td>
                     <td style={{ padding: '12px 16px', textAlign: 'center', fontSize: '14px', color: '#ef4444', fontWeight: '600' }}>{product.currentStock}</td>
-                    <td style={{ padding: '12px 16px', textAlign: 'center', fontSize: '14px', color: '#6b7280' }}>₹{product.price}</td>
+                    <td style={{ padding: '12px 16px', textAlign: 'center', fontSize: '14px', color: '#6b7280' }}>₹{Math.round(parseFloat(product.price) || 0)}</td>
                     <td 
                       onClick={() => handleViewSalesDetail(product)}
                       style={{ 
@@ -548,7 +548,7 @@ const ProductSalesReport = () => {
                         textDecoration: product.saleStock > 0 ? 'underline' : 'none' 
                       }}
                     >
-                      ₹{product.totalSalesAmount}
+                      ₹{Math.round(parseFloat(product.totalSalesAmount) || 0)}
                     </td>
                   </tr>
                 ))
@@ -567,7 +567,7 @@ const ProductSalesReport = () => {
                   <td style={{ padding: '12px 16px', textAlign: 'center', fontSize: '14px', color: '#10b981', fontWeight: '700' }}>{filteredProducts.reduce((sum, p) => sum + p.saleStock, 0)}</td>
                   <td style={{ padding: '12px 16px', textAlign: 'center', fontSize: '14px', color: '#ef4444', fontWeight: '700' }}>{filteredProducts.reduce((sum, p) => sum + p.currentStock, 0)}</td>
                   <td style={{ padding: '12px 16px', textAlign: 'center', fontSize: '14px', color: '#6b7280' }}></td>
-                  <td style={{ padding: '12px 16px', textAlign: 'center', fontSize: '14px', color: '#7c3aed', fontWeight: '700' }}>₹{filteredProducts.reduce((sum, p) => sum + p.totalSalesAmount, 0).toFixed(2)}</td>
+                  <td style={{ padding: '12px 16px', textAlign: 'center', fontSize: '14px', color: '#7c3aed', fontWeight: '700' }}>₹{Math.round(filteredProducts.reduce((sum, p) => sum + p.totalSalesAmount, 0))}</td>
                 </tr>
               )}
             </tbody>
@@ -603,7 +603,7 @@ const ProductSalesReport = () => {
                   </div>
                   <div style={{ display: 'flex', gap: '12px', marginTop: '8px', fontSize: '13px' }}>
                     <span style={{ color: '#10b981', fontWeight: '600' }}>Total Sold Qty: {selectedProductSales.saleStock}</span>
-                    <span style={{ color: '#7c3aed', fontWeight: '700' }}>Total Sales Amount: ₹{selectedProductSales.totalSalesAmount.toFixed(2)}</span>
+                    <span style={{ color: '#7c3aed', fontWeight: '700' }}>Total Sales Amount: ₹{Math.round(selectedProductSales.totalSalesAmount)}</span>
                   </div>
                 </div>
               </div>
@@ -672,9 +672,9 @@ const ProductSalesReport = () => {
                             </span>
                           )}
                         </td>
-                        <td style={{ padding: '10px 12px', textAlign: 'center' }}>₹{parseFloat(sale.price).toFixed(2)}</td>
+                        <td style={{ padding: '10px 12px', textAlign: 'center' }}>₹{Math.round(parseFloat(sale.price))}</td>
                         <td style={{ padding: '10px 12px', textAlign: 'center', fontWeight: '600' }}>{sale.quantity}</td>
-                        <td style={{ padding: '10px 12px', textAlign: 'center', fontWeight: '700', color: '#7c3aed' }}>₹{(sale.price * sale.quantity).toFixed(2)}</td>
+                        <td style={{ padding: '10px 12px', textAlign: 'center', fontWeight: '700', color: '#7c3aed' }}>₹{Math.round(sale.price * sale.quantity)}</td>
                         <td style={{ padding: '10px 12px', textAlign: 'center' }}>
                           <span className={`status-badge ${sale.status?.toLowerCase()}`} style={{ fontSize: '11px', padding: '2px 8px' }}>
                             {sale.status}

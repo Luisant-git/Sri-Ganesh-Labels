@@ -152,7 +152,7 @@ const response = await getAllCustomers(
       'Email': customer.email || 'N/A',
       'Phone': customer.phone || 'N/A',
       'Total Orders': customer.ordersCount || 0,
-      'Total Spent': `₹${(customer.totalSpent || 0).toFixed(2)}`,
+      'Total Spent': `₹${Math.round(customer.totalSpent || 0)}`,
       'Status': customer.status || 'N/A',
       'Join Date': customer.joinDate
         ? new Date(customer.joinDate).toLocaleDateString('en-GB')
@@ -206,7 +206,7 @@ const response = await getAllCustomers(
       )
     },
     { key: 'ordersCount', label: 'Orders', render: (value) => `${value} orders` },
-    { key: 'totalSpent', label: 'Total Spent', render: (value) => `₹${value.toFixed(2)}` },
+    { key: 'totalSpent', label: 'Total Spent', render: (value) => `₹${Math.round(parseFloat(value) || 0)}` },
     {
       key: 'status',
       label: 'Status',

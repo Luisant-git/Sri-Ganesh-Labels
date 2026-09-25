@@ -258,15 +258,15 @@ const AddProduct = () => {
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', padding: '3px 0' }}>
                     <span style={{ color: '#6b7280' }}>Rate (excl. GST)</span>
-                    <span style={{ fontWeight: 600 }}>₹{rate.toFixed(2)}</span>
+                    <span style={{ fontWeight: 600 }}>₹{Math.round(rate)}</span>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', padding: '3px 0' }}>
                     <span style={{ color: '#6b7280' }}>GST ({gstPct}%)</span>
-                    <span style={{ fontWeight: 600 }}>₹{gstAmount.toFixed(2)}</span>
+                    <span style={{ fontWeight: 600 }}>₹{Math.round(gstAmount)}</span>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px', padding: '6px 0 0', borderTop: '1px solid #e5e7eb', marginTop: '4px' }}>
                     <span style={{ fontWeight: 600, color: '#111827' }}>Total (incl. GST)</span>
-                    <span style={{ fontWeight: 700, color: '#166534' }}>₹{totalValue.toFixed(2)}</span>
+                    <span style={{ fontWeight: 700, color: '#166534' }}>₹{Math.round(totalValue)}</span>
                   </div>
                 </div>
               )

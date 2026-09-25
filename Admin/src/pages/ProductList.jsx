@@ -145,7 +145,7 @@ const ProductList = () => {
       render: (value, row) => {
         const gst = parseFloat(row.gstPercentage) || 0;
         const total = (parseFloat(value) || 0) * (1 + gst / 100);
-        return `₹${total.toFixed(2)}`;
+        return `₹${Math.round(total)}`;
       },
     },
     {
@@ -218,7 +218,7 @@ const ProductList = () => {
         </p>
         <p>
           <strong>Price (incl. GST):</strong> ₹
-          {(parseFloat(product.basePrice) * (1 + (parseFloat(product.gstPercentage) || 0) / 100)).toFixed(2)}
+          {Math.round(parseFloat(product.basePrice) * (1 + (parseFloat(product.gstPercentage) || 0) / 100))}
         </p>
         {product.hsnCode && (
           <p>
@@ -251,8 +251,8 @@ const ProductList = () => {
                     return (
                       <tr key={i}>
                         <td style={{ border: '1px solid #e5e7eb', padding: '5px 10px' }}>{t.quantity}</td>
-                        <td style={{ border: '1px solid #e5e7eb', padding: '5px 10px' }}>₹{rate.toFixed(2)}</td>
-                        <td style={{ border: '1px solid #e5e7eb', padding: '5px 10px' }}>₹{(rate + gst).toFixed(2)}</td>
+                        <td style={{ border: '1px solid #e5e7eb', padding: '5px 10px' }}>₹{Math.round(rate)}</td>
+                        <td style={{ border: '1px solid #e5e7eb', padding: '5px 10px' }}>₹{Math.round(rate + gst)}</td>
                       </tr>
                     )
                   })}

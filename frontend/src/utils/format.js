@@ -1,14 +1,11 @@
 export function formatINR(value) {
-  return '₹' + Number(value || 0).toLocaleString('en-IN')
+  return '₹' + Math.round(Number(value || 0)).toLocaleString('en-IN')
 }
 
 export function formatINRDecimal(value) {
   return (
     '₹' +
-    Number(value || 0).toLocaleString('en-IN', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    })
+    Math.round(Number(value || 0)).toLocaleString('en-IN')
   )
 }
 

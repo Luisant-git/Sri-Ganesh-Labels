@@ -526,11 +526,11 @@ const Dashboard = () => {
                 </div>
                 <p style={{ margin: 0, fontSize: '13px', color: '#6b7280', fontWeight: 500 }}>Base Value</p>
               </div>
-              <h3 style={{ margin: 0, fontSize: '24px', fontWeight: 700, color: '#111827' }}>₹{(orderStats.totalBaseValue || 0).toFixed(2)}</h3>
+              <h3 style={{ margin: 0, fontSize: '24px', fontWeight: 700, color: '#111827' }}>₹{Math.round(orderStats.totalBaseValue || 0)}</h3>
               <div style={{ display: 'flex', justifyContent: 'flex-start', gap: '8px', fontSize: '11px', color: '#9ca3af', fontWeight: 500, marginTop: '6px' }}>
-                <span>COD: ₹{(orderStats.totalCodBaseValue || 0).toFixed(2)}</span>
+                <span>COD: ₹{Math.round(orderStats.totalCodBaseValue || 0)}</span>
                 <span style={{ color: '#d1d5db' }}>|</span>
-                <span>Online: ₹{(orderStats.totalOnlineBaseValue || 0).toFixed(2)}</span>
+                <span>Online: ₹{Math.round(orderStats.totalOnlineBaseValue || 0)}</span>
               </div>
             </div>
 
@@ -541,11 +541,11 @@ const Dashboard = () => {
                 </div>
                 <p style={{ margin: 0, fontSize: '13px', color: '#6b7280', fontWeight: 500 }}>Total Value</p>
               </div>
-              <h3 style={{ margin: 0, fontSize: '24px', fontWeight: 700, color: '#111827' }}>₹{(orderStats.totalValue || 0).toFixed(2)}</h3>
+              <h3 style={{ margin: 0, fontSize: '24px', fontWeight: 700, color: '#111827' }}>₹{Math.round(orderStats.totalValue || 0)}</h3>
               <div style={{ display: 'flex', justifyContent: 'flex-start', gap: '8px', fontSize: '11px', color: '#9ca3af', fontWeight: 500, marginTop: '6px' }}>
-                <span>COD: ₹{(orderStats.totalCodValue || 0).toFixed(2)}</span>
+                <span>COD: ₹{Math.round(orderStats.totalCodValue || 0)}</span>
                 <span style={{ color: '#d1d5db' }}>|</span>
-                <span>Online: ₹{(orderStats.totalOnlineValue || 0).toFixed(2)}</span>
+                <span>Online: ₹{Math.round(orderStats.totalOnlineValue || 0)}</span>
               </div>
             </div>
           </div>
@@ -589,11 +589,11 @@ const Dashboard = () => {
                 </div>
                 <p style={{ margin: 0, fontSize: '13px', color: '#6b7280', fontWeight: 500 }}>Shipped Value</p>
               </div>
-              <h3 style={{ margin: 0, fontSize: '24px', fontWeight: 700, color: '#111827' }}>₹{(orderStats.totalShippingValue || 0).toFixed(2)}</h3>
+              <h3 style={{ margin: 0, fontSize: '24px', fontWeight: 700, color: '#111827' }}>₹{Math.round(orderStats.totalShippingValue || 0)}</h3>
               <div style={{ display: 'flex', justifyContent: 'flex-start', gap: '8px', fontSize: '11px', color: '#9ca3af', fontWeight: 500, marginTop: '6px' }}>
-                <span>COD: ₹{(orderStats.totalCodShipping || 0).toFixed(2)}</span>
+                <span>COD: ₹{Math.round(orderStats.totalCodShipping || 0)}</span>
                 <span style={{ color: '#d1d5db' }}>|</span>
-                <span>Online: ₹{(orderStats.totalOnlineShipping || 0).toFixed(2)}</span>
+                <span>Online: ₹{Math.round(orderStats.totalOnlineShipping || 0)}</span>
               </div>
             </div>
 
@@ -619,11 +619,11 @@ const Dashboard = () => {
                 </div>
                 <p style={{ margin: 0, fontSize: '13px', color: '#6b7280', fontWeight: 500 }}>Discount</p>
               </div>
-              <h3 style={{ margin: 0, fontSize: '24px', fontWeight: 700, color: '#111827' }}>₹{(orderStats.totalDiscount || 0).toFixed(2)}</h3>
+              <h3 style={{ margin: 0, fontSize: '24px', fontWeight: 700, color: '#111827' }}>₹{Math.round(orderStats.totalDiscount || 0)}</h3>
               <div style={{ display: 'flex', justifyContent: 'flex-start', gap: '8px', fontSize: '11px', color: '#9ca3af', fontWeight: 500, marginTop: '6px' }}>
-                <span>COD: ₹{(orderStats.totalCodDiscount || 0).toFixed(2)}</span>
+                <span>COD: ₹{Math.round(orderStats.totalCodDiscount || 0)}</span>
                 <span style={{ color: '#d1d5db' }}>|</span>
-                <span>Online: ₹{(orderStats.totalOnlineDiscount || 0).toFixed(2)}</span>
+                <span>Online: ₹{Math.round(orderStats.totalOnlineDiscount || 0)}</span>
               </div>
             </div>
 
@@ -737,7 +737,7 @@ const Dashboard = () => {
               </div>
               <p style={{ margin: 0, fontSize: '13px', color: '#6b7280', fontWeight: 500 }}>Total Sales Amount</p>
             </div>
-            <h3 style={{ margin: 0, fontSize: '24px', fontWeight: 700, color: '#111827' }}>₹{productStats.totalSalesAmount.toFixed(2)}</h3>
+            <h3 style={{ margin: 0, fontSize: '24px', fontWeight: 700, color: '#111827' }}>₹{Math.round(productStats.totalSalesAmount)}</h3>
           </div>
         </div>
       </div>
@@ -820,7 +820,7 @@ const Dashboard = () => {
                 </div>
                 <p style={{ margin: 0, fontSize: '13px', color: '#6b7280', fontWeight: 500 }}>Total Return Base Value</p>
               </div>
-              <h3 style={{ margin: 0, fontSize: '24px', fontWeight: 700, color: '#111827' }}>₹{(orderStats.totalCodReturnBaseValue || 0).toFixed(2)}</h3>
+              <h3 style={{ margin: 0, fontSize: '24px', fontWeight: 700, color: '#111827' }}>₹{Math.round(orderStats.totalCodReturnBaseValue || 0)}</h3>
             </div>
 
             {/* Card 5: Total Return Value */}
@@ -831,7 +831,7 @@ const Dashboard = () => {
                 </div>
                 <p style={{ margin: 0, fontSize: '13px', color: '#6b7280', fontWeight: 500 }}>Total Return Value</p>
               </div>
-              <h3 style={{ margin: 0, fontSize: '24px', fontWeight: 700, color: '#111827' }}>₹{(orderStats.totalCodReturnValue || 0).toFixed(2)}</h3>
+              <h3 style={{ margin: 0, fontSize: '24px', fontWeight: 700, color: '#111827' }}>₹{Math.round(orderStats.totalCodReturnValue || 0)}</h3>
             </div>
 
             {/* Card 6: Return Shipped Value */}
@@ -842,7 +842,7 @@ const Dashboard = () => {
                 </div>
                 <p style={{ margin: 0, fontSize: '13px', color: '#6b7280', fontWeight: 500 }}>Return Shipped Value</p>
               </div>
-              <h3 style={{ margin: 0, fontSize: '24px', fontWeight: 700, color: '#111827' }}>₹{(orderStats.totalCodReturnShipping || 0).toFixed(2)}</h3>
+              <h3 style={{ margin: 0, fontSize: '24px', fontWeight: 700, color: '#111827' }}>₹{Math.round(orderStats.totalCodReturnShipping || 0)}</h3>
             </div>
           </div>
         </div>

@@ -268,7 +268,7 @@ const [orderStats, setOrderStats] = useState({
       }
       
       await fetchOrders();
-      setSelectedOrder(prev => ({ ...prev, items: editItems, subtotal: newSubtotal.toFixed(2), total: newTotal.toFixed(2) }));
+      setSelectedOrder(prev => ({ ...prev, items: editItems, subtotal: parseFloat(newSubtotal.toFixed(2)), total: parseFloat(newTotal.toFixed(2)) }));
       setEditingItems(false);
       setAddProductSearch('');
       setAddProductSelected(null);
@@ -370,11 +370,11 @@ const [orderStats, setOrderStats] = useState({
   if (order.status === 'Delivered') {
     if (isOnline && !order.codCharge) {
       // Online payment: 2.36% commission (2% + 18% GST)
-      const calculatedCharge = (parseFloat(order.total || 0) * 0.0236).toFixed(2);
+      const calculatedCharge = Math.round(parseFloat(order.total || 0) * 0.0236);
       setCodCharge(calculatedCharge);
     } else if (isCOD && !order.codCharge) {
       // COD payment: 1.6% commission
-      const calculatedCharge = (parseFloat(order.total || 0) * 0.016).toFixed(2);
+      const calculatedCharge = Math.round(parseFloat(order.total || 0) * 0.016);
       setCodCharge(calculatedCharge);
     } else {
       setCodCharge(order.codCharge || "");
@@ -543,9 +543,9 @@ const [orderStats, setOrderStats] = useState({
           const lines = pdf.splitTextToSize(itemDesc, 50);
           pdf.text(lines, 30, yPos);
           pdf.text(item.hsnCode || 'N/A', 90, yPos);
-          pdf.text(`Rs.${itemPrice.toFixed(2)}`, 122, yPos, { align: 'right' });
+          pdf.text(`Rs.${Math.round(itemPrice)}`, 122, yPos, { align: 'right' });
           pdf.text(itemQty.toString(), 137, yPos, { align: 'center' });
-          pdf.text(`Rs.${itemTotal.toFixed(2)}`, 193, yPos, { align: 'right' });
+          pdf.text(`Rs.${Math.round(itemTotal)}`, 193, yPos, { align: 'right' });
 
           const rowHeight = lines.length * 5 + 5;
           const rowEndY = yPos + rowHeight - 5;
@@ -571,9 +571,9 @@ const [orderStats, setOrderStats] = useState({
         const lines = pdf.splitTextToSize(itemDesc, 50);
         pdf.text(lines, 30, yPos);
         pdf.text(item.hsnCode || 'N/A', 90, yPos);
-        pdf.text(`Rs.${itemPrice.toFixed(2)}`, 122, yPos, { align: 'right' });
+        pdf.text(`Rs.${Math.round(itemPrice)}`, 122, yPos, { align: 'right' });
         pdf.text(itemQty.toString(), 137, yPos, { align: 'center' });
-        pdf.text(`Rs.${itemTotal.toFixed(2)}`, 193, yPos, { align: 'right' });
+        pdf.text(`Rs.${Math.round(itemTotal)}`, 193, yPos, { align: 'right' });
 
         const rowHeight = lines.length * 5 + 5;
         const rowEndY = yPos + rowHeight - 5;
@@ -615,12 +615,12 @@ const [orderStats, setOrderStats] = useState({
     yPos += 5;
     pdf.setFont(undefined, 'normal');
     pdf.text('Subtotal:', 30, yPos);
-    pdf.text(`Rs.${subtotal.toFixed(2)}`, 190, yPos, { align: 'right' });
+    pdf.text(`Rs.${Math.round(subtotal)}`, 190, yPos, { align: 'right' });
     yPos += 6;
 
     if (discount > 0) {
       pdf.text(`Discount (${order.couponCode || ''}):`, 30, yPos);
-      pdf.text(`- Rs.${discount.toFixed(2)}`, 190, yPos, { align: 'right' });
+      pdf.text(`- Rs.${Math.round(discount)}`, 190, yPos, { align: 'right' });
       yPos += 6;
     }
 
@@ -632,40 +632,40 @@ const [orderStats, setOrderStats] = useState({
       yPos += 6;
     } else {
       pdf.text('Delivery Fee:', 30, yPos);
-      pdf.text(`Rs.${deliveryFee.toFixed(2)}`, 190, yPos, { align: 'right' });
+      pdf.text(`Rs.${Math.round(deliveryFee)}`, 190, yPos, { align: 'right' });
       yPos += 6;
     }
 
     if (shippingFee > 0) {
       pdf.text('Shipping Fee:', 30, yPos);
-      pdf.text(`Rs.${shippingFee.toFixed(2)}`, 190, yPos, { align: 'right' });
+      pdf.text(`Rs.${Math.round(shippingFee)}`, 190, yPos, { align: 'right' });
       yPos += 6;
     }
 
     pdf.text('COD Fee:', 30, yPos);
-    pdf.text(`Rs.${codFee.toFixed(2)}`, 190, yPos, { align: 'right' });
+    pdf.text(`Rs.${Math.round(codFee)}`, 190, yPos, { align: 'right' });
     yPos += 6;
 
     pdf.text('Taxable Amount:', 30, yPos);
-    pdf.text(`Rs.${baseAmount.toFixed(2)}`, 190, yPos, { align: 'right' });
+    pdf.text(`Rs.${Math.round(baseAmount)}`, 190, yPos, { align: 'right' });
     yPos += 6;
 
     if (isSameState) {
       pdf.text(`CGST (${taxRate}%)`, 30, yPos);
-      pdf.text(`Rs.${cgstAmount.toFixed(2)}`, 190, yPos, { align: 'right' });
+      pdf.text(`Rs.${Math.round(cgstAmount)}`, 190, yPos, { align: 'right' });
       yPos += 6;
       pdf.text(`SGST (${taxRate}%)`, 30, yPos);
-      pdf.text(`Rs.${sgstAmount.toFixed(2)}`, 190, yPos, { align: 'right' });
+      pdf.text(`Rs.${Math.round(sgstAmount)}`, 190, yPos, { align: 'right' });
       yPos += 8;
     } else {
       pdf.text(`IGST (${igstRate}%)`, 30, yPos);
-      pdf.text(`Rs.${igstAmount.toFixed(2)}`, 190, yPos, { align: 'right' });
+      pdf.text(`Rs.${Math.round(igstAmount)}`, 190, yPos, { align: 'right' });
       yPos += 8;
     }
 
     pdf.setFont(undefined, 'bold');
     pdf.text('TOTAL:', 30, yPos);
-    pdf.text(`Rs.${total.toFixed(2)}`, 190, yPos, { align: 'right' });
+    pdf.text(`Rs.${Math.round(total)}`, 190, yPos, { align: 'right' });
 
     yPos += 8;
     pdf.setFont(undefined, 'bold');
@@ -829,7 +829,7 @@ const handleUpdateStatus = async () => {
 
       startY += 7;
       pdf.text('COD     :', 120, startY);
-      pdf.text(`Rs.${parseFloat(order.total || 0).toFixed(2)}/-`, 145, startY);
+      pdf.text(`Rs.${Math.round(parseFloat(order.total || 0))}/-`, 145, startY);
 
       startY += 8;
     }
@@ -988,10 +988,10 @@ const exportAllOrdersExcel = () => {
       'Quantity': totalQty,
       'Total Amount': parseFloat(order.total || 0),
       'COD/online commission (Admin)': parseFloat(order.codCharge || 0),
-      'Settlement Amount': (parseFloat(order.total || 0) - parseFloat(order.codCharge || 0)).toFixed(2),
+      'Settlement Amount': Math.round(parseFloat(order.total || 0) - parseFloat(order.codCharge || 0)),
       'Weight (gms)': order.chargedWeight || 0,
-      'Courier Charges': parseFloat(order.courierCharge || 0).toFixed(2),
-      'Total profit': (parseFloat(order.total || 0) - parseFloat(order.codCharge || 0) - parseFloat(order.courierCharge || 0)).toFixed(2),
+      'Courier Charges': Math.round(parseFloat(order.courierCharge || 0)),
+      'Total profit': Math.round(parseFloat(order.total || 0) - parseFloat(order.codCharge || 0) - parseFloat(order.courierCharge || 0)),
       'Discount': parseFloat(order.discount || 0),
       'Coupon Code': order.couponCode || 'N/A',
       'Status': order.status,
@@ -1013,13 +1013,13 @@ const exportAllOrdersExcel = () => {
     'Variant ID': '',
     'Item Qty': '',
     'Quantity': excelData.reduce((sum, row) => sum + (row.Quantity || 0), 0),
-    'Total Amount': excelData.reduce((sum, row) => sum + parseFloat(row['Total Amount'] || 0), 0).toFixed(2),
-    'COD/online commission (Admin)': excelData.reduce((sum, row) => sum + (parseFloat(row['COD/online commission (Admin)']) || 0), 0).toFixed(2),
-    'Settlement Amount': excelData.reduce((sum, row) => sum + parseFloat(row['Settlement Amount'] || 0), 0).toFixed(2),
+    'Total Amount': Math.round(excelData.reduce((sum, row) => sum + parseFloat(row['Total Amount'] || 0), 0)),
+    'COD/online commission (Admin)': Math.round(excelData.reduce((sum, row) => sum + (parseFloat(row['COD/online commission (Admin)']) || 0), 0)),
+    'Settlement Amount': Math.round(excelData.reduce((sum, row) => sum + parseFloat(row['Settlement Amount'] || 0), 0)),
     'Weight (gms)': excelData.reduce((sum, row) => sum + (parseFloat(row['Weight (gms)']) || 0), 0),
-    'Courier Charges': excelData.reduce((sum, row) => sum + parseFloat(row['Courier Charges'] || 0), 0).toFixed(2),
-    'Total profit': excelData.reduce((sum, row) => sum + parseFloat(row['Total profit'] || 0), 0).toFixed(2),
-    'Discount': excelData.reduce((sum, row) => sum + parseFloat(row['Discount'] || 0), 0).toFixed(2),
+    'Courier Charges': Math.round(excelData.reduce((sum, row) => sum + parseFloat(row['Courier Charges'] || 0), 0)),
+    'Total profit': Math.round(excelData.reduce((sum, row) => sum + parseFloat(row['Total profit'] || 0), 0)),
+    'Discount': Math.round(excelData.reduce((sum, row) => sum + parseFloat(row['Discount'] || 0), 0)),
     'Coupon Code': '',
     'Status': '',
     'Payment': '',
@@ -1093,7 +1093,7 @@ const exportAllOrdersExcel = () => {
 
         startY += 7;
         pdf.text('COD     :', 120, startY);
-        pdf.text(`Rs.${parseFloat(order.total || 0).toFixed(2)}/-`, 145, startY);
+        pdf.text(`Rs.${Math.round(parseFloat(order.total || 0))}/-`, 145, startY);
 
         startY += 8;
       }
@@ -1208,8 +1208,8 @@ const exportAllOrdersExcel = () => {
       'S.No': '', 'Order ID': '', 'Customer Name': '', 'Phone': '', 'Email': '', 'City': '', 'State': 'TOTAL',
       'Items Count': excelData.reduce((sum, r) => sum + r['Items Count'], 0), 'Product Name': '', 'Size': '', 'Color': '', 'Variant ID': '', 'Item Qty': '',
       'Total Quantity': excelData.reduce((sum, r) => sum + r['Total Quantity'], 0), 'Coupon Code': '',
-      'Discount': excelData.reduce((sum, r) => sum + parseFloat(r['Discount'] || 0), 0).toFixed(2), 'Payment Method': '',
-      'Total Amount': excelData.reduce((sum, r) => sum + parseFloat(r['Total Amount'] || 0), 0).toFixed(2), 'Order Date': ''
+      'Discount': Math.round(excelData.reduce((sum, r) => sum + parseFloat(r['Discount'] || 0), 0)), 'Payment Method': '',
+      'Total Amount': Math.round(excelData.reduce((sum, r) => sum + parseFloat(r['Total Amount'] || 0), 0)), 'Order Date': ''
     });
     const ws = XLSX.utils.json_to_sheet(excelData);
     const wb = XLSX.utils.book_new();
@@ -1269,8 +1269,8 @@ const exportAllOrdersExcel = () => {
       'S.No': '', 'Order ID': '', 'Customer Name': '', 'Phone': '', 'Email': '', 'City': '', 'State': 'TOTAL',
       'Items Count': excelData.reduce((sum, r) => sum + r['Items Count'], 0), 'Product Name': '', 'Size': '', 'Color': '', 'Variant ID': '', 'Item Qty': '',
       'Total Quantity': excelData.reduce((sum, r) => sum + r['Total Quantity'], 0), 'Coupon Code': '',
-      'Discount': excelData.reduce((sum, r) => sum + parseFloat(r['Discount'] || 0), 0).toFixed(2), 'Payment Method': '',
-      'Total Amount': excelData.reduce((sum, r) => sum + parseFloat(r['Total Amount'] || 0), 0).toFixed(2), 'Cancel Reason': '', 'Order Date': ''
+      'Discount': Math.round(excelData.reduce((sum, r) => sum + parseFloat(r['Discount'] || 0), 0)), 'Payment Method': '',
+      'Total Amount': Math.round(excelData.reduce((sum, r) => sum + parseFloat(r['Total Amount'] || 0), 0)), 'Cancel Reason': '', 'Order Date': ''
     });
     const ws = XLSX.utils.json_to_sheet(excelData);
     const wb = XLSX.utils.book_new();
@@ -1379,8 +1379,8 @@ const exportAllOrdersExcel = () => {
       'Variant ID': '',
       'Item Qty': '',
       'Total Quantity': excelData.reduce((sum, row) => sum + row['Total Quantity'], 0),
-      'Total Amount': excelData.reduce((sum, row) => sum + parseFloat(row['Total Amount'] || 0), 0).toFixed(2),
-      'Discount': excelData.reduce((sum, row) => sum + parseFloat(row['Discount'] || 0), 0).toFixed(2),
+      'Total Amount': Math.round(excelData.reduce((sum, row) => sum + parseFloat(row['Total Amount'] || 0), 0)),
+      'Discount': Math.round(excelData.reduce((sum, row) => sum + parseFloat(row['Discount'] || 0), 0)),
       'Coupon Code': '',
       'Date': '',
       'Payment Method': ''
@@ -1510,11 +1510,11 @@ const exportAllOrdersExcel = () => {
     'Shipped Date': '',
     'Order Date': '',
     'Coupon Code': '',
-    'Discount': excelData.reduce((sum, row) => sum + parseFloat(row['Discount'] || 0), 0).toFixed(2),
+    'Discount': Math.round(excelData.reduce((sum, row) => sum + parseFloat(row['Discount'] || 0), 0)),
     'Payment Method': '',
-    'Total Amount': excelData.reduce((sum, row) => sum + parseFloat(row['Total Amount'] || 0), 0).toFixed(2),
-    'COD Charge': excelData.reduce((sum, row) => sum + parseFloat(row['COD Charge'] || 0), 0).toFixed(2),
-    'Courier Charge': excelData.reduce((sum, row) => sum + parseFloat(row['Courier Charge'] || 0), 0).toFixed(2)
+    'Total Amount': Math.round(excelData.reduce((sum, row) => sum + parseFloat(row['Total Amount'] || 0), 0)),
+    'COD Charge': Math.round(excelData.reduce((sum, row) => sum + parseFloat(row['COD Charge'] || 0), 0)),
+    'Courier Charge': Math.round(excelData.reduce((sum, row) => sum + parseFloat(row['Courier Charge'] || 0), 0))
   };
 
   excelData.push(totals);
@@ -1557,7 +1557,7 @@ const exportAllOrdersExcel = () => {
 
       startY += 5;
       pdf.text('COD     :', 55, startY);
-      pdf.text(`Rs.${parseFloat(order.total || 0).toFixed(2)}/-`, 76, startY);
+      pdf.text(`Rs.${Math.round(parseFloat(order.total || 0))}/-`, 76, startY);
 
       startY += 6;
     }
@@ -1765,9 +1765,9 @@ const exportAllOrdersExcel = () => {
           const lines = pdf.splitTextToSize(itemDesc, 35);
           pdf.text(lines, 118, yPos);
           pdf.text(item.hsnCode || 'N/A', 158, yPos);
-          pdf.text(`Rs.${itemPrice.toFixed(2)}`, 168, yPos);
+          pdf.text(`Rs.${Math.round(itemPrice)}`, 168, yPos);
           pdf.text(itemQty.toString(), 183, yPos);
-          pdf.text(`Rs.${itemTotal.toFixed(2)}`, 200, yPos, { align: 'right' });
+          pdf.text(`Rs.${Math.round(itemTotal)}`, 200, yPos, { align: 'right' });
           yPos += Math.max(lines.length * 2.5, 4);
         });
       } else {
@@ -1781,9 +1781,9 @@ const exportAllOrdersExcel = () => {
         const lines = pdf.splitTextToSize(itemDesc, 35);
         pdf.text(lines, 118, yPos);
         pdf.text(item.hsnCode || 'N/A', 158, yPos);
-        pdf.text(`Rs.${itemPrice.toFixed(2)}`, 168, yPos);
+        pdf.text(`Rs.${Math.round(itemPrice)}`, 168, yPos);
         pdf.text(itemQty.toString(), 183, yPos);
-        pdf.text(`Rs.${itemTotal.toFixed(2)}`, 200, yPos, { align: 'right' });
+        pdf.text(`Rs.${Math.round(itemTotal)}`, 200, yPos, { align: 'right' });
         yPos += Math.max(lines.length * 2.5, 4);
       }
     });
@@ -1819,49 +1819,49 @@ const exportAllOrdersExcel = () => {
 
     pdf.setFont(undefined, 'normal');
     pdf.text('Subtotal:', 118, yPos);
-    pdf.text(`Rs.${subtotal.toFixed(2)}`, 200, yPos, { align: 'right' });
+    pdf.text(`Rs.${Math.round(subtotal)}`, 200, yPos, { align: 'right' });
     yPos += 3;
 
     if (discount > 0) {
       pdf.text(`Discount (${order.couponCode || ''}):`, 118, yPos);
-      pdf.text(`- Rs.${discount.toFixed(2)}`, 200, yPos, { align: 'right' });
+      pdf.text(`- Rs.${Math.round(discount)}`, 200, yPos, { align: 'right' });
       yPos += 3;
     }
 
     pdf.text('Delivery Fee:', 118, yPos);
-    pdf.text(`Rs.${deliveryFee.toFixed(2)}`, 200, yPos, { align: 'right' });
+    pdf.text(`Rs.${Math.round(deliveryFee)}`, 200, yPos, { align: 'right' });
     yPos += 3;
 
     if (shippingFee > 0) {
       pdf.text('Shipping Fee:', 118, yPos);
-      pdf.text(`Rs.${shippingFee.toFixed(2)}`, 200, yPos, { align: 'right' });
+      pdf.text(`Rs.${Math.round(shippingFee)}`, 200, yPos, { align: 'right' });
       yPos += 3;
     }
 
     pdf.text('COD Fee:', 118, yPos);
-    pdf.text(`Rs.${codFee.toFixed(2)}`, 200, yPos, { align: 'right' });
+    pdf.text(`Rs.${Math.round(codFee)}`, 200, yPos, { align: 'right' });
     yPos += 3;
 
     pdf.text('Taxable Amount:', 118, yPos);
-    pdf.text(`Rs.${baseAmount.toFixed(2)}`, 200, yPos, { align: 'right' });
+    pdf.text(`Rs.${Math.round(baseAmount)}`, 200, yPos, { align: 'right' });
     yPos += 3;
 
     if (isSameState) {
       pdf.text(`CGST (2.50%)`, 118, yPos);
-      pdf.text(`Rs.${cgstAmount.toFixed(2)}`, 200, yPos, { align: 'right' });
+      pdf.text(`Rs.${Math.round(cgstAmount)}`, 200, yPos, { align: 'right' });
       yPos += 3;
       pdf.text(`SGST (2.50%)`, 118, yPos);
-      pdf.text(`Rs.${sgstAmount.toFixed(2)}`, 200, yPos, { align: 'right' });
+      pdf.text(`Rs.${Math.round(sgstAmount)}`, 200, yPos, { align: 'right' });
       yPos += 3;
     } else {
       pdf.text(`IGST (5.00%)`, 118, yPos);
-      pdf.text(`Rs.${igstAmount.toFixed(2)}`, 200, yPos, { align: 'right' });
+      pdf.text(`Rs.${Math.round(igstAmount)}`, 200, yPos, { align: 'right' });
       yPos += 3;
     }
 
     pdf.setFont(undefined, 'bold');
     pdf.text('TOTAL:', 118, yPos);
-    pdf.text(`Rs.${total.toFixed(2)}`, 200, yPos, { align: 'right' });
+    pdf.text(`Rs.${Math.round(total)}`, 200, yPos, { align: 'right' });
 
     yPos += 4;
     pdf.text('Amount in Words:', 118, yPos);
@@ -2218,7 +2218,7 @@ const statusCounts = getStatusCounts();
       label: "Weight",
       render: (value) => `${getOrderTotalWeightKg(value).toFixed(2)} kg`,
     },
-    { key: "total", label: "Final Total", render: (value) => `₹${value}` },
+    { key: "total", label: "Final Total", render: (value) => `₹${Math.round(parseFloat(value) || 0)}` },
     {
       key: "status",
       label: "Status",
@@ -2521,13 +2521,13 @@ const statusCounts = getStatusCounts();
       <div className="stat-content">
         <h3>₹{(() => {
           const baseValue = orderStats.totalBaseValue || 0;
-          return baseValue.toFixed(2);
+          return Math.round(baseValue);
         })()}</h3>
         <p style={{ marginBottom: '4px' }}>Total Base Value (Products)</p>
         <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', fontSize: '10px', color: '#9ca3af', fontWeight: '500' }}>
-          <span>COD: ₹{(orderStats.totalCodBaseValue || 0).toFixed(2)}</span>
+          <span>COD: ₹{Math.round(orderStats.totalCodBaseValue || 0)}</span>
           <span style={{ color: '#d1d5db' }}>|</span>
-          <span>Online: ₹{((orderStats.totalBaseValue || 0) - (orderStats.totalCodBaseValue || 0)).toFixed(2)}</span>
+          <span>Online: ₹{Math.round((orderStats.totalBaseValue || 0) - (orderStats.totalCodBaseValue || 0))}</span>
         </div>
       </div>
     </div>
@@ -2537,12 +2537,12 @@ const statusCounts = getStatusCounts();
         <Receipt size={24} />
       </div>
       <div className="stat-content">
-        <h3>₹{orderStats.totalValue?.toFixed(2) || '0.00'}</h3>
+        <h3>₹{Math.round(orderStats.totalValue || 0)}</h3>
         <p style={{ marginBottom: '4px' }}>Total Value</p>
         <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', fontSize: '10px', color: '#9ca3af', fontWeight: '500' }}>
-          <span>COD: ₹{orderStats.totalCodValue?.toFixed(2) || '0.00'}</span>
+          <span>COD: ₹{Math.round(orderStats.totalCodValue || 0)}</span>
           <span style={{ color: '#d1d5db' }}>|</span>
-          <span>Online: ₹{((orderStats.totalValue || 0) - (orderStats.totalCodValue || 0))?.toFixed(2) || '0.00'}</span>
+          <span>Online: ₹{Math.round((orderStats.totalValue || 0) - (orderStats.totalCodValue || 0))}</span>
         </div>
       </div>
     </div>
@@ -2585,12 +2585,12 @@ const statusCounts = getStatusCounts();
         <Truck size={24} />
       </div>
       <div className="stat-content">
-        <h3>₹{orderStats.totalShippingValue?.toFixed(2) || '0.00'}</h3>
+        <h3>₹{Math.round(orderStats.totalShippingValue || 0)}</h3>
         <p style={{ marginBottom: '4px' }}>Shipped Value</p>
         <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', fontSize: '10px', color: '#9ca3af', fontWeight: '500' }}>
-          <span>COD: ₹{orderStats.totalCodShipping?.toFixed(2) || '0.00'}</span>
+          <span>COD: ₹{Math.round(orderStats.totalCodShipping || 0)}</span>
           <span style={{ color: '#d1d5db' }}>|</span>
-          <span>Online: ₹{orderStats.totalOnlineShipping?.toFixed(2) || '0.00'}</span>
+          <span>Online: ₹{Math.round(orderStats.totalOnlineShipping || 0)}</span>
         </div>
       </div>
     </div>
@@ -2615,7 +2615,7 @@ const statusCounts = getStatusCounts();
         <Receipt size={24} />
       </div>
       <div className="stat-content">
-        <h3>₹{orderStats.totalDiscount?.toFixed(2) || '0.00'}</h3>
+        <h3>₹{Math.round(orderStats.totalDiscount || 0)}</h3>
         <p>Total Discount</p>
       </div>
     </div>
@@ -2746,7 +2746,7 @@ const statusCounts = getStatusCounts();
         <ShoppingBag size={24} />
       </div>
       <div className="stat-content">
-        <h3>₹{(orderStats.totalCodReturnBaseValue || 0).toFixed(2)}</h3>
+        <h3>₹{Math.round(orderStats.totalCodReturnBaseValue || 0)}</h3>
         <p>Total Return Base Value</p>
       </div>
     </div>
@@ -2757,7 +2757,7 @@ const statusCounts = getStatusCounts();
         <Receipt size={24} />
       </div>
       <div className="stat-content">
-        <h3>₹{(orderStats.totalCodReturnValue || 0).toFixed(2)}</h3>
+        <h3>₹{Math.round(orderStats.totalCodReturnValue || 0)}</h3>
         <p>Total Return Value</p>
       </div>
     </div>
@@ -2768,7 +2768,7 @@ const statusCounts = getStatusCounts();
         <Truck size={24} />
       </div>
       <div className="stat-content">
-        <h3>₹{(orderStats.totalCodReturnShipping || 0).toFixed(2)}</h3>
+        <h3>₹{Math.round(orderStats.totalCodReturnShipping || 0)}</h3>
         <p>Return Shipped Value</p>
       </div>
     </div>
@@ -3022,27 +3022,27 @@ const statusCounts = getStatusCounts();
                   {selectedOrder.couponCode && (
                     <p><strong>Coupon:</strong> {selectedOrder.couponCode}</p>
                   )}
-                  <p><strong>Subtotal:</strong> ₹{editingItems ? editItems.reduce((sum, item) => sum + (parseFloat(item.price) || 0) * (parseInt(item.quantity) || 1), 0).toFixed(2) : selectedOrder.subtotal}</p>
-                  <p><strong>Delivery Fee:</strong> ₹{selectedOrder.deliveryFee}</p>
+                  <p><strong>Subtotal:</strong> ₹{Math.round(editingItems ? editItems.reduce((sum, item) => sum + (parseFloat(item.price) || 0) * (parseInt(item.quantity) || 1), 0) : parseFloat(selectedOrder.subtotal))}</p>
+                  <p><strong>Delivery Fee:</strong> ₹{Math.round(parseFloat(selectedOrder.deliveryFee) || 0)}</p>
                   {parseFloat(selectedOrder.shippingFee) > 0 && (
-                    <p><strong>Shipping Fee:</strong> ₹{selectedOrder.shippingFee}</p>
+                    <p><strong>Shipping Fee:</strong> ₹{Math.round(parseFloat(selectedOrder.shippingFee) || 0)}</p>
                   )}
                   {parseFloat(selectedOrder.codFee) > 0 && (
-                    <p><strong>COD Fee:</strong> ₹{selectedOrder.codFee}</p>
+                    <p><strong>COD Fee:</strong> ₹{Math.round(parseFloat(selectedOrder.codFee) || 0)}</p>
                   )}
                   {selectedOrder.discount && parseFloat(selectedOrder.discount) > 0 && (
-                    <p><strong>Discount:</strong> -₹{selectedOrder.discount}</p>
+                    <p><strong>Discount:</strong> -₹{Math.round(parseFloat(selectedOrder.discount) || 0)}</p>
                   )}
-                  <p><strong>Total:</strong> ₹{editingItems ? (editItems.reduce((sum, item) => sum + (parseFloat(item.price) || 0) * (parseInt(item.quantity) || 1), 0) - (parseFloat(selectedOrder.discount) || 0) + (parseFloat(selectedOrder.deliveryFee) || 0) + (parseFloat(selectedOrder.shippingFee) || 0) + (parseFloat(selectedOrder.codFee) || 0)).toFixed(2) : selectedOrder.total}</p>
+                  <p><strong>Total:</strong> ₹{Math.round(editingItems ? (editItems.reduce((sum, item) => sum + (parseFloat(item.price) || 0) * (parseInt(item.quantity) || 1), 0) - (parseFloat(selectedOrder.discount) || 0) + (parseFloat(selectedOrder.deliveryFee) || 0) + (parseFloat(selectedOrder.shippingFee) || 0) + (parseFloat(selectedOrder.codFee) || 0)) : parseFloat(selectedOrder.total))}</p>
                   <p><strong>Total Weight:</strong> {getOrderTotalWeightKg(editingItems ? editItems : selectedOrder).toFixed(2)} kg</p>
                   {selectedOrder.chargedWeight > 0 && (
                     <p><strong>Weight (Admin):</strong> {selectedOrder.chargedWeight} g</p>
                   )}
                   {selectedOrder.courierCharge > 0 && (
-                    <p><strong>Courier Charge (Admin):</strong> ₹{selectedOrder.courierCharge}</p>
+                    <p><strong>Courier Charge (Admin):</strong> ₹{Math.round(parseFloat(selectedOrder.courierCharge) || 0)}</p>
                   )}
                   {selectedOrder.codCharge > 0 && (
-                    <p><strong>COD/online commission (Admin):</strong> ₹{selectedOrder.codCharge}</p>
+                    <p><strong>COD/online commission (Admin):</strong> ₹{Math.round(parseFloat(selectedOrder.codCharge) || 0)}</p>
                   )}
                 </div>
 
@@ -3281,7 +3281,7 @@ const statusCounts = getStatusCounts();
                       {item.type === 'bundle' ? (
                         <div style={{ width: '100%' }}>
                           <p><strong>{item.name}</strong></p>
-                          <p>Bundle | Qty: {item.quantity} × ₹{item.price}</p>
+                          <p>Bundle | Qty: {item.quantity} × ₹{Math.round(parseFloat(item.price) || 0)}</p>
                           {getItemWeightKg(item) > 0 && <p>Weight: {getItemTotalWeightKg(item).toFixed(2)} kg</p>}
                           <div style={{ display: 'flex', gap: '10px', marginTop: '10px', flexWrap: 'wrap' }}>
                             {item.bundleItems?.map((bundle, bIdx) => (
@@ -3432,7 +3432,7 @@ const statusCounts = getStatusCounts();
                                     Variant ID: <strong style={{ fontWeight: '900', fontSize: '16px' }}>{item.sizeVariantId}</strong>
                                   </p>
                                 )}
-                                <p>Qty: {item.quantity} × ₹{item.price}</p>
+                                <p>Qty: {item.quantity} × ₹{Math.round(parseFloat(item.price) || 0)}</p>
                                 {getItemWeightKg(item) > 0 && (
                                   <p>Weight: {getItemTotalWeightKg(item).toFixed(2)} kg</p>
                                 )}
@@ -3493,11 +3493,11 @@ const statusCounts = getStatusCounts();
           
           if (isOnline) {
             // Online payment: 2.36% commission (2% + 18% GST)
-            const calculatedCharge = (parseFloat(selectedOrder.total || 0) * 0.0236).toFixed(2);
+            const calculatedCharge = Math.round(parseFloat(selectedOrder.total || 0) * 0.0236);
             setCodCharge(calculatedCharge);
           } else if (isCOD) {
             // COD payment: 1.6% commission
-            const calculatedCharge = (parseFloat(selectedOrder.total || 0) * 0.016).toFixed(2);
+            const calculatedCharge = Math.round(parseFloat(selectedOrder.total || 0) * 0.016);
             setCodCharge(calculatedCharge);
           }
         }

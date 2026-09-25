@@ -52,7 +52,7 @@ const ShippingSettings = () => {
       .map((rule) => {
         const weight = Number(rule.weightKg)
         const weightLabel = Number.isInteger(weight) ? `${weight} kg` : `${weight.toFixed(2)} kg`
-        return `${weightLabel} = ₹${Number(rule.rate).toFixed(2)}`
+        return `${weightLabel} = ₹${Math.round(Number(rule.rate) || 0)}`
       })
       .join(' • ')
   }
@@ -172,7 +172,7 @@ const ShippingSettings = () => {
                             return (
                               <tr key={`${weight}-${index}`}>
                                 <td>{Number.isInteger(weight) ? `${weight} kg` : `${weight.toFixed(2)} kg`}</td>
-                                <td>₹{Number(rule.rate).toFixed(2)}</td>
+                                <td>₹{Math.round(Number(rule.rate) || 0)}</td>
                               </tr>
                             )
                           })}
